@@ -163,6 +163,20 @@
     }
     .compare-banner strong { color: var(--accent); }
 
+    .compare-section { margin-top: 2.6rem; padding-top: 2rem; border-top: 2px dashed var(--border-dark); }
+    .compare-heading {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800;
+      letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent2);
+      margin-bottom: 1rem;
+    }
+    .total-banner.alt {
+      background: var(--surface); border: 1px solid var(--border-dark);
+    }
+    .total-banner.alt .total-banner-team { color: var(--muted); }
+    .total-banner.alt .total-banner-num { color: var(--accent2); }
+    .total-banner.alt .total-banner-breakdown { color: var(--muted); }
+    .total-banner.alt .total-banner-breakdown strong { color: var(--text); }
+
     table.points-table { width: 100%; border-collapse: collapse; }
     .points-table thead th {
       font-family: 'DM Mono', monospace; font-size: 0.58rem;
@@ -313,11 +327,12 @@
 
 <div class="main">
   <div id="totalBannerContainer"></div>
-  <div id="compareBannerContainer"></div>
 
   <div id="tableContainer">
     <div class="state-box"><p><span class="spinner"></span>Loading roster data…</p></div>
   </div>
+
+  <div id="compareSectionContainer"></div>
 
   <div class="how-box">
     <strong>Scoring used</strong>
@@ -414,18 +429,30 @@ function computeTeamTotal(state) {
   return { adv, place, bonus, total: adv+place+bonus };
 }
 
-function renderBanners() {
+function finishOptionsHtml(selected) {
+  return FINISHES.map(f => `<option value="${f.key}" ${f.key===selected?'selected':''}>${f.label}</option>`).join('');
+}
+
+// Renders the primary banner, plus (if a compare team is set) a lightweight diff line under it
+function updateBanners() {
   const teamName = document.getElementById('teamSelect').value;
   const compareName = document.getElementById('compareSelect').value;
+  const bannerEl = document.getElementById('totalBannerContainer');
 
-  if (!teamName) {
-    document.getElementById('totalBannerContainer').innerHTML = '';
-    document.getElementById('compareBannerContainer').innerHTML = '';
-    return;
-  }
+  if (!teamName) { bannerEl.innerHTML = ''; return; }
 
   const totals = computeTeamTotal(rowState);
-  document.getElementById('totalBannerContainer').innerHTML = `
+  let diffHtml = '';
+  if (compareName) {
+    const compTotals = computeTeamTotal(compareRowState);
+    const diff = totals.total - compTotals.total;
+    const diffAbs = Math.abs(diff).toFixed(1);
+    diffHtml = diff === 0
+      ? `<div class="compare-banner"><span>Teams are projected to tie at ${totals.total.toFixed(1)}</span></div>`
+      : `<div class="compare-banner"><span>${totals.total.toFixed(1)} vs ${compTotals.total.toFixed(1)}</span><span><strong>${diff>0?teamName:compareName}</strong> leads by ${diffAbs}</span></div>`;
+  }
+
+  bannerEl.innerHTML = `
     <div class="total-banner">
       <div>
         <div class="total-banner-team">${teamName} &mdash; Projected Total</div>
@@ -436,37 +463,14 @@ function renderBanners() {
         <strong>${totals.place.toFixed(1)}</strong> placement &nbsp;+&nbsp;
         <strong>${totals.bonus.toFixed(1)}</strong> bonus
       </div>
-    </div>`;
-
-  if (compareName) {
-    const compTotals = computeTeamTotal(compareRowState);
-    const diff = totals.total - compTotals.total;
-    const leader = diff === 0 ? null : (diff > 0 ? teamName : compareName);
-    const diffAbs = Math.abs(diff).toFixed(1);
-    document.getElementById('compareBannerContainer').innerHTML = `
-      <div class="compare-banner">
-        <span>${compareName} projects to <strong>${compTotals.total.toFixed(1)}</strong> points</span>
-        <span>${leader ? `<strong>${leader}</strong> leads by ${diffAbs}` : 'Teams are projected to tie'}</span>
-      </div>`;
-  } else {
-    document.getElementById('compareBannerContainer').innerHTML = '';
-  }
+    </div>
+    ${diffHtml}`;
 }
 
-function finishOptionsHtml(selected) {
-  return FINISHES.map(f => `<option value="${f.key}" ${f.key===selected?'selected':''}>${f.label}</option>`).join('');
-}
-
-function renderTable() {
-  const teamName = document.getElementById('teamSelect').value;
-  if (!teamName) {
-    document.getElementById('tableContainer').innerHTML = `
-      <div class="state-box"><p>Pick a team above to start projecting a score.</p></div>`;
-    return;
-  }
-
+// Builds the <table> markup for one team's 10-weight breakdown
+function buildTableHtml(state) {
   const rows = weights.map(w => {
-    const row = rowState[w];
+    const row = state[w];
     const t = computeRowTotal(row);
     return `
       <tr data-weight="${w}">
@@ -490,7 +494,7 @@ function renderTable() {
       </tr>`;
   }).join('');
 
-  document.getElementById('tableContainer').innerHTML = `
+  return `
     <table class="points-table">
       <thead>
         <tr>
@@ -503,21 +507,60 @@ function renderTable() {
       </thead>
       <tbody>${rows}</tbody>
     </table>`;
+}
 
-  document.querySelectorAll('#tableContainer tbody tr').forEach(tr => {
+// Wires up input listeners for a rendered table. `state` is mutated in place;
+// `onChange` re-renders just that row's total plus the shared banners (keeps input focus).
+function attachTableListeners(containerId, state) {
+  document.querySelectorAll(`#${containerId} tbody tr`).forEach(tr => {
     const w = tr.dataset.weight;
     tr.querySelectorAll('[data-field]').forEach(el => {
       el.addEventListener('input', () => {
         const field = el.dataset.field;
-        rowState[w][field] = field === 'name' || field === 'finish' ? el.value : Number(el.value);
-        // Update just this row's total + the banner, avoid full re-render (keeps focus)
-        const t = computeRowTotal(rowState[w]);
+        state[w][field] = field === 'name' || field === 'finish' ? el.value : Number(el.value);
+        const t = computeRowTotal(state[w]);
         tr.querySelector('.row-total').textContent = t.total.toFixed(1);
         tr.querySelector('.row-sub').textContent = `${t.adv.toFixed(1)} adv + ${t.place.toFixed(1)} place + ${t.bonus.toFixed(1)} bonus`;
-        renderBanners();
+        updateBanners();
       });
     });
   });
+}
+
+function renderPrimaryTable() {
+  const teamName = document.getElementById('teamSelect').value;
+  const container = document.getElementById('tableContainer');
+  if (!teamName) {
+    container.innerHTML = `<div class="state-box"><p>Pick a team above to start projecting a score.</p></div>`;
+    return;
+  }
+  container.innerHTML = buildTableHtml(rowState);
+  attachTableListeners('tableContainer', rowState);
+}
+
+function renderCompareSection() {
+  const compareName = document.getElementById('compareSelect').value;
+  const container = document.getElementById('compareSectionContainer');
+  if (!compareName) { container.innerHTML = ''; return; }
+
+  const totals = computeTeamTotal(compareRowState);
+  container.innerHTML = `
+    <div class="compare-section">
+      <div class="compare-heading">Compare Team: ${compareName}</div>
+      <div class="total-banner alt">
+        <div>
+          <div class="total-banner-team">${compareName} &mdash; Projected Total</div>
+          <div class="total-banner-num">${totals.total.toFixed(1)}</div>
+        </div>
+        <div class="total-banner-breakdown">
+          <strong>${totals.adv.toFixed(1)}</strong> advancement &nbsp;+&nbsp;
+          <strong>${totals.place.toFixed(1)}</strong> placement &nbsp;+&nbsp;
+          <strong>${totals.bonus.toFixed(1)}</strong> bonus
+        </div>
+      </div>
+      <div id="compareTableContainer">${buildTableHtml(compareRowState)}</div>
+    </div>`;
+  attachTableListeners('compareTableContainer', compareRowState);
 }
 
 async function fetchWrestlers() {
@@ -539,12 +582,13 @@ function populateTeamSelects() {
 
 document.getElementById('teamSelect').addEventListener('change', (e) => {
   rowState = defaultRowState(e.target.value);
-  renderTable();
-  renderBanners();
+  renderPrimaryTable();
+  updateBanners();
 });
 document.getElementById('compareSelect').addEventListener('change', (e) => {
   compareRowState = e.target.value ? defaultRowState(e.target.value) : {};
-  renderBanners();
+  renderCompareSection();
+  updateBanners();
 });
 
 (async () => {
