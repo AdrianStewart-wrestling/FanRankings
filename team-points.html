@@ -323,7 +323,7 @@
     <strong>Scoring used</strong>
     Placement: 1st&ndash;16, 2nd&ndash;12, 3rd&ndash;10, 4th&ndash;9, 5th&ndash;7, 6th&ndash;6, 7th&ndash;4, 8th&ndash;3. Bonus: fall/forfeit/default/DQ&ndash;2, tech fall&ndash;1.5, major decision&ndash;1 (per match).
     <strong>Advancement points</strong>
-    1 point per championship-bracket win, 0.5 per consolation-bracket win. Since this calculator projects a <em>finish</em> rather than a full match path, advancement points shown for each finish use the typical minimum-win route to that result &mdash; the exact number can run higher if a wrestler takes a longer road through the bracket. For a path-accurate total, use the match-path simulator (coming next).
+    1 point per championship-bracket win, 0.5 per consolation-bracket win. No advancement point is awarded for winning a placement match itself (finals, true 3rd, true 5th, true 7th) &mdash; those wins only add placement points. Since this calculator projects a <em>finish</em> rather than a full match path, advancement points shown for each finish use the typical minimum-win route to that result &mdash; the exact number can run higher if a wrestler takes a longer road through the bracket. For a path-accurate total, use the match-path simulator (coming next).
     <strong>A note on rosters</strong>
     Names are pulled from this site's fan-ranking wrestler database, which may not perfectly match official NCAA qualifiers and seeds once they're announced. Edit any name field to correct it.
   </div>
@@ -331,7 +331,7 @@
 
 <footer>
   <p>The Fan's Vote &middot; Team Points Simulator &middot; Not affiliated with the NCAA</p>
-  <p><a href="index.html">&larr; Back to Rankings</a></p>
+  <!-- <p><a href="index.html">&larr; Back to Rankings</a></p> -->
 </footer>
 
 <script type="module">
@@ -355,13 +355,13 @@ const weights = [125,133,141,149,157,165,174,184,197,285];
 
 // Typical minimum-win route to each finish: [advancement points, placement points]
 const FINISHES = [
-  { key: 'champion', label: 'Champion (1st)',        adv: 5.0, place: 16 },
+  { key: 'champion', label: 'Champion (1st)',        adv: 4.0, place: 16 },
   { key: '2nd',       label: '2nd',                   adv: 4.0, place: 12 },
-  { key: '3rd',       label: '3rd',                   adv: 4.0, place: 10 },
+  { key: '3rd',       label: '3rd',                   adv: 3.5, place: 10 },
   { key: '4th',       label: '4th',                   adv: 3.5, place: 9  },
-  { key: '5th',       label: '5th',                   adv: 3.5, place: 7  },
+  { key: '5th',       label: '5th',                   adv: 3.0, place: 7  },
   { key: '6th',       label: '6th',                   adv: 3.0, place: 6  },
-  { key: '7th',       label: '7th',                   adv: 3.0, place: 4  },
+  { key: '7th',       label: '7th',                   adv: 2.5, place: 4  },
   { key: '8th',       label: '8th',                   adv: 2.5, place: 3  },
   { key: 'r12',       label: 'Round of 12 (missed podium)', adv: 2.5, place: 0 },
   { key: 'r16',       label: 'Round of 16',            adv: 1.0, place: 0 },
