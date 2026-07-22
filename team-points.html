@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Team Points Simulator — The Fan's Vote — NCAA Wrestling</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #eeede9;
+      --border: #dddbd5;
+      --border-dark: #c8c5bc;
+      --accent: #c0392b;
+      --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e;
+      --text: #1c1c1c;
+      --muted: #888880;
+      --muted2: #b0aea6;
+      --gold: #c9a84c;
+      --green: #2e7d52;
+      --cactus-green: #3a9e2e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      letter-spacing: 0.06em; color: var(--accent2);
+      text-transform: uppercase;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; color: var(--muted);
+      letter-spacing: 0.08em; text-align: right; line-height: 1.7;
+    }
+    .live-dot {
+      display: inline-block; width: 5px; height: 5px;
+      background: #2ecc71; border-radius: 50%;
+      margin-right: 4px; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* MASTHEAD */
+    .masthead {
+      background: var(--surface);
+      border-bottom: 3px solid var(--accent2);
+      padding: 2rem 2rem 1.8rem;
+    }
+    .masthead-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: flex-end;
+      justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+    }
+    .masthead h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800; line-height: 0.95;
+      letter-spacing: 0.01em; text-transform: uppercase;
+    }
+    .masthead h1 .line2 { color: var(--accent); font-style: italic; }
+    .masthead-meta { text-align: right; }
+    .masthead-meta p {
+      font-size: 0.82rem; color: var(--muted);
+      max-width: 320px; line-height: 1.5; margin-bottom: 0.8rem;
+    }
+    .tag-row { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 8px; border: 1px solid var(--border-dark);
+      color: var(--muted); border-radius: 2px;
+    }
+    .tag.hot { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+    /* CONTROLS BAR */
+    .setup {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 2rem;
+    }
+    .setup-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 1.6rem; align-items: flex-end; flex-wrap: wrap;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    }
+    select, input[type="text"], input[type="number"] {
+      font-family: 'Lato', sans-serif; font-size: 0.88rem;
+      padding: 8px 10px; border: 1px solid var(--border-dark);
+      border-radius: 2px; background: var(--bg); color: var(--text);
+    }
+    select { min-width: 220px; cursor: pointer; }
+    .field-note {
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      color: var(--muted2); letter-spacing: 0.04em; max-width: 260px; line-height: 1.5;
+    }
+
+    /* MAIN */
+    .main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+    .total-banner {
+      background: var(--accent2); border-radius: 3px;
+      padding: 1.4rem 1.8rem; margin-bottom: 1.8rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .total-banner-team {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.5);
+    }
+    .total-banner-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 3rem; font-weight: 800; color: #fff; line-height: 1;
+    }
+    .total-banner-breakdown {
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      color: rgba(255,255,255,0.55); letter-spacing: 0.05em; text-align: right; line-height: 1.7;
+    }
+    .total-banner-breakdown strong { color: rgba(255,255,255,0.85); }
+
+    .compare-banner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--gold); padding: 0.9rem 1.4rem;
+      margin-bottom: 1.8rem; font-family: 'DM Mono', monospace;
+      font-size: 0.72rem; color: var(--text); letter-spacing: 0.03em;
+    }
+    .compare-banner strong { color: var(--accent); }
+
+    table.points-table { width: 100%; border-collapse: collapse; }
+    .points-table thead th {
+      font-family: 'DM Mono', monospace; font-size: 0.58rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2);
+      padding: 0 0.6rem 0.6rem 0; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .points-table thead th.center { text-align: center; }
+    .points-table thead th.right { text-align: right; }
+    .points-table tbody tr { border-bottom: 1px solid var(--border); }
+    .points-table tbody tr:hover { background: var(--surface2); }
+    .points-table td { padding: 0.7rem 0.6rem 0.7rem 0; vertical-align: middle; }
+
+    .wt-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem; font-weight: 800; color: var(--accent2); line-height: 1;
+    }
+    .wt-badge span {
+      display: block; font-family: 'DM Mono', monospace;
+      font-size: 0.5rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 1px;
+    }
+
+    .wrestler-input { width: 100%; min-width: 150px; }
+    .finish-select { min-width: 190px; }
+
+    .bonus-group { display: flex; gap: 6px; align-items: center; }
+    .bonus-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .bonus-item label {
+      font-family: 'DM Mono', monospace; font-size: 0.52rem;
+      color: var(--muted); letter-spacing: 0.06em;
+    }
+    .bonus-item input { width: 46px; text-align: center; padding: 6px 4px; }
+
+    .row-total {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--accent2); text-align: right;
+    }
+    .row-total-label {
+      font-family: 'DM Mono', monospace; font-size: 0.52rem;
+      color: var(--muted2); display: block; text-align: right; letter-spacing: 0.06em;
+    }
+    .row-sub {
+      font-family: 'DM Mono', monospace; font-size: 0.56rem;
+      color: var(--muted); margin-top: 2px;
+    }
+
+    .how-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      padding: 1.1rem 1.3rem; font-size: 0.78rem; color: var(--muted); line-height: 1.7;
+      margin-top: 2rem;
+    }
+    .how-box strong {
+      display: block; color: var(--text);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 0.2rem; margin-top: 0.7rem;
+    }
+    .how-box strong:first-child { margin-top: 0; }
+    .how-box code {
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      background: var(--surface2); padding: 1px 5px; border-radius: 2px;
+    }
+
+    .state-box { padding: 3rem 0; text-align: center; }
+    .state-box p {
+      font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      color: var(--muted); margin-bottom: 1.2rem;
+    }
+    .spinner {
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid var(--border-dark); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      background: var(--accent2);
+      padding: 1.2rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 2rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em;
+    }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    @media (max-width: 900px) {
+      .points-table { display: block; overflow-x: auto; }
+      .masthead-inner { flex-direction: column; align-items: flex-start; }
+      .masthead-meta { text-align: left; }
+      .tag-row { justify-content: flex-start; }
+      .total-banner { flex-direction: column; align-items: flex-start; }
+      .total-banner-breakdown { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html" class="active">Team Points</a>
+  </nav>
+  <div class="header-right">
+    <div class="header-meta">
+      <div><span class="live-dot"></span>LIVE FROM FIRESTORE</div>
+      <div>TEAM POINTS SIMULATOR</div>
+    </div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <h1>Team Points<br/><span class="line2">Simulator</span></h1>
+    <div class="masthead-meta">
+      <p>Project a team's NCAA Championship point total, weight by weight, using official advancement, placement and bonus scoring.</p>
+      <div class="tag-row">
+        <span class="tag hot">Live Roster Data</span>
+        <span class="tag">Official Scoring</span>
+        <span class="tag">All 10 Weights</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="setup">
+  <div class="setup-inner">
+    <div class="field">
+      <label for="teamSelect">Team</label>
+      <select id="teamSelect"><option value="">Loading teams…</option></select>
+    </div>
+    <div class="field">
+      <label for="compareSelect">Compare against (optional)</label>
+      <select id="compareSelect"><option value="">None</option></select>
+    </div>
+    <div class="field-note">
+      Wrestler names auto-fill from the site's live roster database when a match is found for that team and weight. Every field is editable — overwrite a name, or change a finish, at any time.
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div id="totalBannerContainer"></div>
+  <div id="compareBannerContainer"></div>
+
+  <div id="tableContainer">
+    <div class="state-box"><p><span class="spinner"></span>Loading roster data…</p></div>
+  </div>
+
+  <div class="how-box">
+    <strong>Scoring used</strong>
+    Placement: 1st&ndash;16, 2nd&ndash;12, 3rd&ndash;10, 4th&ndash;9, 5th&ndash;7, 6th&ndash;6, 7th&ndash;4, 8th&ndash;3. Bonus: fall/forfeit/default/DQ&ndash;2, tech fall&ndash;1.5, major decision&ndash;1 (per match).
+    <strong>Advancement points</strong>
+    1 point per championship-bracket win, 0.5 per consolation-bracket win. Since this calculator projects a <em>finish</em> rather than a full match path, advancement points shown for each finish use the typical minimum-win route to that result &mdash; the exact number can run higher if a wrestler takes a longer road through the bracket. For a path-accurate total, use the match-path simulator (coming next).
+    <strong>A note on rosters</strong>
+    Names are pulled from this site's fan-ranking wrestler database, which may not perfectly match official NCAA qualifiers and seeds once they're announced. Edit any name field to correct it.
+  </div>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Team Points Simulator &middot; Not affiliated with the NCAA</p>
+  <p><a href="index.html">&larr; Back to Rankings</a></p>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// === SCORING TABLES ===
+const weights = [125,133,141,149,157,165,174,184,197,285];
+
+// Typical minimum-win route to each finish: [advancement points, placement points]
+const FINISHES = [
+  { key: 'champion', label: 'Champion (1st)',        adv: 5.0, place: 16 },
+  { key: '2nd',       label: '2nd',                   adv: 4.0, place: 12 },
+  { key: '3rd',       label: '3rd',                   adv: 4.0, place: 10 },
+  { key: '4th',       label: '4th',                   adv: 3.5, place: 9  },
+  { key: '5th',       label: '5th',                   adv: 3.5, place: 7  },
+  { key: '6th',       label: '6th',                   adv: 3.0, place: 6  },
+  { key: '7th',       label: '7th',                   adv: 3.0, place: 4  },
+  { key: '8th',       label: '8th',                   adv: 2.5, place: 3  },
+  { key: 'r12',       label: 'Round of 12 (missed podium)', adv: 2.5, place: 0 },
+  { key: 'r16',       label: 'Round of 16',            adv: 1.0, place: 0 },
+  { key: '02',        label: '0–2 (out early)',         adv: 0,   place: 0 },
+  { key: 'dnq',       label: 'Did Not Qualify',         adv: 0,   place: 0 },
+];
+const finishByKey = Object.fromEntries(FINISHES.map(f => [f.key, f]));
+const BONUS_VALUES = { pins: 2, techs: 1.5, majors: 1 };
+
+// === STATE ===
+let wrestlerDB = [];       // [{name, school, weight}]
+let teams = [];             // sorted distinct schools
+let rowState = {};          // primary team row state, by weight
+let compareRowState = {};   // comparison team row state, by weight
+
+function normalizeName(n='') { return String(n).trim(); }
+
+function wrestlersFor(school, weight) {
+  if (!school) return [];
+  return wrestlerDB.filter(w => w.school === school && Number(w.weight) === Number(weight));
+}
+
+function defaultRowState(school) {
+  const state = {};
+  weights.forEach(w => {
+    const matches = wrestlersFor(school, w);
+    state[w] = {
+      name: matches[0]?.name || '',
+      finish: 'r12',
+      pins: 0, techs: 0, majors: 0
+    };
+  });
+  return state;
+}
+
+function computeRowTotal(row) {
+  const f = finishByKey[row.finish] || finishByKey.dnq;
+  const bonus = (Number(row.pins)||0)*BONUS_VALUES.pins
+              + (Number(row.techs)||0)*BONUS_VALUES.techs
+              + (Number(row.majors)||0)*BONUS_VALUES.majors;
+  return { adv: f.adv, place: f.place, bonus, total: f.adv + f.place + bonus };
+}
+
+function computeTeamTotal(state) {
+  let adv=0, place=0, bonus=0;
+  weights.forEach(w => {
+    const r = computeRowTotal(state[w]);
+    adv += r.adv; place += r.place; bonus += r.bonus;
+  });
+  return { adv, place, bonus, total: adv+place+bonus };
+}
+
+function renderBanners() {
+  const teamName = document.getElementById('teamSelect').value;
+  const compareName = document.getElementById('compareSelect').value;
+
+  if (!teamName) {
+    document.getElementById('totalBannerContainer').innerHTML = '';
+    document.getElementById('compareBannerContainer').innerHTML = '';
+    return;
+  }
+
+  const totals = computeTeamTotal(rowState);
+  document.getElementById('totalBannerContainer').innerHTML = `
+    <div class="total-banner">
+      <div>
+        <div class="total-banner-team">${teamName} &mdash; Projected Total</div>
+        <div class="total-banner-num">${totals.total.toFixed(1)}</div>
+      </div>
+      <div class="total-banner-breakdown">
+        <strong>${totals.adv.toFixed(1)}</strong> advancement &nbsp;+&nbsp;
+        <strong>${totals.place.toFixed(1)}</strong> placement &nbsp;+&nbsp;
+        <strong>${totals.bonus.toFixed(1)}</strong> bonus
+      </div>
+    </div>`;
+
+  if (compareName) {
+    const compTotals = computeTeamTotal(compareRowState);
+    const diff = totals.total - compTotals.total;
+    const leader = diff === 0 ? null : (diff > 0 ? teamName : compareName);
+    const diffAbs = Math.abs(diff).toFixed(1);
+    document.getElementById('compareBannerContainer').innerHTML = `
+      <div class="compare-banner">
+        <span>${compareName} projects to <strong>${compTotals.total.toFixed(1)}</strong> points</span>
+        <span>${leader ? `<strong>${leader}</strong> leads by ${diffAbs}` : 'Teams are projected to tie'}</span>
+      </div>`;
+  } else {
+    document.getElementById('compareBannerContainer').innerHTML = '';
+  }
+}
+
+function finishOptionsHtml(selected) {
+  return FINISHES.map(f => `<option value="${f.key}" ${f.key===selected?'selected':''}>${f.label}</option>`).join('');
+}
+
+function renderTable() {
+  const teamName = document.getElementById('teamSelect').value;
+  if (!teamName) {
+    document.getElementById('tableContainer').innerHTML = `
+      <div class="state-box"><p>Pick a team above to start projecting a score.</p></div>`;
+    return;
+  }
+
+  const rows = weights.map(w => {
+    const row = rowState[w];
+    const t = computeRowTotal(row);
+    return `
+      <tr data-weight="${w}">
+        <td><div class="wt-badge">${w}<span>LBS</span></div></td>
+        <td><input type="text" class="wrestler-input" data-field="name" value="${row.name.replace(/"/g,'&quot;')}" placeholder="Enter wrestler name"/></td>
+        <td>
+          <select class="finish-select" data-field="finish">${finishOptionsHtml(row.finish)}</select>
+        </td>
+        <td>
+          <div class="bonus-group">
+            <div class="bonus-item"><label>Falls</label><input type="number" min="0" max="7" data-field="pins" value="${row.pins}"/></div>
+            <div class="bonus-item"><label>Tech</label><input type="number" min="0" max="7" data-field="techs" value="${row.techs}"/></div>
+            <div class="bonus-item"><label>Major</label><input type="number" min="0" max="7" data-field="majors" value="${row.majors}"/></div>
+          </div>
+        </td>
+        <td>
+          <div class="row-total">${t.total.toFixed(1)}</div>
+          <span class="row-total-label">PTS</span>
+          <div class="row-sub">${t.adv.toFixed(1)} adv + ${t.place.toFixed(1)} place + ${t.bonus.toFixed(1)} bonus</div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('tableContainer').innerHTML = `
+    <table class="points-table">
+      <thead>
+        <tr>
+          <th>Wt</th>
+          <th>Wrestler</th>
+          <th>Projected Finish</th>
+          <th class="center">Bonus Wins</th>
+          <th class="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  document.querySelectorAll('#tableContainer tbody tr').forEach(tr => {
+    const w = tr.dataset.weight;
+    tr.querySelectorAll('[data-field]').forEach(el => {
+      el.addEventListener('input', () => {
+        const field = el.dataset.field;
+        rowState[w][field] = field === 'name' || field === 'finish' ? el.value : Number(el.value);
+        // Update just this row's total + the banner, avoid full re-render (keeps focus)
+        const t = computeRowTotal(rowState[w]);
+        tr.querySelector('.row-total').textContent = t.total.toFixed(1);
+        tr.querySelector('.row-sub').textContent = `${t.adv.toFixed(1)} adv + ${t.place.toFixed(1)} place + ${t.bonus.toFixed(1)} bonus`;
+        renderBanners();
+      });
+    });
+  });
+}
+
+async function fetchWrestlers() {
+  const snap = await getDocs(collection(db, 'wrestlers'));
+  wrestlerDB = snap.docs
+    .map(d => d.data())
+    .filter(w => w && w.name && w.school)
+    .map(w => ({ name: w.name, school: w.school, weight: Number(w.weight) }));
+  teams = [...new Set(wrestlerDB.map(w => w.school))].sort((a,b) => a.localeCompare(b));
+}
+
+function populateTeamSelects() {
+  const options = `<option value="">Select a team…</option>` +
+    teams.map(t => `<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
+  document.getElementById('teamSelect').innerHTML = options;
+  document.getElementById('compareSelect').innerHTML = `<option value="">None</option>` +
+    teams.map(t => `<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');
+}
+
+document.getElementById('teamSelect').addEventListener('change', (e) => {
+  rowState = defaultRowState(e.target.value);
+  renderTable();
+  renderBanners();
+});
+document.getElementById('compareSelect').addEventListener('change', (e) => {
+  compareRowState = e.target.value ? defaultRowState(e.target.value) : {};
+  renderBanners();
+});
+
+(async () => {
+  try {
+    await fetchWrestlers();
+    populateTeamSelects();
+    document.getElementById('tableContainer').innerHTML = `
+      <div class="state-box"><p>Pick a team above to start projecting a score.</p></div>`;
+  } catch (e) {
+    console.error(e);
+    document.getElementById('tableContainer').innerHTML = `
+      <div class="state-box"><p>Could not load roster data &mdash; check connection.</p></div>`;
+  }
+})();
+</script>
+
+</body>
+</html>
