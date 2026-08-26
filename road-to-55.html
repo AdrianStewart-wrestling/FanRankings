@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R18TQ9ZF9Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R18TQ9ZF9Z');
+</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Fan's Vote — Road to 55</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9;
+      --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --cactus-green: #3a9e2e;
+      --p4p: #6b2fb5; --teams: #0e6ba8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+    header {
+      background: #ffffff; border-bottom: 2px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
+    .live-dot { display: inline-block; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .partnership-badge { display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 1rem; }
+    .partnership-badge img { height: 48px; width: auto; filter: drop-shadow(0 0 5px rgba(58,158,46,0.5)); }
+    .partnership-text { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.6; }
+    .partnership-text strong { display: block; color: var(--cactus-green); font-size: 0.68rem; letter-spacing: 0.06em; }
+
+    .masthead { background: var(--surface); border-bottom: 3px solid var(--accent2); padding: 2rem; }
+    .masthead-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+    .masthead-left { display: flex; align-items: flex-end; gap: 1.2rem; }
+    .masthead h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+    .masthead h1 .line2 { color: var(--gold); font-style: italic; }
+    .masthead-meta p { font-size: 0.82rem; color: var(--muted); max-width: 320px; line-height: 1.5; }
+    .week-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--gold); color: #8a6f1f; padding: 4px 10px; border-radius: 2px; margin-top: 0.8rem; background: rgba(201,168,76,0.1); }
+
+    .status-bar { max-width: 1000px; margin: 0 auto; padding: 0.8rem 2rem 0; }
+    .status-msg { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 8px 12px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); display: none; }
+    .status-msg.visible { display: block; }
+    .status-msg.error { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .status-msg.success { border-color: var(--green); color: var(--green); background: rgba(46,125,82,0.06); }
+    .status-msg.loading { border-color: var(--border-dark); color: var(--muted); }
+
+    .layout { max-width: 1000px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 1fr 270px; gap: 2rem; }
+
+    /* Road track — signature element replacing the weight-selector strip */
+    .track-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1rem 1.4rem; margin-bottom: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .track-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .track-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .track-total { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent2); }
+    .track-total em { font-style: normal; color: var(--gold); }
+    .track-bar-wrap { position: relative; height: 8px; background: var(--surface2); border-radius: 4px; overflow: visible; border: 1px solid var(--border); }
+    .track-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 4px 0 0 4px; transition: width 0.35s ease; }
+    .track-flag { position: absolute; right: -4px; top: -9px; font-size: 16px; opacity: 0.3; transition: opacity 0.2s ease; }
+    .track-flag.lit { opacity: 1; }
+
+    .ballot-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+    .name-bar { padding: 1rem 1.4rem; border-bottom: 2px solid var(--accent2); background: var(--accent2); }
+    .name-bar label { display: block; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+    .name-input {
+      width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 1.15rem; font-weight: 700;
+      letter-spacing: 0.02em; padding: 8px 12px; border-radius: 3px; outline: none;
+    }
+    .name-input::placeholder { color: rgba(255,255,255,0.35); font-weight: 400; }
+    .name-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .name-input[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .name-hint { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.3); margin-top: 5px; letter-spacing: 0.04em; }
+
+    .name-bar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 700px) { .name-bar-grid { grid-template-columns: 1fr; } }
+
+    .find-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.15); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .find-row span { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.4); letter-spacing: 0.04em; }
+    .btn-find {
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 12px; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.75);
+      border-radius: 3px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-find:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-find:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .weight-row { display: flex; align-items: center; gap: 14px; padding: 0.9rem 1.4rem; border-bottom: 1px solid var(--border); }
+    .weight-row:last-child { border-bottom: none; }
+    .weight-row.complete { background: rgba(46,125,82,0.04); }
+
+    .wt-badge {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.05rem;
+      color: #fff; background: var(--accent2); width: 54px; height: 54px; border-radius: 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: background 0.2s ease;
+    }
+    .wt-badge span { font-family: 'DM Mono', monospace; font-size: 0.5rem; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; }
+    .weight-row.complete .wt-badge { background: var(--green); }
+
+    .wt-controls { flex: 1; min-width: 0; }
+
+    .wt-select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Lato', sans-serif;
+      font-size: 0.88rem; font-weight: 700; padding: 8px 30px 8px 10px;
+      border-radius: 3px; outline: none; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      margin-bottom: 8px;
+    }
+    .wt-select:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(26,26,46,0.1); }
+    .wt-select[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+    .conf-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+    .conf-row { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+    .conf-chip {
+      font-family: 'DM Mono', monospace; font-weight: 700; font-size: 0.72rem;
+      aspect-ratio: 1; border-radius: 3px; border: 1px solid var(--border-dark);
+      background: var(--surface2); color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.13s;
+    }
+    .conf-chip:hover:not(:disabled) { border-color: var(--accent2); color: var(--text); }
+    .conf-chip.selected { background: var(--gold); border-color: var(--gold); color: #1c1c1c; }
+    .conf-chip:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .ballot-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--surface2); }
+    .slots-filled-msg { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+    .slots-filled-msg strong { color: var(--text); }
+    .btn-submit { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 24px; background: var(--accent); color: #fff; border: none; cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap; }
+    .btn-submit:hover:not(:disabled) { background: #a93226; transform: translateY(-1px); }
+    .btn-submit:disabled { background: var(--border-dark); color: var(--muted2); cursor: not-allowed; transform: none; }
+
+    .success-state { padding: 3rem 1.4rem; text-align: center; display: none; flex-direction: column; align-items: center; gap: 0.8rem; }
+    .success-state.visible { display: flex; }
+    .check-ring { width: 60px; height: 60px; border: 2px solid var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; animation: popIn 0.3s ease; }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+    .success-state h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green); }
+    .success-state p { font-size: 0.82rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .btn-change { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; padding: 6px 14px; border: 1px solid var(--border-dark); color: var(--muted); background: transparent; cursor: pointer; border-radius: 2px; margin-top: 0.4rem; transition: all 0.13s; }
+    .btn-change:hover { border-color: var(--text); color: var(--text); }
+
+    .closed-card { background: var(--surface); border: 1px solid var(--accent); border-radius: 4px; padding: 2rem 1.4rem; text-align: center; margin-bottom: 1.2rem; }
+    .closed-card strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--accent); margin-bottom: 6px; }
+    .closed-card p { font-size: 0.82rem; color: var(--muted); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+    .side-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .side-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+
+    .rules-list { display: flex; flex-direction: column; gap: 10px; }
+    .rules-list .r { font-size: 0.78rem; line-height: 1.5; color: var(--text); }
+    .rules-list .r strong { display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0.6rem; }
+    .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent2); line-height: 1; }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 2px; }
+
+    .cactus-partner-card { border: 1px solid var(--border); border-top: 3px solid var(--cactus-green); padding: 1rem; display: flex; align-items: center; gap: 12px; border-radius: 0 0 4px 4px; }
+    .cactus-partner-card img { height: 60px; width: auto; flex-shrink: 0; }
+    .cactus-partner-info strong { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cactus-green); display: block; margin-bottom: 3px; }
+    .cactus-partner-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.45; }
+
+    .spinner { display: inline-block; width: 10px; height: 10px; border: 2px solid var(--border-dark); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer { background: var(--accent2); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-partner { display: flex; align-items: center; gap: 8px; }
+    .footer-partner img { height: 30px; width: auto; opacity: 0.75; }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; padding: 1rem; }
+      .sidebar { order: -1; }
+      .partnership-badge { display: none; }
+      .weight-row { flex-direction: column; align-items: stretch; }
+      .wt-badge { width: 100%; height: 34px; flex-direction: row; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html" class="active">Road to 55</a>
+  </nav>
+  <div class="header-right">
+    <div class="header-meta">
+      <div><span class="live-dot"></span>SEASON CHALLENGE</div>
+      <div>NCAA WRESTLING</div>
+    </div>
+    <div class="partnership-badge">
+      <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      <div class="partnership-text">Official Partner<strong>Cactus Wrestling</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <h1>Road to<br/><span class="line2">55</span></h1>
+    </div>
+    <div class="masthead-meta">
+      <p>Pick the NCAA champion at all 10 weights, then rank your confidence 1–10 across your picks. Get it right, get the points — the perfect card scores 55.</p>
+      <div class="week-badge" id="windowBadge">📅 Loading window…</div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <div class="status-msg" id="statusMsg"></div>
+</div>
+
+<div class="layout">
+  <div class="ballot-col">
+
+    <div class="closed-card" id="closedCard" style="display:none;">
+      <strong id="closedTitle">Entries aren't open yet</strong>
+      <p id="closedBody">Entries open November 1, 2026 and close November 15, 2026. Come back then to lock in your card.</p>
+    </div>
+
+    <div class="track-card">
+      <div class="track-top">
+        <span class="track-label">Confidence assigned</span>
+        <span class="track-total"><span id="trackSum">0</span><em>/55</em></span>
+      </div>
+      <div class="track-bar-wrap">
+        <div class="track-bar-fill" id="trackFill"></div>
+        <div class="track-flag" id="trackFlag">🏁</div>
+      </div>
+    </div>
+
+    <div class="ballot-card">
+      <div id="entryState">
+        <div class="name-bar">
+          <div class="name-bar-grid">
+            <div>
+              <label for="entryNameInput">Entry name</label>
+              <input type="text" id="entryNameInput" class="name-input" placeholder="e.g. Adrian's Card, Team Cactus" maxlength="40" autocomplete="off">
+            </div>
+            <div>
+              <label for="entryPasswordInput">Password</label>
+              <input type="password" id="entryPasswordInput" class="name-input" placeholder="4+ characters" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="name-hint">Name shows on the leaderboard once results are in. Password lets you pull up and edit this card from a different device — leave it blank on future saves from this device to keep it unchanged.</div>
+          <div class="find-row">
+            <span>Card started on another device?</span>
+            <button type="button" class="btn-find" id="findBtn" onclick="findEntry()">Find my card</button>
+          </div>
+        </div>
+        <div id="rowsContainer">
+          <div class="weight-row"><div class="wt-controls" style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);"><span class="spinner"></span>Loading wrestlers...</div></div>
+        </div>
+        <div class="ballot-footer">
+          <div class="slots-filled-msg"><strong id="filledCount">0</strong> / 10 weights picked</div>
+          <button class="btn-submit" id="saveBtn" onclick="saveEntry()" disabled>Save Card</button>
+        </div>
+      </div>
+      <div class="success-state" id="successState">
+        <div class="check-ring">&#10003;</div>
+        <h3>Card Saved!</h3>
+        <p id="successMsg">Your Road to 55 card is locked in.</p>
+        <button class="btn-change" onclick="editEntry()">Edit my card</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div>
+      <div class="side-title">Official Partner</div>
+      <div class="cactus-partner-card">
+        <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+        <div class="cactus-partner-info">
+          <strong>Cactus Wrestling</strong>
+          <p>Proud community partner powering fan-driven NCAA wrestling rankings.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">How It Works</div>
+      <div class="rules-list">
+        <div class="r"><strong>Pick</strong>Choose who you think wins each of the 10 weight classes at NCAAs.</div>
+        <div class="r"><strong>Rank</strong>Assign confidence 1–10 to your picks — each number used exactly once.</div>
+        <div class="r"><strong>Score</strong>Nail a pick, bank its confidence value. Max possible score is 55.</div>
+        <div class="r"><strong>Results</strong>Champions are crowned at the NCAA Championship, March 2027 — that's when the board settles.</div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Entry Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="statFilled">0</div><div class="stat-label">WEIGHTS PICKED</div></div>
+        <div class="stat-box"><div class="stat-num" id="statRemaining">10</div><div class="stat-label">REMAINING</div></div>
+        <div class="stat-box"><div class="stat-num" id="statSum">0</div><div class="stat-label">CONFIDENCE USED</div></div>
+        <div class="stat-box"><div class="stat-num">55</div><div class="stat-label">MAX SCORE</div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+  <div class="footer-partner">
+    <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+    <p>In partnership with <a href="https://www.youtube.com/@CACTUS-Wrestling" target="_blank" rel="noopener">Cactus Wrestling</a></p>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFunctions, httpsCallable
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const functions = getFunctions(app, "us-central1"); // must match the deployed function region
+
+const findEntryFn = httpsCallable(functions, "findRoad55Entry");
+const getEntryByIdFn = httpsCallable(functions, "getRoad55EntryById");
+const saveEntryFn = httpsCallable(functions, "saveRoad55Entry");
+
+const WEIGHTS = [125,133,141,149,157,165,174,184,197,285];
+const ENTRY_OPEN = new Date("2026-11-01T00:00:00");
+const ENTRY_CLOSE = new Date("2026-11-15T23:59:59");
+
+let wrestlerDB = []; // flat: [{name, weight, school, active}]
+let state = {}; // { [weight]: { name, confidence } }
+WEIGHTS.forEach(w => state[w] = { name: "", confidence: null });
+let entryName = "";
+let knownEntryId = null; // set once we know which Firestore doc is "ours" for this session
+
+const nameInput = document.getElementById('entryNameInput');
+const passwordInput = document.getElementById('entryPasswordInput');
+nameInput.addEventListener('input', (e) => {
+  entryName = e.target.value;
+  updateProgress();
+});
+
+function normalizeName(name = "") {
+  return String(name).trim().toLowerCase();
+}
+
+function getStoredEntryId() {
+  return localStorage.getItem('road55EntryId');
+}
+function rememberEntryId(id) {
+  localStorage.setItem('road55EntryId', id);
+  knownEntryId = id;
+}
+
+function isOpen() {
+  const now = new Date();
+  return now >= ENTRY_OPEN && now <= ENTRY_CLOSE;
+}
+
+function showStatus(msg, type='loading') {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status-msg visible ${type}`;
+}
+function hideStatus() {
+  document.getElementById('statusMsg').className = 'status-msg';
+}
+
+function applyWindowUI() {
+  const badge = document.getElementById('windowBadge');
+  const now = new Date();
+  if (now < ENTRY_OPEN) {
+    badge.textContent = '📅 Entries open Nov 1, 2026';
+  } else if (now > ENTRY_CLOSE) {
+    badge.textContent = '📅 Entries closed · Results after NCAAs, March 2027';
+  } else {
+    badge.textContent = '📅 Entries close Nov 15, 2026';
+  }
+  document.getElementById('entryNameInput').disabled = !isOpen();
+  document.getElementById('entryPasswordInput').disabled = !isOpen();
+  document.getElementById('findBtn').disabled = !isOpen();
+  if (!isOpen()) {
+    document.getElementById('closedCard').style.display = 'block';
+    if (now > ENTRY_CLOSE) {
+      document.getElementById('closedTitle').textContent = 'Entries are closed';
+      document.getElementById('closedBody').textContent = 'The board is set. Check back after the NCAA Championship in March 2027 for results.';
+    }
+  }
+}
+
+async function fetchWrestlers() {
+  try {
+    const snap = await getDocs(collection(db, 'wrestlers'));
+    wrestlerDB = snap.docs
+      .map(d => d.data())
+      .filter(w => w && w.name && Number(w.weight))
+      .filter(w => w.active !== false)
+      .map(w => ({ ...w, weight: Number(w.weight) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (e) {
+    console.warn('Could not load wrestlers:', e);
+    showStatus('Could not load the wrestler list. Refresh to try again.', 'error');
+  }
+}
+
+function usedConfidences() {
+  return new Set(Object.values(state).map(s => s.confidence).filter(v => v !== null));
+}
+
+function updateProgress() {
+  const used = usedConfidences();
+  const sum = [...used].reduce((a,b) => a+b, 0);
+  const filled = WEIGHTS.filter(w => state[w].name && state[w].confidence !== null).length;
+
+  document.getElementById('trackSum').textContent = sum;
+  document.getElementById('trackFill').style.width = Math.round((used.size/10)*100) + '%';
+  document.getElementById('trackFlag').classList.toggle('lit', filled === 10);
+  document.getElementById('filledCount').textContent = filled;
+  document.getElementById('statFilled').textContent = filled;
+  document.getElementById('statRemaining').textContent = 10 - filled;
+  document.getElementById('statSum').textContent = sum;
+
+  document.getElementById('saveBtn').disabled = !(filled === 10 && entryName.trim().length > 0 && isOpen());
+}
+
+function renderChips(weight) {
+  const used = usedConfidences();
+  const mine = state[weight].confidence;
+  const wrap = document.createElement('div');
+  wrap.className = 'conf-row';
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'conf-chip' + (mine === i ? ' selected' : '');
+    btn.textContent = i;
+    btn.disabled = (used.has(i) && mine !== i) || !isOpen();
+    btn.addEventListener('click', () => {
+      state[weight].confidence = (mine === i) ? null : i;
+      renderRows();
+    });
+    wrap.appendChild(btn);
+  }
+  return wrap;
+}
+
+function renderRows() {
+  const container = document.getElementById('rowsContainer');
+  container.innerHTML = '';
+
+  WEIGHTS.forEach(weight => {
+    const roster = wrestlerDB.filter(w => w.weight === weight);
+    const complete = state[weight].name && state[weight].confidence !== null;
+
+    const row = document.createElement('div');
+    row.className = 'weight-row' + (complete ? ' complete' : '');
+
+    const badge = document.createElement('div');
+    badge.className = 'wt-badge';
+    badge.innerHTML = `${weight}<span>LBS</span>`;
+
+    const controls = document.createElement('div');
+    controls.className = 'wt-controls';
+
+    const select = document.createElement('select');
+    select.className = 'wt-select';
+    select.disabled = !isOpen();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = roster.length ? 'Pick the champion…' : 'No wrestlers loaded at this weight';
+    select.appendChild(placeholder);
+    roster.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.name;
+      opt.textContent = w.school ? `${w.name} — ${w.school}` : w.name;
+      if (state[weight].name === w.name) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', (e) => {
+      state[weight].name = e.target.value;
+      renderRows();
+    });
+
+    const confLabel = document.createElement('div');
+    confLabel.className = 'conf-label';
+    confLabel.textContent = 'Confidence';
+
+    controls.appendChild(select);
+    controls.appendChild(confLabel);
+    controls.appendChild(renderChips(weight));
+
+    row.appendChild(badge);
+    row.appendChild(controls);
+    container.appendChild(row);
+  });
+
+  updateProgress();
+}
+
+async function loadExistingEntry() {
+  const id = getStoredEntryId();
+  if (!id) return;
+  try {
+    const res = await getEntryByIdFn({ entryId: id });
+    knownEntryId = id;
+    entryName = res.data.entryName || "";
+    nameInput.value = entryName;
+    (res.data.picks || []).forEach(p => {
+      if (state[p.weight] !== undefined) {
+        state[p.weight] = { name: p.name, confidence: p.confidence };
+      }
+    });
+    showStatus('Loaded your saved card — edit anytime before Nov 15.', 'success');
+    setTimeout(hideStatus, 4000);
+  } catch (e) {
+    console.warn('Could not load existing entry:', e);
+    // Stale/invalid id on this device — clear it so the form starts fresh.
+    localStorage.removeItem('road55EntryId');
+  }
+}
+
+window.findEntry = async function findEntry() {
+  const name = nameInput.value;
+  const password = passwordInput.value;
+  if (!name.trim() || !password) {
+    showStatus('Enter your entry name and password to find your card.', 'error');
+    return;
+  }
+
+  const findBtn = document.getElementById('findBtn');
+  findBtn.disabled = true;
+  findBtn.textContent = 'Searching...';
+  showStatus('Looking up your card...', 'loading');
+
+  try {
+    const res = await findEntryFn({ name, password });
+    rememberEntryId(res.data.entryId);
+    entryName = res.data.entryName || "";
+    nameInput.value = entryName;
+    passwordInput.value = "";
+    WEIGHTS.forEach(w => state[w] = { name: "", confidence: null });
+    (res.data.picks || []).forEach(p => {
+      if (state[p.weight] !== undefined) {
+        state[p.weight] = { name: p.name, confidence: p.confidence };
+      }
+    });
+    renderRows();
+    showStatus('Card loaded — you can now edit it on this device.', 'success');
+  } catch (e) {
+    console.error('Find failed:', e);
+    showStatus(e.message || 'No card found with that name and password.', 'error');
+  } finally {
+    findBtn.disabled = false;
+    findBtn.textContent = 'Find my card';
+  }
+};
+
+window.saveEntry = async function saveEntry() {
+  const trimmedName = entryName.trim();
+  if (!trimmedName) {
+    showStatus('Give your card a name before saving.', 'error');
+    nameInput.focus();
+    return;
+  }
+
+  const used = usedConfidences();
+  const sum = [...used].reduce((a,b) => a+b, 0);
+  if (used.size !== 10 || sum !== 55) {
+    showStatus('Each of the 10 weights needs a unique confidence value from 1–10.', 'error');
+    return;
+  }
+
+  const passwordTyped = passwordInput.value;
+  if (!knownEntryId && (!passwordTyped || passwordTyped.length < 4)) {
+    showStatus('Set a password (4+ characters) so you can find this card on another device.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  showStatus('Saving your card...', 'loading');
+
+  const picks = WEIGHTS.map(w => ({ weight: w, name: state[w].name, confidence: state[w].confidence }));
+
+  try {
+    const res = await saveEntryFn({
+      entryId: knownEntryId || null,
+      entryName: trimmedName,
+      password: passwordTyped || null,
+      picks
+    });
+
+    rememberEntryId(res.data.entryId);
+    passwordInput.value = "";
+    hideStatus();
+    document.querySelector('.name-bar').style.display = 'none';
+    document.getElementById('entryState').querySelector('#rowsContainer').style.display = 'none';
+    document.querySelector('.ballot-footer').style.display = 'none';
+    document.getElementById('successMsg').textContent = `"${trimmedName}" is locked in.`;
+    document.getElementById('successState').classList.add('visible');
+  } catch (e) {
+    console.error('Save failed:', e);
+    showStatus(e.message || "Couldn't save — check your connection and try again.", 'error');
+    btn.disabled = false;
+    btn.textContent = 'Save Card';
+  }
+};
+
+window.editEntry = function editEntry() {
+  document.getElementById('successState').classList.remove('visible');
+  document.querySelector('.name-bar').style.display = '';
+  document.getElementById('rowsContainer').style.display = '';
+  document.querySelector('.ballot-footer').style.display = 'flex';
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Save Card';
+  updateProgress();
+};
+
+(async function init() {
+  applyWindowUI();
+  await fetchWrestlers();
+  await loadExistingEntry();
+  renderRows();
+})();
+</script>
+
+</body>
+</html>

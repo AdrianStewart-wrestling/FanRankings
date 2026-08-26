@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-R18TQ9ZF9Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-R18TQ9ZF9Z');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Fan's Vote — NCAA Wrestling Rankings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #eeede9;
+      --border: #dddbd5;
+      --border-dark: #c8c5bc;
+      --accent: #c0392b;
+      --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e;
+      --text: #1c1c1c;
+      --muted: #888880;
+      --muted2: #b0aea6;
+      --gold: #c9a84c;
+      --green: #2e7d52;
+      --cactus-green: #3a9e2e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      letter-spacing: 0.06em; color: var(--accent2);
+      text-transform: uppercase;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+
+    .header-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; color: var(--muted);
+      letter-spacing: 0.08em; text-align: right; line-height: 1.7;
+    }
+
+    .partnership-badge {
+      display: flex; align-items: center; gap: 10px;
+      border-left: 1px solid var(--border);
+      padding-left: 1rem;
+    }
+    .partnership-badge img {
+      height: 48px; width: auto;
+      filter: drop-shadow(0 0 5px rgba(58,158,46,0.5));
+    }
+    .partnership-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.55rem; letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase; line-height: 1.6;
+    }
+    .partnership-text strong {
+      display: block; color: var(--cactus-green);
+      font-size: 0.68rem; letter-spacing: 0.06em;
+    }
+
+    .live-dot {
+      display: inline-block; width: 5px; height: 5px;
+      background: #2ecc71; border-radius: 50%;
+      margin-right: 4px; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* PARTNER STRIP */
+    .partner-strip {
+      background: #0d0f1e;
+      border-bottom: 1px solid rgba(58,158,46,0.3);
+      padding: 0.45rem 2rem;
+    }
+    .partner-strip-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .partner-strip-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(255,255,255,0.28);
+    }
+    .partner-strip-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--cactus-green);
+    }
+    .partner-strip-divider {
+      width: 1px; height: 12px;
+      background: rgba(255,255,255,0.1);
+    }
+    .partner-strip-desc {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.56rem; letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.28);
+    }
+    .partner-strip-img {
+      height: 26px; width: auto; margin-left: auto;
+      filter: drop-shadow(0 0 4px rgba(58,158,46,0.35));
+    }
+
+    /* MASTHEAD */
+    .masthead {
+      background: var(--surface);
+      border-bottom: 3px solid var(--accent2);
+      padding: 2rem 2rem 1.8rem;
+    }
+    .masthead-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: flex-end;
+      justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+    }
+    .masthead-left { display: flex; align-items: flex-end; gap: 1.2rem; }
+    .masthead-cactus { flex-shrink: 0; position: relative; bottom: -10px; }
+    .masthead-cactus img {
+      height: 120px; width: auto;
+      filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.06));
+    }
+
+    .masthead h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 800; line-height: 0.95;
+      letter-spacing: 0.01em; text-transform: uppercase;
+    }
+    .masthead h1 .line2 { color: var(--accent); font-style: italic; }
+
+    .masthead-meta { text-align: right; }
+    .masthead-meta p {
+      font-size: 0.82rem; color: var(--muted);
+      max-width: 280px; line-height: 1.5; margin-bottom: 0.8rem;
+    }
+
+    .tag-row { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 8px; border: 1px solid var(--border-dark);
+      color: var(--muted); border-radius: 2px;
+    }
+    .tag.hot { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .tag.partner {
+      border-color: var(--cactus-green); color: var(--cactus-green);
+      background: rgba(58,158,46,0.08);
+    }
+
+    /* WEIGHT TABS */
+    .controls {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem; overflow-x: auto;
+    }
+    .controls-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 0; align-items: center;
+    }
+    .weight-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.05em;
+      padding: 12px 16px; background: transparent;
+      border: none; border-bottom: 3px solid transparent;
+      color: var(--muted); cursor: pointer;
+      transition: all 0.13s; white-space: nowrap;
+    }
+    .weight-btn:hover { color: var(--text); border-bottom-color: var(--border-dark); }
+    .weight-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Separator before special tabs (P4P / Teams) */
+    .weight-btn.special {
+      margin-left: 8px;
+      padding-left: 18px;
+      border-left: 1px solid var(--border);
+      color: var(--accent2);
+      letter-spacing: 0.12em;
+    }
+    .weight-btn.special:first-of-type { /* first special tab gets the divider */ }
+    .weight-btn.special:hover { color: var(--text); }
+    .weight-btn.special.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* MAIN */
+    .main {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 290px;
+      gap: 0; padding: 0;
+    }
+
+    .rankings-panel { padding: 2rem; border-right: 1px solid var(--border); }
+
+    .panel-header {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.5rem; padding-bottom: 0.8rem;
+      border-bottom: 2px solid var(--accent2);
+    }
+    .panel-weight {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+    .panel-weight span {
+      font-size: 1rem; font-weight: 400; color: var(--muted);
+      margin-left: 6px; font-family: 'DM Mono', monospace; letter-spacing: 0.06em;
+    }
+    .panel-ballot-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; color: var(--muted); letter-spacing: 0.06em;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted2); padding: 0 1rem 0.5rem 0; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th:first-child { width: 40px; padding-left: 0; }
+    thead th.right { text-align: right; padding-right: 0; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody tr:last-child { border-bottom: none; }
+    td { padding: 0.85rem 1rem 0.85rem 0; vertical-align: middle; }
+    td:first-child { padding-left: 0; width: 40px; }
+    td.right { text-align: right; padding-right: 0; }
+
+    .rank-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--muted2); line-height: 1;
+    }
+    tr:nth-child(1) .rank-num { color: var(--gold); }
+    tr:nth-child(2) .rank-num { color: #888; }
+    tr:nth-child(3) .rank-num { color: #a0845c; }
+    .rank-medal { font-size: 0.7rem; display: block; }
+    .wrestler-name { font-weight: 700; font-size: 1rem; color: var(--text); line-height: 1.2; }
+    .wrestler-school {
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      color: var(--muted); margin-top: 2px; letter-spacing: 0.04em;
+    }
+    .points-col {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem; font-weight: 700; color: var(--accent2); text-align: right;
+    }
+    tr:nth-child(1) .points-col { color: var(--accent); }
+    .points-label {
+      font-family: 'DM Mono', monospace; font-size: 0.55rem;
+      color: var(--muted2); display: block; text-align: right; letter-spacing: 0.06em;
+    }
+    .bar-cell { width: 120px; padding-right: 1rem; }
+    .bar-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+    tr:nth-child(1) .bar-fill { background: var(--gold); }
+    tr:nth-child(2) .bar-fill { background: #888; }
+    tr:nth-child(3) .bar-fill { background: #a0845c; }
+
+    .state-box { padding: 3rem 0; text-align: center; }
+    .state-box p {
+      font-family: 'DM Mono', monospace; font-size: 0.75rem;
+      color: var(--muted); margin-bottom: 1.2rem;
+    }
+    .btn-vote {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 10px 22px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 2px; cursor: pointer;
+      text-decoration: none; display: inline-block; transition: background 0.15s;
+    }
+    .btn-vote:hover { background: #a93226; }
+
+    .spinner {
+      display: inline-block; width: 12px; height: 12px;
+      border: 2px solid var(--border-dark); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SIDEBAR */
+    .sidebar { padding: 2rem 1.5rem; }
+    .side-section { margin-bottom: 2rem; }
+    .side-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.8rem;
+      padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
+    }
+
+    /* CACTUS PARTNER CARD */
+    .cactus-partner-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--cactus-green);
+      padding: 1rem;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cactus-partner-card img {
+      height: 70px; width: auto; flex-shrink: 0;
+      filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.06));
+    }
+    .cactus-partner-info strong {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.05rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--cactus-green); display: block; margin-bottom: 3px;
+    }
+    .cactus-partner-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.45; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 3px; padding: 0.8rem;
+    }
+    .stat-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem; font-weight: 800; color: var(--accent2); line-height: 1;
+    }
+    .stat-label {
+      font-family: 'DM Mono', monospace; font-size: 0.55rem;
+      color: var(--muted); letter-spacing: 0.08em; margin-top: 2px;
+    }
+
+    .how-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 3px solid var(--accent2);
+      padding: 1rem; font-size: 0.78rem; color: var(--muted); line-height: 1.7;
+    }
+    .how-box strong {
+      display: block; color: var(--text);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      margin-bottom: 0.2rem; margin-top: 0.6rem;
+    }
+    .how-box strong:first-child { margin-top: 0; }
+
+    .cta-box {
+      background: var(--accent2); border-radius: 3px; padding: 1.2rem; text-align: center;
+    }
+    .cta-box p { font-size: 0.82rem; color: rgba(255,255,255,0.7); margin-bottom: 1rem; line-height: 1.5; }
+    .cta-box strong { color: #fff; }
+    .cta-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 10px 22px; background: var(--accent); color: #fff;
+      border: none; border-radius: 2px; cursor: pointer;
+      text-decoration: none; display: inline-block; transition: background 0.15s;
+    }
+    .cta-btn:hover { background: #e74c3c; }
+
+    footer {
+      background: var(--accent2);
+      padding: 1.2rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 2rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    footer p {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em;
+    }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-partner {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .footer-partner img {
+      height: 30px; width: auto;
+      filter: drop-shadow(0 0 3px rgba(58,158,46,0.4));
+      opacity: 0.75;
+    }
+
+    @media (max-width: 768px) {
+      .main { grid-template-columns: 1fr; }
+      .sidebar { border-top: 1px solid var(--border); }
+      .masthead-inner { flex-direction: column; align-items: flex-start; }
+      .masthead-meta { text-align: left; }
+      .tag-row { justify-content: flex-start; }
+      .bar-cell { display: none; }
+      .partnership-badge { display: none; }
+      .partner-strip-img { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html" class="active">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html">Road to 55</a>
+  </nav>
+  <div class="header-right">
+    <div class="header-meta">
+      <div><span class="live-dot"></span>COMMUNITY POWERED</div>
+      <div id="weekLabel">NCAA WRESTLING</div>
+    </div>
+    <div class="partnership-badge">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150"> 
+      <div class="partnership-text">
+        Official Partner<strong>Cactus Wrestling</strong>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <div class="masthead-cactus">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      </div>
+      <h1>
+        Fan-Powered<br/>
+        <span class="line2">Rankings</span>
+      </h1>
+    </div>
+    <div class="masthead-meta">
+      <p>NCAA Wrestling rankings built entirely from fan ballots. No editorial staff. No paid polls. Just people who watch every match.</p>
+      <div class="tag-row">
+        <span class="tag hot">Fan Votes</span>
+        <span class="tag">Weighted Scoring</span>
+        <span class="tag">All 10 Weights</span>
+        <span class="tag">P4P + Teams</span>
+        <span class="tag partner">Cactus Wrestling</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="controls-inner" id="weightTabs"></div>
+</div>
+
+<div class="main">
+  <div class="rankings-panel">
+    <div class="panel-header">
+      <div class="panel-weight" id="panelWeight">125 <span>LBS</span></div>
+      <div class="panel-ballot-count" id="panelBallotCount"></div>
+    </div>
+    <div id="tableContainer">
+      <div class="state-box">
+        <p><span class="spinner"></span>Loading rankings...</p>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="side-section">
+      <div class="side-title">Official Partner</div>
+      <div class="cactus-partner-card">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+        <div class="cactus-partner-info">
+          <strong>Cactus Wrestling</strong>
+          <p>Proud community partner powering fan-driven NCAA wrestling rankings.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-title">Poll Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num" id="statWeek">&mdash;</div>
+          <div class="stat-label">CURRENT WEEK</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="statBallots">&mdash;</div>
+          <div class="stat-label">BALLOTS CAST</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">10</div>
+          <div class="stat-label">WEIGHT CLASSES</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">P4P</div>
+          <div class="stat-label">+ TEAM RANKS</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-title">How It Works</div>
+      <div class="how-box">
+        <strong>Voting</strong>
+        Fans rank up to 8 wrestlers per weight class, top 12 Pound-for-Pound, and top 8 teams each week.
+        <strong>Scoring</strong>
+        Weight classes: 1st = 8 pts down to 8th = 1 pt. P4P: 1st = 12 pts down to 12th = 1 pt. Teams: 1st = 8 pts down to 8th = 1 pt.
+        <strong>Updates</strong>
+        Rankings refresh live as new votes come in. A new ballot opens each week of the season.
+        <strong>Off-Season</strong>
+        Votes cast now count toward Week 1 when the season opens in November.
+      </div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-title">Your Voice Matters</div>
+      <div class="cta-box">
+        <p>These rankings are only as good as the fans voting. <strong>Add your picks</strong> to shape the consensus.</p>
+        <a href="poll.html" class="cta-btn">Cast Your Vote &rarr;</a>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+  <div class="footer-partner">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+    <p>In partnership with <a href="https://www.youtube.com/@CACTUS-Wrestling" target="_blank" rel="noopener">Cactus Wrestling</a></p>
+  </div>
+ </footer>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// === CONFIG ===
+const weights = [125,133,141,149,157,165,174,184,197,285];
+const specialTabs = ['p4p', 'teams']; // stored in Firestore with weight === 'p4p' or 'teams'
+
+// Point scales — rank index 0 = 1st place
+const rankPoints = {
+  weight: [8,7,6,5,4,3,2,1],                    // top 8
+  p4p:    [12,11,10,9,8,7,6,5,4,3,2,1],         // top 12
+  teams:  [8,7,6,5,4,3,2,1]                     // top 8
+};
+
+// Display labels for each tab
+const tabLabels = {
+  p4p: 'P4P',
+  teams: 'TEAMS'
+};
+
+// Headers shown in the panel (big text + small units)
+const panelHeaders = {
+  p4p: { big: 'POUND 4', small: 'POUND' },
+  teams: { big: 'TEAM', small: 'RANKINGS' }
+};
+
+let wrestlerDB = [];
+let activeTab = 125; // number for weights, or 'p4p' / 'teams' for specials
+let currentWeekId = 'week-0';
+let weekLabel = 'Off-Season';
+
+function normalizeName(name='') {
+  return String(name).trim().toLowerCase();
+}
+
+function schoolFor(name='') {
+  const match = wrestlerDB.find(w => normalizeName(w.name) === normalizeName(name));
+  return match?.school || '';
+}
+
+function isSpecialTab(tab) {
+  return tab === 'p4p' || tab === 'teams';
+}
+
+function pointsForTab(tab) {
+  if (tab === 'p4p') return rankPoints.p4p;
+  if (tab === 'teams') return rankPoints.teams;
+  return rankPoints.weight;
+}
+
+async function fetchWrestlers() {
+  try {
+    const snap = await getDocs(collection(db, 'wrestlers'));
+    wrestlerDB = snap.docs
+      .map(d => d.data())
+      .filter(w => w && w.name)
+      .map(w => ({ ...w, weight: Number(w.weight) }));
+  } catch (e) {
+    console.warn('Could not load wrestlers:', e);
+  }
+}
+
+async function fetchWeekInfo() {
+  try {
+    const snap = await getDoc(doc(db, 'weeks', 'current'));
+    const data = snap.exists() ? snap.data() : { weekId: 'week-0', label: 'Off-Season', weekNumber: 0 };
+    currentWeekId = data.weekId || 'week-0';
+    weekLabel = data.label || 'Off-Season';
+    document.getElementById('weekLabel').textContent = weekLabel.toUpperCase();
+    document.getElementById('statWeek').textContent = data.weekNumber ?? data.week ?? '—';
+  } catch (e) {
+    console.warn('Could not load week info:', e);
+  }
+}
+
+function aggregateBallots(ballots, tab) {
+  const points = pointsForTab(tab);
+  const totals = new Map();
+
+  ballots.forEach(ballot => {
+    (ballot.picks || []).forEach((name, idx) => {
+      if (!name) return;
+      const key = normalizeName(name);
+      // For team ballots, school lookup doesn't apply
+      const school = isSpecialTab(tab) && tab === 'teams' ? '' : schoolFor(name);
+      const current = totals.get(key) || { name, school, points: 0 };
+      current.points += points[idx] || 0;
+      // For P4P, still try to attach the wrestler's school
+      if (tab === 'p4p') current.school = current.school || schoolFor(name);
+      totals.set(key, current);
+    });
+  });
+
+  return Array.from(totals.values())
+    .sort((a, b) => (b.points - a.points) || a.name.localeCompare(b.name))
+    .map((row, idx) => ({ rank: idx + 1, name: row.name, school: row.school || '', points: row.points }));
+}
+
+async function computeResultsFromBallots(tab) {
+  // Ballots are stored with `weight` as the key — for specials, weight === 'p4p' or 'teams'
+  const weightKey = isSpecialTab(tab) ? tab : Number(tab);
+  const ballotsSnap = await getDocs(query(collection(db, 'ballots'), where('weekId', '==', currentWeekId)));
+  const ballots = ballotsSnap.docs
+    .map(d => d.data())
+    .filter(b => {
+      // Match either numeric weight or string tab name
+      if (isSpecialTab(tab)) return b.weight === weightKey || b.weight === String(weightKey);
+      return Number(b.weight) === Number(weightKey);
+    });
+
+  return {
+    weekLabel,
+    totalBallots: ballots.length,
+    results: aggregateBallots(ballots, tab)
+  };
+}
+
+async function fetchRankings(tab) {
+  // Update panel header
+  if (isSpecialTab(tab)) {
+    const header = panelHeaders[tab];
+    document.getElementById('panelWeight').innerHTML = `${header.big} <span>${header.small}</span>`;
+  } else {
+    document.getElementById('panelWeight').innerHTML = `${tab} <span>LBS</span>`;
+  }
+  document.getElementById('panelBallotCount').textContent = '';
+  document.getElementById('tableContainer').innerHTML =
+    `<div class="state-box"><p><span class="spinner"></span>Loading rankings...</p></div>`;
+
+  try {
+    // Check pre-computed rankings first (weights subcollection uses string keys)
+    const rankingKey = String(tab);
+    const rankingsRef = doc(db, 'rankings', currentWeekId, 'weights', rankingKey);
+    const snap = await getDoc(rankingsRef);
+    if (snap.exists()) {
+      renderTable(snap.data(), tab);
+      return;
+    }
+
+    // Otherwise rebuild from raw ballots
+    const rebuilt = await computeResultsFromBallots(tab);
+    renderTable(rebuilt, tab);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('tableContainer').innerHTML =
+      `<div class="state-box"><p>Could not load rankings &mdash; check connection.</p></div>`;
+  }
+}
+
+function renderTable(data, tab) {
+  if (data.totalBallots !== undefined) {
+    // Only update the sidebar "ballots cast" stat when on a weight tab (not the specials)
+    if (!isSpecialTab(tab)) {
+      document.getElementById('statBallots').textContent = data.totalBallots || '0';
+    }
+    document.getElementById('panelBallotCount').textContent =
+      data.totalBallots
+        ? `${data.totalBallots} ballot${data.totalBallots !== 1 ? 's' : ''} \u00b7 ${data.weekLabel || 'Off-Season'}`
+        : `0 ballots \u00b7 ${data.weekLabel || 'Off-Season'}`;
+  }
+
+  if (!data.results || !data.results.length) {
+    document.getElementById('tableContainer').innerHTML = `
+      <div class="state-box">
+        <p>No votes yet for this ${isSpecialTab(tab) ? (tab === 'p4p' ? 'P4P list' : 'team ranking') : 'weight class'} &mdash; be the first!</p>
+        <a href="poll.html" class="btn-vote">Cast Your Vote &rarr;</a>
+      </div>`;
+    return;
+  }
+
+  const maxPts = data.results[0]?.points || 1;
+  const medals = ['🥇','🥈','🥉'];
+  const isTeams = tab === 'teams';
+  const nameColHeader = isTeams ? 'Team' : 'Wrestler';
+
+  document.getElementById('tableContainer').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>${nameColHeader}</th>
+          ${isTeams ? '' : '<th>School</th>'}
+          <th class="right" style="padding-right:1rem;">Votes</th>
+          <th class="bar-cell" style="width:120px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.results.map((r, i) => `
+          <tr>
+            <td>
+              <div class="rank-num">${r.rank}</div>
+              ${i < 3 ? `<span class="rank-medal">${medals[i]}</span>` : ''}
+            </td>
+            <td><div class="wrestler-name">${r.name}</div></td>
+            ${isTeams ? '' : `<td><div class="wrestler-school">${r.school || '&mdash;'}</div></td>`}
+            <td class="right">
+              <div class="points-col">${r.points}</div>
+              <span class="points-label">PTS</span>
+            </td>
+            <td class="bar-cell">
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${Math.round((r.points/maxPts)*100)}%"></div>
+              </div>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderWeightTabs() {
+  const weightButtons = weights.map(w =>
+    `<button class="weight-btn ${w === activeTab ? 'active' : ''}" onclick="window.setTab(${w})">${w} lbs</button>`
+  ).join('');
+
+  const specialButtons = specialTabs.map(t =>
+    `<button class="weight-btn special ${t === activeTab ? 'active' : ''}" onclick="window.setTab('${t}')">${tabLabels[t]}</button>`
+  ).join('');
+
+  document.getElementById('weightTabs').innerHTML = weightButtons + specialButtons;
+}
+
+function setTab(t) {
+  // Normalize — numeric tabs come in as numbers, specials as strings
+  activeTab = (typeof t === 'string' && !isSpecialTab(t)) ? Number(t) : t;
+  renderWeightTabs();
+  fetchRankings(activeTab);
+  if (typeof gtag === 'function') {
+    gtag('event', 'select_rankings_tab', { tab_name: String(activeTab) });
+  }
+}
+
+// Expose for inline onclick handlers
+window.setTab = setTab;
+// Keep old name for backwards compat if anything else uses it
+window.setWeight = setTab;
+
+(async () => {
+  await Promise.all([fetchWeekInfo(), fetchWrestlers()]);
+  renderWeightTabs();
+  fetchRankings(activeTab);
+})();
+</script>
+
+</body>
+</html>

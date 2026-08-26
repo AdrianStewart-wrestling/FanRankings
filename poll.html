@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta charset="UTF-8"/>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R18TQ9ZF9Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R18TQ9ZF9Z');
+</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Fan's Vote — Cast Your Ballot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9;
+      --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --cactus-green: #3a9e2e;
+      --p4p: #6b2fb5; --teams: #0e6ba8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+    header {
+      background: #ffffff; border-bottom: 2px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
+    .live-dot { display: inline-block; width: 5px; height: 5px; background: #2ecc71; border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .partnership-badge { display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 1rem; }
+    .partnership-badge img { height: 48px; width: auto; filter: drop-shadow(0 0 5px rgba(58,158,46,0.5)); }
+    .partnership-text { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.6; }
+    .partnership-text strong { display: block; color: var(--cactus-green); font-size: 0.68rem; letter-spacing: 0.06em; }
+
+    .partner-strip { background: #0d0f1e; border-bottom: 1px solid rgba(58,158,46,0.3); padding: 0.45rem 2rem; }
+    .partner-strip-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+    .partner-strip-label { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.28); }
+    .partner-strip-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cactus-green); }
+    .partner-strip-divider { width: 1px; height: 12px; background: rgba(255,255,255,0.1); }
+    .partner-strip-desc { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.28); }
+    .partner-strip-img { height: 26px; width: auto; margin-left: auto; filter: drop-shadow(0 0 4px rgba(58,158,46,0.35)); }
+
+    .masthead { background: var(--surface); border-bottom: 3px solid var(--accent2); padding: 2rem; }
+    .masthead-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+    .masthead-left { display: flex; align-items: flex-end; gap: 1.2rem; }
+    .masthead-cactus { flex-shrink: 0; position: relative; bottom: -10px; }
+    .masthead-cactus img { height: 110px; width: auto; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.06)); }
+    .masthead h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+    .masthead h1 .line2 { color: var(--accent); font-style: italic; }
+    .masthead-meta p { font-size: 0.82rem; color: var(--muted); max-width: 300px; line-height: 1.5; }
+    .week-badge { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 2px; margin-top: 0.8rem; background: var(--accent-dim); }
+    .partner-tag { display: inline-flex; margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--cactus-green); color: var(--cactus-green); background: rgba(58,158,46,0.08); border-radius: 2px; }
+
+    .status-bar { max-width: 1000px; margin: 0 auto; padding: 0.8rem 2rem 0; }
+    .status-msg { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 8px 12px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); display: none; }
+    .status-msg.visible { display: block; }
+    .status-msg.error { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .status-msg.success { border-color: var(--green); color: var(--green); }
+    .status-msg.loading { border-color: var(--border-dark); color: var(--muted); }
+
+    .layout { max-width: 1000px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 1fr 270px; gap: 2rem; }
+
+    .weight-selector { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center; }
+    .wt-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 700; padding: 5px 12px; border: 1px solid var(--border-dark); background: var(--surface); color: var(--muted); cursor: pointer; border-radius: 2px; transition: all 0.13s; letter-spacing: 0.04em; }
+    .wt-btn:hover { border-color: var(--accent2); color: var(--text); }
+    .wt-btn.done { border-color: var(--green); color: var(--green); background: rgba(46,125,82,0.06); }
+    .wt-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+    .wt-divider { width: 1px; height: 22px; background: var(--border-dark); margin: 0 6px; }
+    .wt-btn.special { padding: 5px 14px; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.85rem; }
+    .wt-btn.special.p4p { border-color: var(--p4p); color: var(--p4p); }
+    .wt-btn.special.p4p:hover { background: rgba(107,47,181,0.08); }
+    .wt-btn.special.p4p.active { background: var(--p4p); border-color: var(--p4p); color: #fff; }
+    .wt-btn.special.p4p.done:not(.active) { border-color: var(--green); color: var(--green); background: rgba(46,125,82,0.06); }
+    .wt-btn.special.teams { border-color: var(--teams); color: var(--teams); }
+    .wt-btn.special.teams:hover { background: rgba(14,107,168,0.08); }
+    .wt-btn.special.teams.active { background: var(--teams); border-color: var(--teams); color: #fff; }
+    .wt-btn.special.teams.done:not(.active) { border-color: var(--green); color: var(--green); background: rgba(46,125,82,0.06); }
+
+    .ballot-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .ballot-header { padding: 1.2rem 1.4rem; border-bottom: 2px solid var(--accent2); display: flex; align-items: baseline; justify-content: space-between; background: var(--accent2); transition: background 0.2s, border-color 0.2s; }
+    .ballot-header.p4p-header { background: var(--p4p); border-bottom-color: var(--p4p); }
+    .ballot-header.teams-header { background: var(--teams); border-bottom-color: var(--teams); }
+    .ballot-weight { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: 0.03em; text-transform: uppercase; }
+    .ballot-weight span { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.45); margin-left: 6px; letter-spacing: 0.1em; }
+    .ballot-instruction { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; }
+
+    .slots { padding: 1.2rem 1.4rem; display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; }
+    .slot { display: flex; align-items: center; gap: 10px; }
+    .slot-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--muted2); width: 30px; text-align: center; flex-shrink: 0; }
+    .slot:nth-child(1) .slot-num { color: var(--gold); }
+    .slot:nth-child(2) .slot-num { color: #888; }
+    .slot:nth-child(3) .slot-num { color: #a0845c; }
+
+    .slot-select {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Lato', sans-serif;
+      font-size: 0.9rem; font-weight: 700; padding: 9px 32px 9px 12px;
+      border-radius: 3px; outline: none; cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+    }
+    .slot-select:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(26,26,46,0.1); }
+    .slot-select.filled { border-color: var(--accent2); background-color: #fff; }
+    .slot-select option { background: #fff; color: var(--text); }
+    .slot-select option:disabled { color: var(--muted2); }
+    .slot-select[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .slots-loading { padding: 1.5rem 1.4rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 0.5rem; }
+
+    .ballot-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--surface2); }
+    .slots-filled-msg { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+    .slots-filled-msg strong { color: var(--text); }
+    .btn-submit { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 24px; background: var(--accent); color: #fff; border: none; cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap; }
+    .btn-submit:hover { background: #a93226; transform: translateY(-1px); }
+    .btn-submit:disabled { background: var(--border-dark); color: var(--muted2); cursor: not-allowed; transform: none; }
+
+    .success-state { padding: 3rem 1.4rem; text-align: center; display: none; flex-direction: column; align-items: center; gap: 0.8rem; }
+    .success-state.visible { display: flex; }
+    .check-ring { width: 60px; height: 60px; border: 2px solid var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; animation: popIn 0.3s ease; }
+    @keyframes popIn { 0%{transform:scale(0.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+    .success-state h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green); }
+    .success-state p { font-size: 0.82rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .btn-change { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; padding: 6px 14px; border: 1px solid var(--border-dark); color: var(--muted); background: transparent; cursor: pointer; border-radius: 2px; margin-top: 0.4rem; transition: all 0.13s; }
+    .btn-change:hover { border-color: var(--text); color: var(--text); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+    .side-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .side-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: baseline; }
+    .side-title-weight { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--accent); }
+
+    .cactus-partner-card { border: 1px solid var(--border); border-top: 3px solid var(--cactus-green); padding: 1rem; display: flex; align-items: center; gap: 12px; border-radius: 0 0 4px 4px; }
+    .cactus-partner-card img { height: 60px; width: auto; flex-shrink: 0; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.06)); }
+    .cactus-partner-info strong { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cactus-green); display: block; margin-bottom: 3px; }
+    .cactus-partner-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.45; }
+
+    .progress-list { display: flex; flex-direction: column; gap: 5px; }
+    .progress-item { display: flex; align-items: center; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.65rem; }
+    .progress-item .wt { color: var(--muted2); }
+    .progress-item .status { color: var(--muted2); }
+    .progress-item.done .wt { color: var(--text); font-weight: 700; }
+    .progress-item.done .status { color: var(--green); }
+    .progress-item.special .wt { letter-spacing: 0.08em; }
+    .progress-bar-wrap { margin-top: 0.8rem; background: var(--surface2); border-radius: 2px; height: 5px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+    .progress-pct { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-top: 4px; text-align: right; }
+
+    .results-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
+    .result-row { display: flex; align-items: center; gap: 8px; }
+    .result-rank { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; color: var(--muted2); width: 22px; text-align: center; flex-shrink: 0; }
+    .result-row:nth-child(1) .result-rank { color: var(--gold); }
+    .result-row:nth-child(2) .result-rank { color: #888; }
+    .result-row:nth-child(3) .result-rank { color: #a0845c; }
+    .result-bar-wrap { flex: 1; min-width: 0; }
+    .result-name { font-size: 0.78rem; font-weight: 700; margin-bottom: 3px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .result-bar { height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+    .result-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease; }
+    .result-row:nth-child(1) .result-bar-fill { background: var(--gold); }
+    .result-votes { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: var(--muted); white-space: nowrap; }
+    .results-loading, .no-votes { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); font-style: italic; }
+
+    /* Movement indicators */
+    .move-indicator {
+      display: inline-flex; align-items: center; gap: 1px;
+      font-family: 'DM Mono', monospace; font-size: 0.56rem; font-weight: 700;
+      padding: 1px 4px; border-radius: 2px; letter-spacing: 0.02em;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .move-up { background: rgba(46,125,82,0.12); color: var(--green); }
+    .move-down { background: rgba(192,57,43,0.1); color: var(--accent); }
+    .move-same { color: var(--muted2); font-size: 0.7rem; padding: 0 3px; }
+    .move-new { background: var(--gold); color: #1c1c1c; font-size: 0.52rem; letter-spacing: 0.08em; padding: 2px 5px; }
+    .move-arrow { font-size: 0.7rem; line-height: 1; }
+
+    .drop-section { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px dashed var(--border); }
+    .drop-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .drop-row { display: flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); padding: 2px 0; }
+    .drop-badge { background: rgba(192,57,43,0.12); color: var(--accent); font-weight: 700; padding: 1px 5px; border-radius: 2px; font-size: 0.52rem; letter-spacing: 0.08em; }
+    .drop-name { color: var(--text); font-weight: 700; font-family: 'Lato', sans-serif; font-size: 0.72rem; }
+    .drop-prev { color: var(--muted2); margin-left: auto; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0.6rem; }
+    .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent2); line-height: 1; }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 2px; }
+
+    .spinner { display: inline-block; width: 10px; height: 10px; border: 2px solid var(--border-dark); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer { background: var(--accent2); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-partner { display: flex; align-items: center; gap: 8px; }
+    .footer-partner img { height: 30px; width: auto; filter: drop-shadow(0 0 3px rgba(58,158,46,0.4)); opacity: 0.75; }
+
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; padding: 1rem; } .sidebar { order: -1; } .partnership-badge { display: none; } .partner-strip-img { display: none; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html">Rankings</a>
+    <a href="poll.html" class="active">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html">Road to 55</a>
+  </nav>
+  <div class="header-right">
+    <div class="header-meta">
+      <div><span class="live-dot"></span>LIVE VOTING</div>
+      <div id="weekLabelNav">NCAA WRESTLING</div>
+    </div>
+    <div class="partnership-badge">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      <div class="partnership-text">Official Partner<strong>Cactus Wrestling</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <div class="masthead-cactus">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      </div>
+      <h1>Cast Your<br/><span class="line2">Ballot</span></h1>
+    </div>
+    <div class="masthead-meta">
+      <p>Rank your top wrestlers at each weight class, plus Pound-for-Pound and Team rankings. Your votes directly shape the community rankings — no algorithm, no bias.</p>
+      <div class="week-badge" id="weekBadge">&#128197; Loading...</div>
+      <div style="margin-top:6px;"><span class="partner-tag">Cactus Wrestling</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <div class="status-msg" id="statusMsg"></div>
+</div>
+
+<div class="layout">
+  <div class="ballot-col">
+    <div class="weight-selector" id="weightSelector"></div>
+    <div class="ballot-card">
+      <div id="votingState">
+        <div class="ballot-header" id="ballotHeader">
+          <div>
+            <div class="ballot-weight" id="ballotWeightLabel">125 <span>LBS</span></div>
+            <div class="ballot-instruction" id="ballotInstruction">SELECT YOUR TOP 8 &middot; #1 IS YOUR PICK FOR BEST</div>
+          </div>
+        </div>
+        <div id="slotsContainer">
+          <div class="slots-loading"><span class="spinner"></span>Loading wrestlers...</div>
+        </div>
+        <div class="ballot-footer">
+          <div class="slots-filled-msg"><strong id="filledCount">0</strong> / <span id="slotTotal">8</span> <span id="slotLabel">wrestlers</span> ranked</div>
+          <button class="btn-submit" id="submitBtn" onclick="submitBallot()" disabled>Submit Ballot</button>
+        </div>
+      </div>
+      <div class="success-state" id="successState">
+        <div class="check-ring">&#10003;</div>
+        <h3>Ballot Submitted!</h3>
+        <p id="successMsg">Your rankings are live.</p>
+        <button class="btn-change" onclick="editBallot()">Edit my picks</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+
+    <div>
+      <div class="side-title" style="font-family:'Barlow Condensed',sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;padding-bottom:0.4rem;border-bottom:1px solid var(--border);">Official Partner</div>
+      <div class="cactus-partner-card">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+        <div class="cactus-partner-info">
+          <strong>Cactus Wrestling</strong>
+          <p>Proud community partner powering fan-driven NCAA wrestling rankings.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Your Progress</div>
+      <div class="progress-list" id="progressList"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-pct" id="progressPct">0 of 12 ballots submitted</div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">
+        Live Results
+        <span class="side-title-weight" id="resultsWeightLabel">125 LBS</span>
+      </div>
+      <div class="results-list" id="resultsList">
+        <div class="results-loading"><span class="spinner"></span>Loading...</div>
+      </div>
+      <div style="margin-top:0.8rem;font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--muted);" id="resultsBallotCount"></div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Poll Stats</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="statMyBallots">0</div><div class="stat-label">MY BALLOTS</div></div>
+        <div class="stat-box"><div class="stat-num" id="statWeightsDone">0</div><div class="stat-label">BALLOTS DONE</div></div>
+        <div class="stat-box"><div class="stat-num" id="statWeek">&mdash;</div><div class="stat-label">CURRENT WEEK</div></div>
+        <div class="stat-box"><div class="stat-num" id="statRemaining">12</div><div class="stat-label">REMAINING</div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+  <div class="footer-partner">
+<img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+    <p>In partnership with <p><a href="https://www.youtube.com/@CACTUS-Wrestling" target="_blank" rel="noopener">Cactus Wrestling</a></p>>Cactus Wrestling</a></p>
+  </div>
+ </footer>
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  runTransaction,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ===== Ballot types =====
+// Weight classes are numbers. P4P and Teams are string keys.
+const weights = [125,133,141,149,157,165,174,184,197,285];
+const P4P_KEY = 'p4p';
+const TEAMS_KEY = 'teams';
+const allBallots = [...weights, P4P_KEY, TEAMS_KEY];
+
+// Slot counts per ballot type
+function slotsFor(ballotKey) {
+  if (ballotKey === P4P_KEY) return 10;
+  if (ballotKey === TEAMS_KEY) return 25;
+  return 8;
+}
+
+// Points per rank — longer ballots need longer arrays
+function rankPointsFor(ballotKey) {
+  const n = slotsFor(ballotKey);
+  // Linear descending: top slot gets `n` points, last gets 1.
+  return Array.from({ length: n }, (_, i) => n - i);
+}
+
+// Nice label for a ballot key
+function labelFor(ballotKey) {
+  if (ballotKey === P4P_KEY) return 'P4P';
+  if (ballotKey === TEAMS_KEY) return 'TEAMS';
+  return `${ballotKey} LBS`;
+}
+
+// Storage id for Firestore doc under rankings/{weekId}/weights/{id}
+function weightDocId(ballotKey) {
+  if (ballotKey === P4P_KEY) return 'p4p';
+  if (ballotKey === TEAMS_KEY) return 'teams';
+  return String(ballotKey);
+}
+
+// The filter value stored on ballots — matches existing schema's `weight` field
+function weightFieldFor(ballotKey) {
+  if (ballotKey === P4P_KEY) return 'p4p';
+  if (ballotKey === TEAMS_KEY) return 'teams';
+  return Number(ballotKey);
+}
+
+let wrestlerDB = [];
+let teamsDB = []; // [{ name: 'Penn State', wrestlerCount: 10 }]
+let activeBallot = 125; // current selection (number for weights, string for p4p/teams)
+let picks = {}; // keyed by ballot key ("125", "p4p", "teams")
+let submitted = JSON.parse(localStorage.getItem('fanVoteSubmitted') || '{}');
+let weekLabel = "Off-Season";
+let currentWeekId = 'week-0';
+let currentWeekNumber = 0;
+let previousWeekId = null;
+// Cache of previous-week rank maps, keyed by ballotKey. Value is Map<normalizedName, rank>.
+const prevRankCache = {};
+// Cache of previous-week full entries, keyed by ballotKey. Value is Array<{name, school, rank}>.
+const prevEntriesCache = {};
+
+function showStatus(msg, type='loading') {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status-msg visible ${type}`;
+}
+
+function hideStatus() {
+  document.getElementById('statusMsg').className = 'status-msg';
+}
+
+function persistSubmitted() {
+  localStorage.setItem('fanVoteSubmitted', JSON.stringify(submitted));
+}
+
+function normalizeName(name='') {
+  return String(name).trim().toLowerCase();
+}
+
+function schoolFor(name='') {
+  const match = wrestlerDB.find(w => normalizeName(w.name) === normalizeName(name));
+  return match?.school || '';
+}
+
+function defaultWeekMeta() {
+  return { weekId: 'week-0', label: 'Off-Season', weekNumber: 0, isOpen: true };
+}
+
+async function fetchWrestlers() {
+  try {
+    const snap = await getDocs(collection(db, 'wrestlers'));
+    wrestlerDB = snap.docs
+      .map(d => d.data())
+      .filter(w => w && w.name && Number(w.weight))
+      .filter(w => w.active !== false)
+      .map(w => ({ ...w, weight: Number(w.weight) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    // Derive teams from schools in the wrestlers collection
+    const teamMap = new Map();
+    wrestlerDB.forEach(w => {
+      const school = (w.school || '').trim();
+      if (!school) return;
+      const key = school.toLowerCase();
+      const existing = teamMap.get(key) || { name: school, wrestlerCount: 0 };
+      existing.wrestlerCount += 1;
+      teamMap.set(key, existing);
+    });
+    teamsDB = Array.from(teamMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  } catch (e) {
+    console.warn('Could not load wrestlers:', e);
+  }
+}
+
+async function fetchWeekInfo() {
+  try {
+    const snap = await getDoc(doc(db, 'weeks', 'current'));
+    const data = snap.exists() ? snap.data() : defaultWeekMeta();
+    currentWeekId = data.weekId || 'week-0';
+    weekLabel = data.label || 'Off-Season';
+    currentWeekNumber = Number(data.weekNumber ?? data.week ?? 0);
+    // Prefer explicit previousWeekId from doc; fall back to week-{n-1}
+    previousWeekId = data.previousWeekId
+      || (currentWeekNumber > 0 ? `week-${currentWeekNumber - 1}` : null);
+    document.getElementById('weekBadge').textContent = `📅 ${weekLabel} · Ballot closes Sunday`;
+    document.getElementById('weekLabelNav').textContent = weekLabel.toUpperCase();
+    document.getElementById('statWeek').textContent = currentWeekNumber || '—';
+  } catch (e) {
+    console.warn('Could not load week info:', e);
+    document.getElementById('weekBadge').textContent = '📅 Off-Season Edition';
+  }
+}
+
+function aggregateBallots(ballots, ballotKey) {
+  const rankPoints = rankPointsFor(ballotKey);
+  const totals = new Map();
+  ballots.forEach(ballot => {
+    (ballot.picks || []).forEach((name, idx) => {
+      if (!name) return;
+      const key = normalizeName(name);
+      const existing = totals.get(key) || { name, school: ballotKey === TEAMS_KEY ? '' : schoolFor(name), points: 0 };
+      existing.name = existing.name || name;
+      if (ballotKey !== TEAMS_KEY) existing.school = existing.school || schoolFor(name);
+      existing.points += rankPoints[idx] || 0;
+      totals.set(key, existing);
+    });
+  });
+
+  return Array.from(totals.values())
+    .sort((a, b) => (b.points - a.points) || a.name.localeCompare(b.name))
+    .map((row, idx) => ({ rank: idx + 1, name: row.name, school: row.school || '', points: row.points }));
+}
+
+async function computeResultsFromBallots(ballotKey) {
+  const filterVal = weightFieldFor(ballotKey);
+  const ballotsSnap = await getDocs(query(collection(db, 'ballots'), where('weekId', '==', currentWeekId)));
+  const ballots = ballotsSnap.docs
+    .map(d => d.data())
+    .filter(b => String(b.weight) === String(filterVal));
+
+  return {
+    totalBallots: ballots.length,
+    weekLabel,
+    results: aggregateBallots(ballots, ballotKey)
+  };
+}
+
+async function fetchPreviousRankings(ballotKey) {
+  if (prevRankCache[ballotKey]) {
+    return { rankMap: prevRankCache[ballotKey], entries: prevEntriesCache[ballotKey] || [] };
+  }
+  const emptyResult = { rankMap: new Map(), entries: [] };
+  if (!previousWeekId) {
+    prevRankCache[ballotKey] = emptyResult.rankMap;
+    prevEntriesCache[ballotKey] = emptyResult.entries;
+    return emptyResult;
+  }
+  try {
+    const prevRef = doc(db, 'rankings', previousWeekId, 'weights', weightDocId(ballotKey));
+    const snap = await getDoc(prevRef);
+    if (!snap.exists()) {
+      prevRankCache[ballotKey] = emptyResult.rankMap;
+      prevEntriesCache[ballotKey] = emptyResult.entries;
+      return emptyResult;
+    }
+    const data = snap.data();
+    const rankMap = new Map();
+    const entries = [];
+    (data.results || []).forEach(row => {
+      if (!row.name || !row.rank) return;
+      const key = normalizeName(row.name);
+      rankMap.set(key, Number(row.rank));
+      entries.push({ name: row.name, school: row.school || '', rank: Number(row.rank) });
+    });
+    prevRankCache[ballotKey] = rankMap;
+    prevEntriesCache[ballotKey] = entries;
+    return { rankMap, entries };
+  } catch (e) {
+    console.warn('Could not load previous week rankings:', e);
+    prevRankCache[ballotKey] = emptyResult.rankMap;
+    prevEntriesCache[ballotKey] = emptyResult.entries;
+    return emptyResult;
+  }
+}
+
+async function fetchResults(ballotKey) {
+  document.getElementById('resultsList').innerHTML = `<div class="results-loading"><span class="spinner"></span>Loading...</div>`;
+  document.getElementById('resultsBallotCount').textContent = '';
+
+  try {
+    // Fetch previous week rankings in parallel with current
+    const [prevData, rankingsSnap] = await Promise.all([
+      fetchPreviousRankings(ballotKey),
+      getDoc(doc(db, 'rankings', currentWeekId, 'weights', weightDocId(ballotKey)))
+    ]);
+
+    if (rankingsSnap.exists()) {
+      renderResultsSidebar(rankingsSnap.data(), ballotKey, prevData);
+      return;
+    }
+
+    const rebuilt = await computeResultsFromBallots(ballotKey);
+    renderResultsSidebar(rebuilt, ballotKey, prevData);
+  } catch (e) {
+    console.warn('Could not load results:', e);
+    document.getElementById('resultsList').innerHTML = `<div class="no-votes">Could not load results.</div>`;
+  }
+}
+
+function movementHtml(currentRank, prevRank) {
+  if (prevRank == null) {
+    return `<span class="move-indicator move-new">NEW</span>`;
+  }
+  const delta = prevRank - currentRank; // positive = moved up
+  if (delta === 0) {
+    return `<span class="move-same" title="No change">—</span>`;
+  }
+  if (delta > 0) {
+    return `<span class="move-indicator move-up" title="Up ${delta} from #${prevRank}"><span class="move-arrow">▲</span>${delta}</span>`;
+  }
+  return `<span class="move-indicator move-down" title="Down ${Math.abs(delta)} from #${prevRank}"><span class="move-arrow">▼</span>${Math.abs(delta)}</span>`;
+}
+
+function renderResultsSidebar(data, ballotKey, prevData = { rankMap: new Map(), entries: [] }) {
+  document.getElementById('resultsWeightLabel').textContent = labelFor(ballotKey);
+  const el = document.getElementById('resultsList');
+  if (!data.results || !data.results.length) {
+    el.innerHTML = `<div class="no-votes">No votes yet — be the first!</div>`;
+    document.getElementById('resultsBallotCount').textContent = `0 ballots · ${data.weekLabel || weekLabel}`;
+    return;
+  }
+
+  const maxPts = data.results[0]?.points || 1;
+  const topN = ballotKey === TEAMS_KEY ? 25 : (ballotKey === P4P_KEY ? 10 : 8);
+  const currentTop = data.results.slice(0, topN);
+
+  // Build set of current top-N names (normalized) to find dropouts
+  const currentNames = new Set(currentTop.map(r => normalizeName(r.name)));
+
+  el.innerHTML = currentTop.map(r => {
+    const key = normalizeName(r.name);
+    const prevRank = prevData.rankMap.has(key) ? prevData.rankMap.get(key) : null;
+    const moveHtml = movementHtml(r.rank, prevRank);
+    const schoolHtml = r.school && ballotKey !== TEAMS_KEY
+      ? ` <span style="font-weight:400;color:var(--muted);font-size:0.68rem;">${r.school}</span>`
+      : '';
+    return `
+    <div class="result-row">
+      <div class="result-rank">${r.rank}</div>
+      <div class="result-bar-wrap">
+        <div class="result-name">${r.name}${schoolHtml}</div>
+        <div class="result-bar"><div class="result-bar-fill" style="width:${Math.round((r.points/maxPts)*100)}%"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+        ${moveHtml}
+        <div class="result-votes">${r.points}pt</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Dropouts: people in prev top-N who are NOT in current top-N
+  const dropouts = (prevData.entries || [])
+    .filter(p => p.rank <= topN && !currentNames.has(normalizeName(p.name)))
+    .sort((a, b) => a.rank - b.rank);
+
+  if (dropouts.length) {
+    const schoolsByName = new Map();
+    (prevData.entries || []).forEach(p => schoolsByName.set(normalizeName(p.name), p.school || ''));
+    const dropHtml = `
+      <div class="drop-section">
+        <div class="drop-label">Dropped Out</div>
+        ${dropouts.map(d => {
+          const sch = schoolsByName.get(normalizeName(d.name));
+          const schHtml = sch && ballotKey !== TEAMS_KEY ? ` · ${sch}` : '';
+          return `<div class="drop-row">
+            <span class="drop-badge">DROP</span>
+            <span class="drop-name">${d.name}</span><span style="color:var(--muted2);">${schHtml}</span>
+            <span class="drop-prev">was #${d.rank}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    el.insertAdjacentHTML('beforeend', dropHtml);
+  }
+
+  const totalBallots = Number(data.totalBallots || 0);
+  const prevNote = previousWeekId && prevData.entries.length
+    ? ` · vs ${previousWeekId.replace('week-', 'Wk ')}`
+    : '';
+  document.getElementById('resultsBallotCount').textContent =
+    `${totalBallots} ballot${totalBallots !== 1 ? 's' : ''} · ${data.weekLabel || weekLabel}${prevNote}`;
+}
+
+// Sort a roster array: ranked items (by prev-week rank) first, unranked alphabetical after.
+// Also returns the rank map so the caller can decorate labels.
+function sortByPrevRank(roster, ballotKey) {
+  const rankMap = prevRankCache[ballotKey] || new Map();
+  if (!rankMap.size) {
+    // No previous-week data — pure alphabetical (roster is already sorted that way)
+    return { roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)), rankMap };
+  }
+  const sorted = [...roster].sort((a, b) => {
+    const ra = rankMap.get(normalizeName(a.name));
+    const rb = rankMap.get(normalizeName(b.name));
+    // Ranked before unranked
+    if (ra != null && rb == null) return -1;
+    if (ra == null && rb != null) return 1;
+    // Both ranked — by rank asc
+    if (ra != null && rb != null) return ra - rb;
+    // Both unranked — alphabetical
+    return a.name.localeCompare(b.name);
+  });
+  return { roster: sorted, rankMap };
+}
+
+// Build <option>s from the correct roster based on ballot type
+function buildOptions(ballotKey, excludeNames = [], selectedName = '') {
+  let roster;
+  if (ballotKey === TEAMS_KEY) {
+    roster = teamsDB
+      .filter(t => !excludeNames.includes(t.name) || t.name === selectedName);
+    const { roster: sorted, rankMap } = sortByPrevRank(roster, ballotKey);
+    const blank = `<option value="" disabled ${!selectedName ? 'selected' : ''}>— Select team —</option>`;
+    const opts = sorted.map(t => {
+      const rank = rankMap.get(normalizeName(t.name));
+      const prefix = rank != null ? `#${rank} · ` : '';
+      return `<option value="${t.name}" ${t.name === selectedName ? 'selected' : ''}>${prefix}${t.name}</option>`;
+    }).join('');
+    return blank + opts;
+  }
+  if (ballotKey === P4P_KEY) {
+    roster = wrestlerDB
+      .filter(w => !excludeNames.includes(w.name) || w.name === selectedName);
+  } else {
+    roster = wrestlerDB
+      .filter(w => Number(w.weight) === Number(ballotKey))
+      .filter(w => !excludeNames.includes(w.name) || w.name === selectedName);
+  }
+  const { roster: sorted, rankMap } = sortByPrevRank(roster, ballotKey);
+  const blank = `<option value="" disabled ${!selectedName ? 'selected' : ''}>— Select wrestler —</option>`;
+  const opts = sorted.map(w => {
+    const rank = rankMap.get(normalizeName(w.name));
+    const prefix = rank != null ? `#${rank} · ` : '';
+    return `<option value="${w.name}" ${w.name === selectedName ? 'selected' : ''}>${prefix}${w.name} · ${w.school}</option>`;
+  }).join('');
+  return blank + opts;
+}
+
+function renderSlots() {
+  const container = document.getElementById('slotsContainer');
+  const nSlots = slotsFor(activeBallot);
+  const currentPicks = picks[activeBallot] || Array(nSlots).fill('');
+  const isSubmitted = submitted[activeBallot];
+
+  // Guard: need wrestlers for everything; teams ballot also needs teamsDB populated
+  if (!wrestlerDB.length || (activeBallot === TEAMS_KEY && !teamsDB.length)) {
+    container.innerHTML = `<div class="slots-loading"><span class="spinner"></span>Loading ${activeBallot === TEAMS_KEY ? 'teams' : 'wrestlers'}...</div>`;
+    return;
+  }
+  container.innerHTML = `<div class="slots">${
+    Array.from({length: nSlots}, (_, i) => {
+      const val = currentPicks[i] || '';
+      const others = currentPicks.filter((v, idx) => idx !== i && v);
+      return `<div class="slot">
+        <div class="slot-num">${i + 1}</div>
+        <select class="slot-select ${val ? 'filled' : ''}" id="slot-select-${i}"
+          ${isSubmitted ? 'disabled' : ''}
+          onchange="window.onSlotChange(${i}, this.value)"
+        >${buildOptions(activeBallot, others, val)}</select>
+      </div>`;
+    }).join('')
+  }</div>`;
+}
+
+function onSlotChange(slotIdx, value) {
+  const nSlots = slotsFor(activeBallot);
+  if (!picks[activeBallot]) picks[activeBallot] = Array(nSlots).fill('');
+  picks[activeBallot][slotIdx] = value;
+  renderSlots();
+  updateFooter();
+}
+
+function updateFooter() {
+  const filled = (picks[activeBallot] || []).filter(Boolean).length;
+  document.getElementById('filledCount').textContent = filled;
+  document.getElementById('slotTotal').textContent = slotsFor(activeBallot);
+  document.getElementById('slotLabel').textContent = activeBallot === TEAMS_KEY ? 'teams' : 'wrestlers';
+  document.getElementById('submitBtn').disabled = filled < 1;
+}
+
+async function submitBallot() {
+  const validPicks = (picks[activeBallot] || []).filter(Boolean);
+  if (!validPicks.length) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  showStatus('Sending your ballot...', 'loading');
+
+  const rankingsRef = doc(db, 'rankings', currentWeekId, 'weights', weightDocId(activeBallot));
+  const ballotRef = doc(collection(db, 'ballots'));
+  const rankPoints = rankPointsFor(activeBallot);
+  const filterVal = weightFieldFor(activeBallot);
+
+  try {
+    await runTransaction(db, async (tx) => {
+      const currentSnap = await tx.get(rankingsRef);
+      const current = currentSnap.exists()
+        ? currentSnap.data()
+        : { results: [], totalBallots: 0, weekId: currentWeekId, weekLabel, weight: filterVal };
+
+      const scoreMap = new Map(
+        (current.results || []).map(row => [
+          normalizeName(row.name),
+          {
+            ...row,
+            points: Number(row.points || 0),
+            school: row.school || (activeBallot === TEAMS_KEY ? '' : schoolFor(row.name))
+          }
+        ])
+      );
+
+      validPicks.forEach((name, idx) => {
+        const key = normalizeName(name);
+        const entry = scoreMap.get(key) || {
+          name,
+          school: activeBallot === TEAMS_KEY ? '' : schoolFor(name),
+          points: 0
+        };
+        entry.name = entry.name || name;
+        if (activeBallot !== TEAMS_KEY) entry.school = entry.school || schoolFor(name);
+        entry.points += rankPoints[idx] || 0;
+        scoreMap.set(key, entry);
+      });
+
+      const results = Array.from(scoreMap.values())
+        .sort((a, b) => (b.points - a.points) || a.name.localeCompare(b.name))
+        .map((row, idx) => ({ rank: idx + 1, name: row.name, school: row.school || '', points: row.points }));
+
+      tx.set(ballotRef, {
+        createdAt: serverTimestamp(),
+        weekId: currentWeekId,
+        weekLabel,
+        weekNumber: currentWeekNumber,
+        weight: filterVal,
+        ballotType: activeBallot === P4P_KEY ? 'p4p' : activeBallot === TEAMS_KEY ? 'teams' : 'weight',
+        picks: validPicks
+      });
+
+      tx.set(rankingsRef, {
+        weekId: currentWeekId,
+        weekLabel,
+        weekNumber: currentWeekNumber,
+        weight: filterVal,
+        ballotType: activeBallot === P4P_KEY ? 'p4p' : activeBallot === TEAMS_KEY ? 'teams' : 'weight',
+        totalBallots: Number(current.totalBallots || 0) + 1,
+        results,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    });
+
+    submitted[activeBallot] = true;
+    persistSubmitted();
+    hideStatus();
+    document.getElementById('votingState').style.display = 'none';
+    document.getElementById('successState').classList.add('visible');
+    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is live on the scoreboard.`;
+    renderWeightSelector();
+    renderProgress();
+    renderStats();
+    await fetchResults(activeBallot);
+  } catch (e) {
+    console.error(e);
+    showStatus('Submission failed. Check Firestore rules and try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit Ballot';
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Submit Ballot';
+}
+
+function editBallot() {
+  submitted[activeBallot] = false;
+  persistSubmitted();
+  document.getElementById('votingState').style.display = '';
+  document.getElementById('successState').classList.remove('visible');
+  renderSlots();
+  updateFooter();
+}
+
+async function setBallot(b) {
+  activeBallot = b;
+  renderWeightSelector();
+  // Preload previous-week rankings so the dropdowns can sort by rank on first paint
+  await fetchPreviousRankings(b);
+  renderBallotCard();
+  fetchResults(b);
+}
+
+function renderBallotCard() {
+  const isSubmitted = submitted[activeBallot];
+  const header = document.getElementById('ballotHeader');
+  header.classList.remove('p4p-header', 'teams-header');
+  if (activeBallot === P4P_KEY) header.classList.add('p4p-header');
+  if (activeBallot === TEAMS_KEY) header.classList.add('teams-header');
+
+  if (activeBallot === P4P_KEY) {
+    document.getElementById('ballotWeightLabel').innerHTML = `POUND <span>FOR POUND</span>`;
+    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 10 · #1 IS THE BEST WRESTLER REGARDLESS OF WEIGHT';
+  } else if (activeBallot === TEAMS_KEY) {
+    document.getElementById('ballotWeightLabel').innerHTML = `TEAM <span>RANKINGS</span>`;
+    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 25 · #1 IS THE BEST PROGRAM IN THE NATION';
+  } else {
+    document.getElementById('ballotWeightLabel').innerHTML = `${activeBallot} <span>LBS</span>`;
+    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 8 · #1 IS YOUR PICK FOR BEST';
+  }
+
+  if (isSubmitted) {
+    document.getElementById('votingState').style.display = 'none';
+    document.getElementById('successState').classList.add('visible');
+    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is live on the scoreboard.`;
+  } else {
+    document.getElementById('votingState').style.display = '';
+    document.getElementById('successState').classList.remove('visible');
+    renderSlots();
+    updateFooter();
+  }
+}
+
+function renderWeightSelector() {
+  const weightBtns = weights.map(w =>
+    `<button class="wt-btn ${w === activeBallot ? 'active' : ''} ${submitted[w] && w !== activeBallot ? 'done' : ''}"
+      onclick="window.setBallot(${w})">${w}</button>`
+  ).join('');
+
+  const p4pBtn = `<button class="wt-btn special p4p ${activeBallot === P4P_KEY ? 'active' : ''} ${submitted[P4P_KEY] ? 'done' : ''}"
+      onclick="window.setBallot('${P4P_KEY}')">P4P</button>`;
+
+  const teamsBtn = `<button class="wt-btn special teams ${activeBallot === TEAMS_KEY ? 'active' : ''} ${submitted[TEAMS_KEY] ? 'done' : ''}"
+      onclick="window.setBallot('${TEAMS_KEY}')">Teams</button>`;
+
+  document.getElementById('weightSelector').innerHTML =
+    weightBtns + `<div class="wt-divider"></div>` + p4pBtn + teamsBtn;
+}
+
+function renderProgress() {
+  const done = allBallots.filter(b => submitted[b]);
+  const pct = Math.round((done.length / allBallots.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = `${done.length} of ${allBallots.length} ballots submitted`;
+
+  const weightItems = weights.map(w =>
+    `<div class="progress-item ${submitted[w] ? 'done' : ''}">
+      <span class="wt">${w} lbs</span>
+      <span class="status">${submitted[w] ? '✓ Voted' : '—'}</span>
+    </div>`).join('');
+
+  const specialItems = `
+    <div class="progress-item special ${submitted[P4P_KEY] ? 'done' : ''}">
+      <span class="wt">P4P</span>
+      <span class="status">${submitted[P4P_KEY] ? '✓ Voted' : '—'}</span>
+    </div>
+    <div class="progress-item special ${submitted[TEAMS_KEY] ? 'done' : ''}">
+      <span class="wt">Teams</span>
+      <span class="status">${submitted[TEAMS_KEY] ? '✓ Voted' : '—'}</span>
+    </div>`;
+
+  document.getElementById('progressList').innerHTML = weightItems + specialItems;
+}
+
+function renderStats() {
+  const done = allBallots.filter(b => submitted[b]).length;
+  document.getElementById('statMyBallots').textContent = done;
+  document.getElementById('statWeightsDone').textContent = done;
+  document.getElementById('statRemaining').textContent = allBallots.length - done;
+}
+
+window.onSlotChange = onSlotChange;
+window.setBallot = setBallot;
+window.submitBallot = submitBallot;
+window.editBallot = editBallot;
+
+(async () => {
+  showStatus('Loading...', 'loading');
+  await Promise.all([fetchWeekInfo(), fetchWrestlers()]);
+  // Preload previous-week rankings for the starting ballot so dropdowns sort correctly on first paint
+  await fetchPreviousRankings(activeBallot);
+  hideStatus();
+  renderWeightSelector();
+  renderBallotCard();
+  renderProgress();
+  renderStats();
+  fetchResults(activeBallot);
+})();
+</script>
+
+</body>
+</html>
