@@ -438,7 +438,12 @@ async function fetchWrestlers() {
       .filter(w => w && w.name && Number(w.weight))
       .filter(w => w.active !== false)
       .map(w => ({ ...w, weight: Number(w.weight) }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => {
+        const schoolA = (a.school || '').toLowerCase();
+        const schoolB = (b.school || '').toLowerCase();
+        if (schoolA !== schoolB) return schoolA.localeCompare(schoolB);
+        return a.name.localeCompare(b.name);
+      });
   } catch (e) {
     console.warn('Could not load wrestlers:', e);
     showStatus('Could not load the wrestler list. Refresh to try again.', 'error');
