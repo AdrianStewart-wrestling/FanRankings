@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Road to 55 — Results Entry (Admin)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9;
+      --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --green-dim: rgba(46,125,82,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+    header { background: var(--accent2); padding: 1.4rem 2rem; }
+    header .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.06em; color: #fff; text-transform: uppercase; }
+    header .logo em { color: var(--gold); font-style: normal; }
+    header .subtitle { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; margin-top: 4px; text-transform: uppercase; }
+
+    .layout { max-width: 760px; margin: 0 auto; padding: 2rem; }
+
+    .warn-banner { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 4px; padding: 0.8rem 1rem; margin-bottom: 1.2rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--accent); line-height: 1.5; }
+
+    .key-card { background: var(--accent2); border-radius: 4px; padding: 1rem 1.2rem; margin-bottom: 1.2rem; }
+    .key-card label { display: block; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+    .key-input {
+      width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; font-family: 'DM Mono', monospace; font-size: 0.85rem;
+      padding: 8px 12px; border-radius: 3px; outline: none;
+    }
+    .key-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .key-status { font-family: 'DM Mono', monospace; font-size: 0.6rem; margin-top: 6px; color: rgba(255,255,255,0.4); }
+    .key-status.ok { color: #7fd99a; }
+
+    .status-msg { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 8px 12px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); display: none; margin-bottom: 1rem; }
+    .status-msg.visible { display: block; }
+    .status-msg.error { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .status-msg.success { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+    .board-progress { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-bottom: 1rem; letter-spacing: 0.04em; }
+    .board-progress strong { color: var(--text); }
+
+    .weight-row { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; margin-bottom: 0.7rem; display: flex; align-items: center; gap: 14px; }
+    .weight-row.confirmed { border-color: var(--green); background: var(--green-dim); }
+
+    .wt-badge {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1rem;
+      color: #fff; background: var(--accent2); width: 50px; height: 50px; border-radius: 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .weight-row.confirmed .wt-badge { background: var(--green); }
+    .wt-badge span { font-family: 'DM Mono', monospace; font-size: 0.48rem; color: rgba(255,255,255,0.5); letter-spacing: 0.08em; }
+
+    .wt-body { flex: 1; min-width: 0; }
+    .wt-current { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 6px; }
+    .wt-current strong { color: var(--green); }
+    .wt-controls { display: flex; gap: 8px; }
+
+    .wt-select {
+      flex: 1; background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Lato', sans-serif;
+      font-size: 0.85rem; font-weight: 700; padding: 7px 28px 7px 10px;
+      border-radius: 3px; outline: none; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+    }
+    .wt-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-set { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 16px; background: var(--accent2); color: #fff; border: none; cursor: pointer; border-radius: 3px; white-space: nowrap; }
+    .btn-set:hover:not(:disabled) { background: #2a2a4a; }
+    .btn-set:disabled { background: var(--border-dark); color: var(--muted2); cursor: not-allowed; }
+
+    .btn-clear { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.04em; padding: 0 12px; background: transparent; border: 1px solid var(--border-dark); color: var(--muted); cursor: pointer; border-radius: 3px; white-space: nowrap; }
+    .btn-clear:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .btn-clear:disabled { opacity: 0.4; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em> — Road to 55</div>
+  <div class="subtitle">Results Entry · Admin Only · Not linked publicly</div>
+</header>
+
+<div class="layout">
+  <div class="warn-banner">
+    This page is unlisted, not linked from the site nav, and requires the admin key below to make any changes. Bookmark it directly — don't link to it from anywhere public.
+  </div>
+
+  <div class="key-card">
+    <label for="adminKeyInput">Admin key</label>
+    <input type="password" id="adminKeyInput" class="key-input" placeholder="Enter your admin key" autocomplete="off">
+    <div class="key-status" id="keyStatus">Not verified yet — enter your key and set any result to check it.</div>
+  </div>
+
+  <div class="status-msg" id="statusMsg"></div>
+  <div class="board-progress" id="boardProgress">Loading current results…</div>
+
+  <div id="rowsContainer">
+    <div class="status-msg visible">Loading wrestlers…</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const functions = getFunctions(app, "us-central1");
+
+const setChampionFn = httpsCallable(functions, "setRoad55Champion");
+const clearChampionFn = httpsCallable(functions, "clearRoad55Champion");
+const getChampionsFn = httpsCallable(functions, "getRoad55Champions");
+
+const WEIGHTS = [125,133,141,149,157,165,174,184,197,285];
+
+let wrestlerDB = [];
+let champions = {};
+
+function showStatus(msg, type = 'loading') {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status-msg visible ${type}`;
+}
+function hideStatus() {
+  document.getElementById('statusMsg').className = 'status-msg';
+}
+
+function updateBoardProgress() {
+  const decided = Object.keys(champions).length;
+  document.getElementById('boardProgress').innerHTML =
+    `<strong>${decided}</strong> / 10 weights confirmed`;
+}
+
+async function fetchWrestlers() {
+  const snap = await getDocs(collection(db, 'wrestlers'));
+  wrestlerDB = snap.docs
+    .map(d => d.data())
+    .filter(w => w && w.name && Number(w.weight))
+    .filter(w => w.active !== false)
+    .map(w => ({ ...w, weight: Number(w.weight) }))
+    .sort((a, b) => {
+      const schoolA = (a.school || '').toLowerCase();
+      const schoolB = (b.school || '').toLowerCase();
+      if (schoolA !== schoolB) return schoolA.localeCompare(schoolB);
+      return a.name.localeCompare(b.name);
+    });
+}
+
+async function fetchChampions() {
+  const res = await getChampionsFn();
+  champions = res.data.champions || {};
+}
+
+function renderRows() {
+  const container = document.getElementById('rowsContainer');
+  container.innerHTML = '';
+
+  WEIGHTS.forEach(weight => {
+    const roster = wrestlerDB.filter(w => w.weight === weight);
+    const current = champions[String(weight)];
+
+    const row = document.createElement('div');
+    row.className = 'weight-row' + (current ? ' confirmed' : '');
+
+    const badge = document.createElement('div');
+    badge.className = 'wt-badge';
+    badge.innerHTML = `${weight}<span>LBS</span>`;
+
+    const body = document.createElement('div');
+    body.className = 'wt-body';
+
+    const currentLine = document.createElement('div');
+    currentLine.className = 'wt-current';
+    currentLine.innerHTML = current
+      ? `Confirmed: <strong>${escapeHtml(current)}</strong>`
+      : 'Not yet confirmed';
+
+    const controls = document.createElement('div');
+    controls.className = 'wt-controls';
+
+    const select = document.createElement('select');
+    select.className = 'wt-select';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = roster.length ? 'Select champion…' : 'No wrestlers loaded at this weight';
+    select.appendChild(placeholder);
+    roster.forEach(w => {
+      const opt = document.createElement('option');
+      opt.value = w.name;
+      opt.textContent = w.school ? `${w.name} — ${w.school}` : w.name;
+      if (current === w.name) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    const setBtn = document.createElement('button');
+    setBtn.className = 'btn-set';
+    setBtn.textContent = current ? 'Update' : 'Set';
+    setBtn.addEventListener('click', () => handleSet(weight, select.value, setBtn));
+
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'btn-clear';
+    clearBtn.textContent = 'Clear';
+    clearBtn.disabled = !current;
+    clearBtn.addEventListener('click', () => handleClear(weight, clearBtn));
+
+    controls.appendChild(select);
+    controls.appendChild(setBtn);
+    controls.appendChild(clearBtn);
+
+    body.appendChild(currentLine);
+    body.appendChild(controls);
+
+    row.appendChild(badge);
+    row.appendChild(body);
+    container.appendChild(row);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function getAdminKey() {
+  return document.getElementById('adminKeyInput').value;
+}
+
+function markKeyVerified() {
+  const el = document.getElementById('keyStatus');
+  el.textContent = 'Key verified — you can set or clear results.';
+  el.classList.add('ok');
+}
+
+async function handleSet(weight, championName, btn) {
+  if (!championName) {
+    showStatus('Pick a wrestler before setting the result.', 'error');
+    return;
+  }
+  const adminKey = getAdminKey();
+  if (!adminKey) {
+    showStatus('Enter your admin key first.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Saving...';
+  showStatus(`Setting ${weight} lbs champion...`, 'loading');
+
+  try {
+    const res = await setChampionFn({ adminKey, weight, champion: championName });
+    champions = res.data.champions || {};
+    markKeyVerified();
+    updateBoardProgress();
+    renderRows();
+    showStatus(`${weight} lbs champion set to ${championName}.`, 'success');
+    setTimeout(hideStatus, 3000);
+  } catch (e) {
+    console.error('Set champion failed:', e);
+    showStatus(e.message || 'Could not set champion.', 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function handleClear(weight, btn) {
+  const adminKey = getAdminKey();
+  if (!adminKey) {
+    showStatus('Enter your admin key first.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  showStatus(`Clearing ${weight} lbs result...`, 'loading');
+
+  try {
+    const res = await clearChampionFn({ adminKey, weight });
+    champions = res.data.champions || {};
+    markKeyVerified();
+    updateBoardProgress();
+    renderRows();
+    showStatus(`${weight} lbs result cleared.`, 'success');
+    setTimeout(hideStatus, 3000);
+  } catch (e) {
+    console.error('Clear champion failed:', e);
+    showStatus(e.message || 'Could not clear champion.', 'error');
+    btn.disabled = false;
+  }
+}
+
+(async function init() {
+  try {
+    await Promise.all([fetchWrestlers(), fetchChampions()]);
+    updateBoardProgress();
+    renderRows();
+  } catch (e) {
+    console.error('Init failed:', e);
+    showStatus("Couldn't load data. Refresh to try again.", 'error');
+  }
+})();
+</script>
+
+</body>
+</html>

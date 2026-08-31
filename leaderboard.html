@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R18TQ9ZF9Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R18TQ9ZF9Z');
+</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Fan's Vote — Road to 55 Leaderboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9;
+      --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --green-dim: rgba(46,125,82,0.08);
+      --cactus-green: #3a9e2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+    header {
+      background: #ffffff; border-bottom: 2px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
+    .live-dot { display: inline-block; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .masthead { background: var(--surface); border-bottom: 3px solid var(--accent2); padding: 2rem; }
+    .masthead-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+    .masthead h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+    .masthead h1 .line2 { color: var(--gold); font-style: italic; }
+    .masthead-meta p { font-size: 0.82rem; color: var(--muted); max-width: 420px; line-height: 1.5; }
+    .board-status { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--border-dark); color: var(--muted); padding: 4px 10px; border-radius: 2px; margin-top: 0.8rem; }
+    .board-status.live { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+
+    .layout { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+    .winner-banner {
+      background: linear-gradient(135deg, var(--accent2), #2a2a4a);
+      border-radius: 4px; padding: 1.6rem; margin-bottom: 1.4rem;
+      text-align: center; display: none;
+    }
+    .winner-banner.visible { display: block; }
+    .winner-banner .trophy { font-size: 2.2rem; margin-bottom: 0.3rem; }
+    .winner-banner .label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.4rem; }
+    .winner-banner h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: 0.02em; color: #fff; text-transform: uppercase; line-height: 1.15; }
+    .winner-banner .score-line { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
+    .winner-banner .score-line strong { color: var(--gold); }
+
+    .entry-card.medal-1 { border-color: var(--gold); box-shadow: 0 1px 6px rgba(201,168,76,0.25); }
+    .entry-card.medal-2 { border-color: #b8b8b8; }
+    .entry-card.medal-3 { border-color: #b5772e; }
+    .medal-icon { margin-right: 4px; }
+
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search-input {
+      background: var(--surface); border: 1px solid var(--border-dark); border-radius: 3px;
+      padding: 8px 12px; font-family: 'Lato', sans-serif; font-size: 0.85rem; color: var(--text);
+      width: 260px; outline: none;
+    }
+    .search-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
+    .entry-count { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.06em; }
+
+    .status-msg { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); padding: 2rem 0; text-align: center; }
+    .status-msg.error { color: var(--accent); }
+
+    .entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 0.8rem; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .entry-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: 0.85rem 1.2rem; cursor: pointer; user-select: none;
+    }
+    .entry-head:hover { background: var(--surface2); }
+    .entry-name-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .entry-rank { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted2); flex-shrink: 0; width: 28px; }
+    .entry-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .entry-score-wrap { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .entry-score { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--accent2); }
+    .entry-score em { font-style: normal; color: var(--gold); font-size: 0.9rem; }
+    .chevron { font-size: 0.7rem; color: var(--muted); transition: transform 0.15s; }
+    .entry-card.open .chevron { transform: rotate(180deg); }
+
+    .entry-picks { display: none; border-top: 1px solid var(--border); padding: 0.9rem 1.2rem 1.1rem; background: var(--surface2); }
+    .entry-card.open .entry-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+
+    .pick-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 6px 9px; }
+    .pick-chip.hit { border-color: var(--green); background: var(--green-dim); }
+    .pick-chip.miss { opacity: 0.55; }
+    .pick-weight { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; display: flex; justify-content: space-between; }
+    .pick-weight .conf { color: var(--text); font-weight: 700; }
+    .pick-name { font-size: 0.78rem; font-weight: 700; margin-top: 2px; line-height: 1.25; }
+    .pick-chip.hit .pick-name { color: var(--green); }
+
+    footer { background: var(--accent2); padding: 1.2rem 2rem; display: flex; justify-content: center; margin-top: 1rem; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+
+    @media (max-width: 700px) {
+      .layout { padding: 1rem; }
+      .entry-picks { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html">Road to 55</a>
+  </nav>
+  <div class="header-meta">
+    <div><span class="live-dot"></span>SEASON CHALLENGE</div>
+    <div>NCAA WRESTLING</div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div>
+      <h1>Road to<br/><span class="line2">55 — Entries</span></h1>
+    </div>
+    <div class="masthead-meta">
+      <p>Every card that's been locked in. Scores update automatically as champions are confirmed after NCAAs, March 2027.</p>
+      <div class="board-status" id="boardStatus">Loading board status…</div>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="winner-banner" id="winnerBanner"></div>
+
+  <div class="toolbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="Search entry name…">
+    <div class="entry-count" id="entryCount"></div>
+  </div>
+
+  <div id="listContainer">
+    <div class="status-msg" id="statusMsg">Loading entries…</div>
+  </div>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app, "us-central1");
+const listEntriesFn = httpsCallable(functions, "listRoad55Entries");
+
+const TOTAL_WEIGHTS = 10;
+
+let allEntries = [];
+let champions = {};
+
+function isBoardComplete() {
+  return Object.keys(champions).length === TOTAL_WEIGHTS;
+}
+
+function renderBoardStatus() {
+  const decided = Object.keys(champions).length;
+  const badge = document.getElementById('boardStatus');
+  if (decided === 0) {
+    badge.textContent = '📋 Board locked — no champions confirmed yet';
+    badge.classList.remove('live');
+  } else if (isBoardComplete()) {
+    badge.textContent = '🏁 Final results are in!';
+    badge.classList.add('live');
+  } else {
+    badge.textContent = `🏆 ${decided} / 10 weights confirmed`;
+    badge.classList.add('live');
+  }
+}
+
+function renderWinnerBanner() {
+  const banner = document.getElementById('winnerBanner');
+  if (!isBoardComplete() || allEntries.length === 0) {
+    banner.classList.remove('visible');
+    banner.innerHTML = '';
+    return;
+  }
+
+  const topScore = Math.max(...allEntries.map(e => e.score));
+  const winners = allEntries.filter(e => e.score === topScore);
+  const isTie = winners.length > 1;
+  const names = winners.map(w => escapeHtml(w.entryName)).join(isTie ? ' & ' : '');
+
+  banner.innerHTML = `
+    <div class="trophy">🏆</div>
+    <div class="label">${isTie ? 'Tie for first!' : 'Champion'}</div>
+    <h2>${names}</h2>
+    <div class="score-line">Final score: <strong>${topScore}/55</strong></div>
+  `;
+  banner.classList.add('visible');
+}
+
+function rankEntries(entries) {
+  // Standing (#1, #2, ...) is always by score, independent of the current
+  // display/sort order, which is alphabetical pre-results and score-based once final.
+  const byScore = [...entries].sort((a, b) => b.score - a.score);
+  const rankMap = new Map();
+  byScore.forEach((e, i) => rankMap.set(e.entryId, i + 1));
+  return rankMap;
+}
+
+function renderList(entries) {
+  const container = document.getElementById('listContainer');
+  container.innerHTML = '';
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="status-msg">No entries match your search.</div>';
+    return;
+  }
+
+  const rankMap = rankEntries(allEntries);
+
+  entries.forEach(entry => {
+    const rank = rankMap.get(entry.entryId);
+    const medal = isBoardComplete() ? { 1: '🥇', 2: '🥈', 3: '🥉' }[rank] : null;
+
+    const card = document.createElement('div');
+    card.className = 'entry-card' + (medal ? ` medal-${rank}` : '');
+
+    const head = document.createElement('div');
+    head.className = 'entry-head';
+    head.innerHTML = `
+      <div class="entry-name-wrap">
+        <span class="entry-rank">#${rank}</span>
+        <span class="entry-name">${medal ? `<span class="medal-icon">${medal}</span>` : ''}${escapeHtml(entry.entryName)}</span>
+      </div>
+      <div class="entry-score-wrap">
+        <span class="entry-score">${entry.score}<em>/55</em></span>
+        <span class="chevron">▾</span>
+      </div>
+    `;
+    head.addEventListener('click', () => card.classList.toggle('open'));
+
+    const picksWrap = document.createElement('div');
+    picksWrap.className = 'entry-picks';
+    entry.picks
+      .slice()
+      .sort((a, b) => a.weight - b.weight)
+      .forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'pick-chip' + (p.status === 'hit' ? ' hit' : p.status === 'miss' ? ' miss' : '');
+        chip.innerHTML = `
+          <div class="pick-weight"><span>${p.weight} LBS</span><span class="conf">${p.confidence}</span></div>
+          <div class="pick-name">${escapeHtml(p.name || '—')}</div>
+        `;
+        picksWrap.appendChild(chip);
+      });
+
+    card.appendChild(head);
+    card.appendChild(picksWrap);
+    container.appendChild(card);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function applySearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let filtered = q
+    ? allEntries.filter(e => e.entryName.toLowerCase().includes(q))
+    : allEntries.slice();
+
+  // Once the contest is decided, lead with standings instead of alphabetical order.
+  if (isBoardComplete()) {
+    filtered.sort((a, b) => b.score - a.score || a.entryName.localeCompare(b.entryName));
+  } else {
+    filtered.sort((a, b) => a.entryName.localeCompare(b.entryName, undefined, { sensitivity: 'base' }));
+  }
+
+  document.getElementById('entryCount').textContent = `${filtered.length} of ${allEntries.length} entries`;
+  renderList(filtered);
+}
+
+document.getElementById('searchInput').addEventListener('input', applySearch);
+
+(async function init() {
+  try {
+    const res = await listEntriesFn();
+    allEntries = res.data.entries || [];
+    champions = res.data.champions || {};
+    renderBoardStatus();
+    renderWinnerBanner();
+    applySearch();
+  } catch (e) {
+    console.error('Could not load entries:', e);
+    document.getElementById('statusMsg').textContent = "Couldn't load entries. Refresh to try again.";
+    document.getElementById('statusMsg').classList.add('error');
+  }
+})();
+</script>
+
+</body>
+</html>
