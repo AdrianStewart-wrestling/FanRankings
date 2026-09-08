@@ -187,11 +187,48 @@
     .footer-partner img { height: 30px; width: auto; opacity: 0.75; }
 
     @media (max-width: 700px) {
-      .layout { grid-template-columns: 1fr; padding: 1rem; }
+      header { height: auto; flex-wrap: wrap; padding: 0.7rem 1rem; row-gap: 6px; }
+      .header-meta { display: none; }
+      .nav-links { gap: 0.9rem; flex-wrap: wrap; }
+      .nav-links a { font-size: 0.6rem; }
+      .logo { font-size: 1.25rem; }
+
+      .masthead { padding: 1.4rem 1rem; }
+      .masthead-meta p { max-width: none; }
+
+      .status-bar { padding: 0.6rem 1rem 0; }
+      .layout { grid-template-columns: 1fr; padding: 1rem; gap: 1.4rem; }
       .sidebar { order: -1; }
       .partnership-badge { display: none; }
+
+      .track-card { padding: 0.8rem 1rem; }
+      .name-bar { padding: 0.9rem 1rem; }
+      .day-header { padding: 0.5rem 1rem; }
+      .dual-meta { padding: 6px 1rem 0; flex-wrap: wrap; gap: 4px 10px; }
       .dual-sides { flex-direction: column; }
       .dual-mid { width: 100%; height: 22px; border-left: none; border-right: none; border-top: 1px dashed var(--border-dark); border-bottom: 1px dashed var(--border-dark); }
+      .dual-side { padding: 0.85rem 1rem; }
+
+      .ballot-footer { flex-direction: column; align-items: stretch; padding: 0.9rem 1rem; gap: 0.7rem; }
+      .slots-filled-msg { text-align: center; }
+      .btn-submit { width: 100%; }
+      .success-note { padding: 0.7rem 1rem; }
+
+      .lb-head { padding: 0.9rem 1rem; }
+      table.ledger, table.ledger tbody { display: block; width: 100%; }
+      table.ledger thead { display: none; }
+      table.ledger tr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 1rem; border-bottom: 1px solid var(--border); }
+      table.ledger td { display: block; padding: 0; border-bottom: none; }
+      table.ledger td:nth-child(1) { order: 1; }
+      table.ledger td:nth-child(2) { order: 2; flex: 1 1 auto; min-width: 0; }
+      table.ledger td:nth-child(3) { order: 3; }
+      .week-records .wk { display: block; margin-right: 0; }
+
+      .side-card, .stats-grid { padding: 1rem; }
+    }
+    @media (max-width: 400px) {
+      .masthead h1 { font-size: 2.1rem; }
+      .name-bar-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
