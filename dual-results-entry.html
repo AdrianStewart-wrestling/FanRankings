@@ -121,11 +121,26 @@
     <label class="f-label">Note (shown to players, optional)</label>
     <input type="text" id="newWeekLock" placeholder="e.g. Times subject to TV adjustment">
 
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:0.9rem 1rem;margin-bottom:14px;">
+      <label class="f-label" style="margin-top:0;">Paste from WrestleStat</label>
+      <div class="section-hint" style="margin-bottom:8px;">
+        Go to <a href="https://www.wrestlestat.com/d1/event/duals" target="_blank" rel="noopener">wrestlestat.com/d1/event/duals</a>,
+        select the rows for the duals you want this week, copy, and paste the raw text below. This pulls out team
+        names and dates automatically — WrestleStat doesn't publish start times/venues without a login, so those
+        still need a quick manual fill-in per dual after parsing.
+      </div>
+      <label class="f-label" style="margin-top:0;">Season year (for turning "12/18" / "01/16" into a real date)</label>
+      <input type="text" id="seasonYear" placeholder="e.g. 2026" style="max-width:140px;">
+      <label class="f-label">Pasted text</label>
+      <textarea id="wrestlestatPaste" rows="6" placeholder="12/18 Lock Haven - Wisconsin Dual #27 Wisconsin #38 Lock Haven&#10;12/19 North Carolina - Nebraska Dual #6 Nebraska #26 North Carolina&#10;..."></textarea>
+      <button type="button" class="btn-secondary" id="parseWrestleStatBtn" style="margin-top:8px;">Parse into duals below</button>
+    </div>
+
     <label class="f-label" style="margin-top:16px;">Duals</label>
     <div id="dualInputs"></div>
     <button type="button" class="btn-secondary" id="addDualBtn">+ Add dual</button>
 
-    <label class="f-label" style="margin-top:16px;">...or paste JSON (this is the shape a WrestleStat export maps to)</label>
+    <label class="f-label" style="margin-top:16px;">...or paste JSON directly</label>
     <textarea id="jsonImport" rows="7" placeholder='{"week":5,"label":"Week 5","duals":[{"date":"2026-11-14","time":"19:00","teamA":"Iowa","teamB":"Penn State","location":"Carver-Hawkeye Arena"}]}'></textarea>
     <button type="button" class="btn-secondary" id="loadJsonBtn" style="margin-top:8px;">Load JSON into form</button>
     <div class="schema-code">{
@@ -266,6 +281,68 @@ renderDualInputs();
 document.getElementById('addDualBtn').onclick = () => {
   manualDuals.push({ date: '', time: '', location: '', teamA: '', teamB: '' });
   renderDualInputs();
+};
+
+/**
+ * Parses text copy-pasted from wrestlestat.com/d1/event/duals. Handles both
+ * the desktop table row style ("12/18 Iowa - Penn State Dual #1 Penn State #2 Iowa")
+ * and the mobile card style (date on its own line, "Iowa - Penn State Dual" on
+ * the next, then the ranked "#1 Penn State | #2 Iowa" line, which is ignored —
+ * we pull the clean team names out of the "TeamA - TeamB Dual" text instead of
+ * the ranked pair, so "#" prefixes and rankings never leak into team names).
+ * Does NOT recover time or venue — WrestleStat doesn't publish those without
+ * a login, so those fields are left blank for manual fill-in.
+ */
+function parseWrestleStatText(raw, seasonYear) {
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  const results = [];
+  let pendingDate = null;
+  const dateOnlyRe = /^(\d{1,2})\/(\d{1,2})$/;
+  const dualLineRe = /^(?:(\d{1,2})\/(\d{1,2})\s+)?(.+?)\s+-\s+(.+?)\s+Dual\b/i;
+
+  function toIsoDate(month, day) {
+    const m = parseInt(month, 10);
+    const d = parseInt(day, 10);
+    // Wrestling season spans two calendar years — Aug–Dec is the season's
+    // start year, Jan–Jul rolls into the following year.
+    const year = m >= 8 ? seasonYear : seasonYear + 1;
+    return `${year}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+
+  for (const line of lines) {
+    const dateOnly = line.match(dateOnlyRe);
+    if (dateOnly) {
+      pendingDate = toIsoDate(dateOnly[1], dateOnly[2]);
+      continue;
+    }
+    const m = line.match(dualLineRe);
+    if (m) {
+      const date = m[1] ? toIsoDate(m[1], m[2]) : pendingDate;
+      if (!date) continue; // no date context yet — skip rather than guess
+      const teamA = m[3].replace(/^#\d+\s+/, '').trim();
+      const teamB = m[4].replace(/^#\d+\s+/, '').trim();
+      results.push({ date, time: '', location: '', teamA, teamB });
+    }
+  }
+  return results;
+}
+
+document.getElementById('parseWrestleStatBtn').onclick = () => {
+  const raw = document.getElementById('wrestlestatPaste').value;
+  const yearInput = document.getElementById('seasonYear').value.trim();
+  if (!raw.trim()) { showStatus('Paste some text from WrestleStat first.', 'error'); return; }
+  if (!yearInput || !/^\d{4}$/.test(yearInput)) {
+    showStatus('Enter a 4-digit season year (e.g. 2026) so dates resolve correctly.', 'error');
+    return;
+  }
+  const parsed = parseWrestleStatText(raw, parseInt(yearInput, 10));
+  if (parsed.length === 0) {
+    showStatus("Couldn't find any duals in that text — check you copied full lines including the date.", 'error');
+    return;
+  }
+  manualDuals = parsed;
+  renderDualInputs();
+  showStatus(`Parsed ${parsed.length} dual${parsed.length === 1 ? '' : 's'} — set time/location for each, then publish.`, 'success');
 };
 
 document.getElementById('loadJsonBtn').onclick = () => {
