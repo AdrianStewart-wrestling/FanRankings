@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Fan's Vote — Dual Pick'em</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9;
+      --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08);
+      --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --cactus-green: #3a9e2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+    header {
+      background: #ffffff; border-bottom: 2px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-align: right; line-height: 1.7; }
+    .live-dot { display: inline-block; width: 5px; height: 5px; background: var(--gold); border-radius: 50%; margin-right: 4px; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .partnership-badge { display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 1rem; }
+    .partnership-badge img { height: 48px; width: auto; filter: drop-shadow(0 0 5px rgba(58,158,46,0.5)); }
+    .partnership-text { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.6; }
+    .partnership-text strong { display: block; color: var(--cactus-green); font-size: 0.68rem; letter-spacing: 0.06em; }
+
+    .masthead { background: var(--surface); border-bottom: 3px solid var(--accent2); padding: 2rem; }
+    .masthead-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+    .masthead-left { display: flex; align-items: flex-end; gap: 1.2rem; }
+    .masthead h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+    .masthead h1 .line2 { color: var(--gold); font-style: italic; }
+    .masthead-meta p { font-size: 0.82rem; color: var(--muted); max-width: 320px; line-height: 1.5; }
+    .week-select-wrap { margin-top: 0.8rem; }
+    .week-select {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase;
+      border: 1px solid var(--gold); color: #8a6f1f; padding: 6px 10px; border-radius: 2px;
+      background: rgba(201,168,76,0.1); cursor: pointer; outline: none;
+    }
+
+    .status-bar { max-width: 1000px; margin: 0 auto; padding: 0.8rem 2rem 0; }
+    .status-msg { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 8px 12px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); display: none; }
+    .status-msg.visible { display: block; }
+    .status-msg.error { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .status-msg.success { border-color: var(--green); color: var(--green); background: rgba(46,125,82,0.06); }
+    .status-msg.loading { border-color: var(--border-dark); color: var(--muted); }
+    .status-msg.note { border-color: var(--gold); color: #8a6f1f; background: rgba(201,168,76,0.08); }
+
+    .layout { max-width: 1000px; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 1fr 270px; gap: 2rem; }
+
+    .track-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1rem 1.4rem; margin-bottom: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .track-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .track-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .track-total { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent2); }
+    .track-total em { font-style: normal; color: var(--gold); }
+    .track-bar-wrap { position: relative; height: 8px; background: var(--surface2); border-radius: 4px; overflow: visible; border: 1px solid var(--border); }
+    .track-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 4px 0 0 4px; transition: width 0.35s ease; }
+    .track-flag { position: absolute; right: -4px; top: -9px; font-size: 16px; opacity: 0.3; transition: opacity 0.2s ease; }
+    .track-flag.lit { opacity: 1; }
+
+    .ballot-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 1.6rem; }
+
+    .name-bar { padding: 1rem 1.4rem; border-bottom: 2px solid var(--accent2); background: var(--accent2); }
+    .name-bar label { display: block; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 6px; }
+    .name-input {
+      width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; font-family: 'Barlow Condensed', sans-serif; font-size: 1.15rem; font-weight: 700;
+      letter-spacing: 0.02em; padding: 8px 12px; border-radius: 3px; outline: none;
+    }
+    .name-input::placeholder { color: rgba(255,255,255,0.35); font-weight: 400; }
+    .name-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+    .name-bar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 700px) { .name-bar-grid { grid-template-columns: 1fr; } }
+    .name-hint { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: rgba(255,255,255,0.3); margin-top: 5px; letter-spacing: 0.04em; }
+    .find-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.15); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .find-row span { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.4); letter-spacing: 0.04em; }
+    .btn-find {
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 12px; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.75);
+      border-radius: 3px; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-find:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-find:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Day grouping — "that lets us present Friday/Saturday/Sunday cleanly" */
+    .day-header {
+      padding: 0.5rem 1.4rem; background: var(--surface2); border-bottom: 1px solid var(--border);
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+    .day-header strong { color: var(--text); }
+
+    .dual-row { display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .dual-row:last-child { border-bottom: none; }
+    .dual-row.decided { background: rgba(46,125,82,0.03); }
+    .dual-row.locked-pending { background: rgba(201,168,76,0.04); }
+    .dual-meta { display: flex; justify-content: space-between; align-items: center; padding: 6px 1.4rem 0; font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.03em; }
+    .dual-meta .lock-tag { color: #8a6f1f; }
+    .dual-sides { display: flex; align-items: stretch; padding: 4px 0 0; }
+    .dual-side {
+      flex: 1; padding: 0.9rem 1rem; background: none; border: none; cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 700;
+      color: var(--text); text-align: center; transition: all 0.13s; position: relative;
+    }
+    .dual-side:hover:not(:disabled) { background: var(--surface2); }
+    .dual-side.selected { background: var(--gold); color: #1c1c1c; }
+    .dual-side.correct { background: var(--green); color: #fff; }
+    .dual-side.wrong { opacity: 0.45; }
+    .dual-side:disabled:not(.selected):not(.correct) { color: var(--muted2); cursor: not-allowed; }
+    .dual-side.winner-tag::after {
+      content: "W"; position: absolute; top: 4px; right: 8px;
+      font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.06em;
+      color: var(--gold); font-weight: 700;
+    }
+    .dual-side.correct.winner-tag::after { color: #fff; }
+    .dual-mid {
+      width: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted);
+      border-left: 1px dashed var(--border-dark); border-right: 1px dashed var(--border-dark);
+      background: var(--surface2);
+    }
+
+    .ballot-footer { padding: 1rem 1.4rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: var(--surface2); flex-wrap: wrap; }
+    .slots-filled-msg { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+    .slots-filled-msg strong { color: var(--text); }
+    .btn-submit { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 24px; background: var(--accent); color: #fff; border: none; cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap; }
+    .btn-submit:hover:not(:disabled) { background: #a93226; transform: translateY(-1px); }
+    .btn-submit:disabled { background: var(--border-dark); color: var(--muted2); cursor: not-allowed; transform: none; }
+
+    .success-note { padding: 0.7rem 1.4rem; background: rgba(46,125,82,0.06); border-top: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--green); display: none; }
+    .success-note.visible { display: block; }
+
+    .lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .lb-head { padding: 1rem 1.4rem; border-bottom: 2px solid var(--accent2); background: var(--accent2); }
+    .lb-head h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; }
+    table.ledger { width: 100%; border-collapse: collapse; }
+    table.ledger th { text-align: left; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    table.ledger td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: top; }
+    table.ledger tr:last-child td { border-bottom: none; }
+    table.ledger tr.me td { color: var(--accent); }
+    table.ledger tr.me .entry-name { font-weight: 800; }
+    .rank-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--muted2); }
+    table.ledger tr:nth-child(1) .rank-num, table.ledger tr:nth-child(2) .rank-num, table.ledger tr:nth-child(3) .rank-num { color: var(--gold); }
+    .entry-name { font-weight: 700; }
+    .week-records { margin-top: 4px; font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.02em; line-height: 1.6; }
+    .week-records .wk { display: inline-block; margin-right: 12px; white-space: nowrap; }
+    .season-record { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 800; white-space: nowrap; }
+    .lb-empty { padding: 2rem 1.4rem; text-align: center; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 1.2rem; }
+    .side-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .side-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    .rules-list { display: flex; flex-direction: column; gap: 10px; }
+    .rules-list .r { font-size: 0.78rem; line-height: 1.5; color: var(--text); }
+    .rules-list .r strong { display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 0.6rem; }
+    .stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent2); line-height: 1; }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 0.08em; margin-top: 2px; }
+
+    .cactus-partner-card { border: 1px solid var(--border); border-top: 3px solid var(--cactus-green); padding: 1rem; display: flex; align-items: center; gap: 12px; border-radius: 0 0 4px 4px; }
+    .cactus-partner-card img { height: 60px; width: auto; flex-shrink: 0; }
+    .cactus-partner-info strong { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cactus-green); display: block; margin-bottom: 3px; }
+    .cactus-partner-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.45; }
+
+    .spinner { display: inline-block; width: 10px; height: 10px; border: 2px solid var(--border-dark); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 6px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer { background: var(--accent2); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    footer a:hover { color: #fff; }
+    .footer-partner { display: flex; align-items: center; gap: 8px; }
+    .footer-partner img { height: 30px; width: auto; opacity: 0.75; }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; padding: 1rem; }
+      .sidebar { order: -1; }
+      .partnership-badge { display: none; }
+      .dual-sides { flex-direction: column; }
+      .dual-mid { width: 100%; height: 22px; border-left: none; border-right: none; border-top: 1px dashed var(--border-dark); border-bottom: 1px dashed var(--border-dark); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">The Fan's <em>Vote</em></div>
+  <nav class="nav-links">
+    <a href="index.html">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html">Road to 55</a>
+    <a href="dual-pickem.html" class="active">Dual Pick'em</a>
+  </nav>
+  <div class="header-right">
+    <div class="header-meta">
+      <div><span class="live-dot"></span>WEEKLY CHALLENGE</div>
+      <div>NCAA WRESTLING</div>
+    </div>
+    <div class="partnership-badge">
+      <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      <div class="partnership-text">Official Partner<strong>Cactus Wrestling</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-left">
+      <h1>Dual<br/><span class="line2">Pick'em</span></h1>
+    </div>
+    <div class="masthead-meta">
+      <p>Pick a winner in every dual on the card. Each matchup locks on its own at first whistle — no need to wait on the whole week.</p>
+      <div class="week-select-wrap">
+        <select class="week-select" id="weekSelect"><option>Loading weeks…</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <div class="status-msg" id="statusMsg"></div>
+</div>
+
+<div class="layout">
+  <div class="ballot-col">
+
+    <div class="track-card">
+      <div class="track-top">
+        <span class="track-label">Duals picked</span>
+        <span class="track-total"><span id="trackSum">0</span><em id="trackOf">/0</em></span>
+      </div>
+      <div class="track-bar-wrap">
+        <div class="track-bar-fill" id="trackFill"></div>
+        <div class="track-flag" id="trackFlag">🏁</div>
+      </div>
+    </div>
+
+    <div class="ballot-card" id="ballotCard">
+      <div class="name-bar">
+        <div class="name-bar-grid">
+          <div>
+            <label for="entryNameInput">Entry name</label>
+            <input type="text" id="entryNameInput" class="name-input" placeholder="e.g. Adrian's Card, Team Cactus" maxlength="40" autocomplete="off">
+          </div>
+          <div>
+            <label for="entryPasswordInput">Password</label>
+            <input type="password" id="entryPasswordInput" class="name-input" placeholder="4+ characters" autocomplete="new-password">
+          </div>
+        </div>
+        <div class="name-hint">Name shows on the leaderboard once results are in. Password lets you pull up and edit your picks from a different device — leave it blank on future saves from this device to keep it unchanged.</div>
+        <div class="find-row">
+          <span>Started on another device?</span>
+          <button type="button" class="btn-find" id="findBtn">Find my card</button>
+        </div>
+      </div>
+      <div id="rowsContainer">
+        <div class="dual-row"><div class="dual-side" style="cursor:default;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);font-weight:400;"><span class="spinner"></span>Loading this week's duals...</div></div>
+      </div>
+      <div class="ballot-footer">
+        <div class="slots-filled-msg"><strong id="filledCount">0</strong> / <span id="totalCount">0</span> duals picked &middot; <span id="lockedCount">0</span> locked</div>
+        <button class="btn-submit" id="saveBtn">Save Picks</button>
+      </div>
+      <div class="success-note" id="successNote">Saved.</div>
+    </div>
+
+    <div class="lb-card">
+      <div class="lb-head"><h2>Season Leaderboard</h2></div>
+      <div id="leaderboardBody"><div class="lb-empty"><span class="spinner"></span>Loading standings...</div></div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div>
+      <div class="side-title">Official Partner</div>
+      <div class="cactus-partner-card">
+        <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+        <div class="cactus-partner-info">
+          <strong>Cactus Wrestling</strong>
+          <p>Proud community partner powering fan-driven NCAA wrestling rankings.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">How It Works</div>
+      <div class="rules-list">
+        <div class="r"><strong>Pick</strong>Choose the winner of every dual on this week's card.</div>
+        <div class="r"><strong>Lock In</strong>Each dual locks on its own at its scheduled start — save anytime before then, dual by dual.</div>
+        <div class="r"><strong>Score</strong>Each correct pick banks one point toward your season total.</div>
+        <div class="r"><strong>Climb</strong>The leaderboard updates as soon as results are entered each week.</div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">This Week</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="statFilled">0</div><div class="stat-label">PICKED</div></div>
+        <div class="stat-box"><div class="stat-num" id="statOpen">0</div><div class="stat-label">STILL OPEN</div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+  <div class="footer-partner">
+    <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+    <p>In partnership with <a href="https://www.youtube.com/@CACTUS-Wrestling" target="_blank" rel="noopener">Cactus Wrestling</a></p>
+  </div>
+</footer>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const functions = getFunctions(app, "us-central1");
+
+const findPlayerFn = httpsCallable(functions, "findDualPlayer");
+const getPlayerByIdFn = httpsCallable(functions, "getDualPlayerById");
+const savePlayerFn = httpsCallable(functions, "saveDualPlayer");
+const getPicksFn = httpsCallable(functions, "getDualPicks");
+const savePicksFn = httpsCallable(functions, "saveDualPicks");
+const getLeaderboardFn = httpsCallable(functions, "getDualLeaderboard");
+
+// Must match the server's assumption exactly — see TZ_OFFSET comment in functions/index.js
+const TZ_OFFSET = "-05:00"; // US Eastern Standard Time
+
+function dualLockTime(dual) {
+  if (!dual || !dual.date) return null;
+  const time = dual.time || "19:00";
+  const d = new Date(`${dual.date}T${time}:00${TZ_OFFSET}`);
+  return isNaN(d.getTime()) ? null : d;
+}
+function isDualLocked(dual) {
+  if (dual && dual.winner) return true;
+  const lockAt = dualLockTime(dual);
+  if (!lockAt) return false;
+  return Date.now() >= lockAt.getTime();
+}
+function formatDay(dateStr) {
+  const d = new Date(`${dateStr}T12:00:00${TZ_OFFSET}`);
+  return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+}
+function formatTime(dual) {
+  const lockAt = dualLockTime(dual);
+  if (!lockAt) return '';
+  return lockAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) + ' ET';
+}
+
+let allWeeks = [];
+let currentWeek = null;
+let knownPlayerId = null;
+let entryName = "";
+let myPicks = {};
+
+const nameInput = document.getElementById('entryNameInput');
+const passwordInput = document.getElementById('entryPasswordInput');
+const weekSelect = document.getElementById('weekSelect');
+nameInput.addEventListener('input', () => { entryName = nameInput.value; });
+
+function showStatus(msg, type = 'loading') {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status-msg visible ${type}`;
+}
+function hideStatus() { document.getElementById('statusMsg').className = 'status-msg'; }
+function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str || ''; return div.innerHTML; }
+function getStoredPlayerId() { return localStorage.getItem('dualPickemPlayerId'); }
+function rememberPlayerId(id) { localStorage.setItem('dualPickemPlayerId', id); knownPlayerId = id; }
+
+async function fetchWeeks() {
+  const snap = await getDocs(collection(db, 'dualWeeks'));
+  allWeeks = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.week || 0) - (a.week || 0));
+}
+
+function pickDefaultWeekId() {
+  const visible = allWeeks.filter(w => w.status !== 'closed');
+  const withOpenDuals = visible.filter(w => Object.values(w.duals || {}).some(d => !isDualLocked(d)));
+  if (withOpenDuals.length) {
+    return withOpenDuals.sort((a, b) => (a.week || 0) - (b.week || 0))[0].id;
+  }
+  const pool = visible.length ? visible : allWeeks;
+  return pool.length ? pool.sort((a, b) => (b.week || 0) - (a.week || 0))[0].id : null;
+}
+
+function populateWeekSelect() {
+  weekSelect.innerHTML = '';
+  if (allWeeks.length === 0) {
+    weekSelect.innerHTML = '<option>No weeks posted yet</option>';
+    return;
+  }
+  allWeeks.forEach(w => {
+    const total = Object.keys(w.duals || {}).length;
+    const openCount = Object.values(w.duals || {}).filter(d => !isDualLocked(d)).length;
+    const opt = document.createElement('option');
+    opt.value = w.id;
+    opt.textContent = `${w.label || ('Week ' + w.week)} — ${openCount}/${total} open`;
+    weekSelect.appendChild(opt);
+  });
+  weekSelect.value = pickDefaultWeekId();
+}
+
+function usedCount() {
+  if (!currentWeek) return 0;
+  return Object.keys(currentWeek.duals || {}).filter(id => myPicks[id]).length;
+}
+function openCount() {
+  if (!currentWeek) return 0;
+  return Object.values(currentWeek.duals || {}).filter(d => !isDualLocked(d)).length;
+}
+
+function updateProgress() {
+  const total = currentWeek ? Object.keys(currentWeek.duals || {}).length : 0;
+  const used = usedCount();
+  const open = openCount();
+  document.getElementById('trackSum').textContent = used;
+  document.getElementById('trackOf').textContent = `/${total}`;
+  document.getElementById('trackFill').style.width = total ? `${(used / total) * 100}%` : '0%';
+  document.getElementById('trackFlag').classList.toggle('lit', total > 0 && used === total);
+  document.getElementById('filledCount').textContent = used;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('lockedCount').textContent = total - open;
+  document.getElementById('statFilled').textContent = used;
+  document.getElementById('statOpen').textContent = open;
+  document.getElementById('saveBtn').disabled = open === 0;
+}
+
+function renderRows() {
+  const container = document.getElementById('rowsContainer');
+  container.innerHTML = '';
+  if (!currentWeek || !currentWeek.duals) return;
+
+  const entries = Object.entries(currentWeek.duals)
+    .sort(([, a], [, b]) => (dualLockTime(a)?.getTime() || 0) - (dualLockTime(b)?.getTime() || 0));
+
+  let lastDay = null;
+  entries.forEach(([dualId, d]) => {
+    if (d.date && d.date !== lastDay) {
+      lastDay = d.date;
+      const dayHeader = document.createElement('div');
+      dayHeader.className = 'day-header';
+      dayHeader.innerHTML = `<strong>${formatDay(d.date)}</strong>`;
+      container.appendChild(dayHeader);
+    }
+
+    const locked = isDualLocked(d);
+    const row = document.createElement('div');
+    row.className = 'dual-row' + (d.winner ? ' decided' : locked ? ' locked-pending' : '');
+
+    const meta = document.createElement('div');
+    meta.className = 'dual-meta';
+    const timeLabel = formatTime(d) + (d.location ? ` &middot; ${escapeHtml(d.location)}` : '');
+    meta.innerHTML = `<span>${timeLabel}</span>` + (locked && !d.winner ? `<span class="lock-tag">🔒 Locked</span>` : '');
+
+    const sidesWrap = document.createElement('div');
+    sidesWrap.className = 'dual-sides';
+
+    const sideA = document.createElement('button');
+    sideA.type = 'button';
+    sideA.className = 'dual-side';
+    sideA.textContent = d.teamA;
+    sideA.disabled = locked;
+
+    const sideB = document.createElement('button');
+    sideB.type = 'button';
+    sideB.className = 'dual-side';
+    sideB.textContent = d.teamB;
+    sideB.disabled = locked;
+
+    const pick = myPicks[dualId];
+    [['A', sideA], ['B', sideB]].forEach(([side, el]) => {
+      if (d.winner) {
+        el.classList.toggle('winner-tag', d.winner === side);
+        if (pick === side) el.classList.add(d.winner === side ? 'correct' : 'wrong');
+      } else if (pick === side) {
+        el.classList.add('selected');
+      }
+    });
+
+    if (!locked) {
+      sideA.addEventListener('click', () => { myPicks[dualId] = 'A'; renderRows(); updateProgress(); });
+      sideB.addEventListener('click', () => { myPicks[dualId] = 'B'; renderRows(); updateProgress(); });
+    }
+
+    const mid = document.createElement('div');
+    mid.className = 'dual-mid';
+    mid.textContent = 'VS';
+
+    sidesWrap.appendChild(sideA);
+    sidesWrap.appendChild(mid);
+    sidesWrap.appendChild(sideB);
+
+    row.appendChild(meta);
+    row.appendChild(sidesWrap);
+    container.appendChild(row);
+  });
+
+  updateProgress();
+}
+
+async function loadWeek(weekId) {
+  currentWeek = allWeeks.find(w => w.id === weekId);
+  if (!currentWeek) return;
+  document.getElementById('successNote').classList.remove('visible');
+  myPicks = {};
+  if (knownPlayerId) {
+    try {
+      const res = await getPicksFn({ playerId: knownPlayerId, weekId });
+      myPicks = res.data.picks || {};
+    } catch (e) {
+      console.warn('Could not load picks for this week:', e);
+    }
+  }
+  renderRows();
+}
+
+async function loadExistingPlayer() {
+  const id = getStoredPlayerId();
+  if (!id) return;
+  try {
+    const res = await getPlayerByIdFn({ playerId: id });
+    knownPlayerId = id;
+    entryName = res.data.displayName || '';
+    nameInput.value = entryName;
+  } catch (e) {
+    console.warn('Could not load saved player:', e);
+    localStorage.removeItem('dualPickemPlayerId');
+  }
+}
+
+document.getElementById('findBtn').addEventListener('click', async () => {
+  const name = nameInput.value;
+  const password = passwordInput.value;
+  if (!name.trim() || !password) {
+    showStatus('Enter your entry name and password to find your card.', 'error');
+    return;
+  }
+  const btn = document.getElementById('findBtn');
+  btn.disabled = true;
+  btn.textContent = 'Searching...';
+  showStatus('Looking up your card...', 'loading');
+  try {
+    const res = await findPlayerFn({ name, password });
+    rememberPlayerId(res.data.playerId);
+    entryName = res.data.displayName || '';
+    nameInput.value = entryName;
+    passwordInput.value = '';
+    await loadWeek(weekSelect.value);
+    showStatus('Card loaded — you can now edit it on this device.', 'success');
+  } catch (e) {
+    console.error('Find failed:', e);
+    showStatus(e.message || 'No card found with that name and password.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Find my card';
+  }
+});
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const trimmedName = (entryName || nameInput.value).trim();
+  if (!trimmedName) {
+    showStatus('Give your card a name before saving.', 'error');
+    nameInput.focus();
+    return;
+  }
+  const passwordTyped = passwordInput.value;
+  if (!knownPlayerId && (!passwordTyped || passwordTyped.length < 4)) {
+    showStatus('Set a password (4+ characters) so you can find this card on another device.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Saving...';
+  showStatus('Saving your picks...', 'loading');
+
+  try {
+    const playerRes = await savePlayerFn({
+      playerId: knownPlayerId || null,
+      displayName: trimmedName,
+      password: passwordTyped || null
+    });
+    rememberPlayerId(playerRes.data.playerId);
+
+    const res = await savePicksFn({ playerId: knownPlayerId, weekId: currentWeek.id, picks: myPicks });
+    myPicks = res.data.picks || myPicks;
+
+    passwordInput.value = '';
+    hideStatus();
+    const note = document.getElementById('successNote');
+    note.textContent = `"${trimmedName}" is saved for ${currentWeek.label || 'this week'}. Come back and pick the rest as they open up.`;
+    note.classList.add('visible');
+    renderRows();
+    refreshLeaderboard();
+  } catch (e) {
+    console.error('Save failed:', e);
+    showStatus(e.message || "Couldn't save — check your connection and try again.", 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+    updateProgress();
+  }
+});
+
+weekSelect.addEventListener('change', () => loadWeek(weekSelect.value));
+
+async function refreshLeaderboard() {
+  const el = document.getElementById('leaderboardBody');
+  try {
+    const res = await getLeaderboardFn();
+    const rows = res.data.leaderboard || [];
+    if (rows.length === 0) {
+      el.innerHTML = '<div class="lb-empty">No scored duals yet. The leaderboard fills in once results are entered each week.</div>';
+      return;
+    }
+    let html = '<table class="ledger"><thead><tr><th></th><th>Entry</th><th>Season</th></tr></thead><tbody>';
+    rows.forEach((r, i) => {
+      const mine = entryName && r.displayName && entryName.trim().toLowerCase() === r.displayName.trim().toLowerCase() ? ' me' : '';
+      const weeksLine = r.weeks.map(w => `<span class="wk">${escapeHtml(w.label)}: ${w.correct}-${w.total - w.correct}</span>`).join('');
+      html += `<tr class="${mine.trim()}">
+        <td><span class="rank-num">${i + 1}</span></td>
+        <td>
+          <div class="entry-name">${escapeHtml(r.displayName)}</div>
+          <div class="week-records">${weeksLine}</div>
+        </td>
+        <td><span class="season-record">${r.seasonCorrect}-${r.seasonTotal - r.seasonCorrect}</span></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  } catch (e) {
+    console.error('Leaderboard load failed:', e);
+    el.innerHTML = '<div class="lb-empty">Couldn\'t load the leaderboard right now.</div>';
+  }
+}
+
+(async function init() {
+  try {
+    await fetchWeeks();
+    populateWeekSelect();
+    await loadExistingPlayer();
+    await loadWeek(weekSelect.value);
+    refreshLeaderboard();
+  } catch (e) {
+    console.error('Init failed:', e);
+    showStatus("Couldn't load this week's card. Refresh to try again.", 'error');
+  }
+})();
+</script>
+
+</body>
+</html>
