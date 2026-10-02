@@ -376,7 +376,7 @@ const allBallots = [...weights, P4P_KEY, TEAMS_KEY];
 // Slot counts per ballot type
 function slotsFor(ballotKey) {
   if (ballotKey === P4P_KEY) return 10;
-  if (ballotKey === TEAMS_KEY) return 25;
+  if (ballotKey === TEAMS_KEY) return 10;
   return 8;
 }
 
@@ -614,7 +614,7 @@ function renderResultsSidebar(data, ballotKey, prevData = { rankMap: new Map(), 
   }
 
   const maxPts = data.results[0]?.points || 1;
-  const topN = ballotKey === TEAMS_KEY ? 25 : (ballotKey === P4P_KEY ? 10 : 8);
+  const topN = ballotKey === TEAMS_KEY ? 10 : (ballotKey === P4P_KEY ? 10 : 8);
   const currentTop = data.results.slice(0, topN);
 
   // Build set of current top-N names (normalized) to find dropouts
@@ -893,7 +893,7 @@ function renderBallotCard() {
     document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 10 · #1 IS THE BEST WRESTLER REGARDLESS OF WEIGHT';
   } else if (activeBallot === TEAMS_KEY) {
     document.getElementById('ballotWeightLabel').innerHTML = `TEAM <span>RANKINGS</span>`;
-    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 25 · #1 IS THE BEST PROGRAM IN THE NATION';
+    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 10 · #1 IS THE BEST PROGRAM IN THE NATION';
   } else {
     document.getElementById('ballotWeightLabel').innerHTML = `${activeBallot} <span>LBS</span>`;
     document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 8 · #1 IS YOUR PICK FOR BEST';
