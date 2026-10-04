@@ -187,12 +187,26 @@ defaults to 19:00.</div>
   </div>
 
   <div class="section-card">
+    <div class="section-title">Import a Week from the 2026–27 Schedule</div>
+    <div class="section-hint">Paste one week file (payloads/week-N.json) built from the frozen schedule. Check it first: an existing week
+      is only replaced when every dual is the same dual in the same position (so dual IDs, saved picks and results are kept),
+      results already entered are carried over, and a dual that has already locked is never reopened.</div>
+    <textarea id="masterImport" rows="6" placeholder='{"data":{"week":13,"label":"Week 13 · Jan 18 – Jan 24","duals":[...]}}'></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn-secondary" id="checkMasterBtn">Check week</button>
+      <button type="button" class="btn-set" id="publishMasterBtn" disabled>Publish checked week</button>
+    </div>
+    <div id="masterReport" class="section-hint" style="margin-top:10px;white-space:pre-wrap;"></div>
+  </div>
+
+  <div class="section-card">
     <div class="section-title">Manage a Week</div>
     <select id="manageWeekSelect" class="f-select"><option>Loading weeks…</option></select>
     <div id="manageWeekDetail"></div>
   </div>
 </div>
 
+<script src="eastern-time.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -217,13 +231,13 @@ const setDualWeekStatusFn = httpsCallable(functions, "setDualWeekStatus");
 const setDualResultFn = httpsCallable(functions, "setDualResult");
 const clearDualResultFn = httpsCallable(functions, "clearDualResult");
 
-const TZ_OFFSET = "-05:00"; // must match functions/index.js
+// Date-aware America/New_York lock instants (eastern-time.js, byte-identical to functions/eastern-time.js).
+const NO_START_TIME = "00:00"; // no confirmed start time: locks 12:00 AM ET
 
 function dualLockTime(dual) {
   if (!dual || !dual.date) return null;
   const time = dual.time || "19:00";
-  const d = new Date(`${dual.date}T${time}:00${TZ_OFFSET}`);
-  return isNaN(d.getTime()) ? null : d;
+  return window.EasternTime.easternToDate(dual.date, time);
 }
 function isDualLocked(dual) {
   if (dual && dual.winner) return true;
@@ -232,6 +246,7 @@ function isDualLocked(dual) {
   return Date.now() >= lockAt.getTime();
 }
 function formatWhen(dual) {
+  if (dual && dual.date && dual.time === NO_START_TIME) return formatGroupDay(dual.date) + ' · no start time yet (locks 12:00 AM ET)';
   const lockAt = dualLockTime(dual);
   if (!lockAt) return dual.date || 'No date set';
   return lockAt.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) + ' ET';
@@ -255,9 +270,9 @@ function markKeyVerified() {
 
 function formatGroupDay(dateStr) {
   if (!dateStr) return 'No date set';
-  const d = new Date(`${dateStr}T12:00:00-05:00`);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'America/New_York' });
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (!m) return dateStr;
+  return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12)).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
 }
 
 function renderDualInputs() {
@@ -402,6 +417,75 @@ document.getElementById('loadJsonBtn').onclick = () => {
   }
 };
 
+
+// ---------- Import a week from the frozen 2026–27 schedule (safe re-publish) ----------
+let checkedMaster = null;
+function parseMasterInput(raw) {
+  const obj = JSON.parse(raw);
+  const data = obj && obj.data ? obj.data : obj;
+  const week = Number(data.week);
+  if (!Number.isInteger(week) || week < 1 || week > 17) throw new Error('Week must be a number from 1 to 17.');
+  if (!Array.isArray(data.duals) || !data.duals.length) throw new Error('The week has no duals.');
+  data.duals.forEach((d, i) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.date || '') || !/^\d{2}:\d{2}$/.test(d.time || '') || !d.teamA || !d.teamB)
+      throw new Error(`Dual ${i + 1} needs a date (YYYY-MM-DD), a time (HH:MM), and both teams.`);
+  });
+  return { week, label: data.label || `Week ${week}`, lockNote: data.lockNote || '', duals: data.duals };
+}
+// Pure planner (also exercised by the offline tests): returns what would be published, or why it is refused.
+function planMasterPublish(incoming, existing, nowMs) {
+  const weekId = `week-${incoming.week}`;
+  if (!existing) return { ok: true, weekId, isNew: true, status: 'open', duals: incoming.duals.map(d => ({ date: d.date, time: d.time, location: d.location || '', teamA: d.teamA, teamB: d.teamB })), changes: [], held: [], carried: 0 };
+  const cur = Object.entries(existing.duals || {}).sort(([a], [b]) => Number(a.slice(1)) - Number(b.slice(1)));
+  const problems = [];
+  if (cur.length !== incoming.duals.length) problems.push(`Published week has ${cur.length} duals; this file has ${incoming.duals.length}.`);
+  incoming.duals.forEach((d, i) => { const c = cur[i] && cur[i][1];
+    if (!c || cur[i][0] !== `d${i}`) { problems.push(`d${i}: missing in the published week`); return; }
+    if (c.date !== d.date || c.teamA !== d.teamA || c.teamB !== d.teamB) problems.push(`d${i}: published ${c.date} ${c.teamA} vs ${c.teamB}, file ${d.date} ${d.teamA} vs ${d.teamB}`); });
+  if (problems.length) return { ok: false, weekId, problems };
+  const changes = [], held = []; let carried = 0;
+  const duals = incoming.duals.map((d, i) => { const c = cur[i][1];
+    const out = { date: d.date, time: d.time, location: c.location || d.location || '', teamA: d.teamA, teamB: d.teamB };
+    if (c.winner) { out.winner = c.winner; carried++; }
+    if ((c.time || '19:00') !== d.time) {
+      const wasLocked = nowMs >= (dualLockTime(c)?.getTime() ?? Infinity);
+      if (wasLocked) { out.time = c.time || '19:00'; held.push(`d${i} ${d.teamA} vs ${d.teamB}: already locked — kept ${out.time}`); }
+      else changes.push(`d${i} ${d.teamA} vs ${d.teamB}: ${c.time || '19:00'} -> ${d.time}`);
+    }
+    return out; });
+  return { ok: true, weekId, isNew: false, status: existing.status || 'open', duals, changes, held, carried };
+}
+window.__planMasterPublish = planMasterPublish;   // test hook (offline test harness)
+
+document.getElementById('checkMasterBtn').onclick = async () => {
+  const rep = document.getElementById('masterReport'), pub = document.getElementById('publishMasterBtn');
+  pub.disabled = true; checkedMaster = null;
+  try {
+    const incoming = parseMasterInput(document.getElementById('masterImport').value.trim());
+    await loadWeeks();
+    const existing = allWeeks.find(w => w.id === `week-${incoming.week}`) || null;
+    const plan = planMasterPublish(incoming, existing, Date.now());
+    if (!plan.ok) { rep.textContent = `Not published. These duals differ from the published ${plan.weekId}, and changing them would move saved picks to the wrong dual. Get owner approval first:\n- ` + plan.problems.join('\n- '); return; }
+    checkedMaster = { incoming, plan };
+    rep.textContent = plan.isNew
+      ? `${plan.weekId} is new: ${plan.duals.length} duals ready to publish.`
+      : `${plan.weekId} matches the published week dual-for-dual (${plan.duals.length} duals). Lock-time changes: ${plan.changes.length}. Results carried over: ${plan.carried}. Held (already locked): ${plan.held.length}.` +
+        (plan.changes.length ? '\n- ' + plan.changes.join('\n- ') : '') + (plan.held.length ? '\n- ' + plan.held.join('\n- ') : '');
+    pub.disabled = false;
+  } catch (e) { rep.textContent = 'Could not check that week: ' + e.message; }
+};
+document.getElementById('publishMasterBtn').onclick = async () => {
+  if (!checkedMaster) return;
+  const adminKey = getAdminKey(); if (!adminKey) { showStatus('Enter your admin key first.', 'error'); return; }
+  const { incoming, plan } = checkedMaster, btn = document.getElementById('publishMasterBtn');
+  btn.disabled = true; showStatus(`Publishing ${plan.weekId}...`, 'loading');
+  try {
+    await setDualWeekFn({ adminKey, week: incoming.week, label: incoming.label, lockNote: incoming.lockNote, status: plan.status, duals: plan.duals });
+    markKeyVerified(); showStatus(`${plan.weekId} published (${plan.duals.length} duals).`, 'success');
+    checkedMaster = null; document.getElementById('masterReport').textContent = ''; await loadWeeks();
+  } catch (e) { showStatus(e.message || 'Publish failed.', 'error'); btn.disabled = false; }
+};
+
 document.getElementById('publishBtn').onclick = async () => {
   const adminKey = getAdminKey();
   if (!adminKey) { showStatus('Enter your admin key first.', 'error'); return; }
@@ -410,6 +494,12 @@ document.getElementById('publishBtn').onclick = async () => {
   const label = document.getElementById('newWeekLabel').value.trim() || `Week ${week}`;
   const lockNote = document.getElementById('newWeekLock').value.trim();
   const cleanDuals = manualDuals.filter(d => d.teamA.trim() && d.teamB.trim() && d.date);
+  const existingWeek = allWeeks.find(w => w.id === `week-${Number(week)}`);
+  if (existingWeek) {
+    const scored = Object.values(existingWeek.duals || {}).some(d => d.winner);
+    if (scored) { showStatus(`Week ${week} already has results. Use "Import a Week from the 2026–27 Schedule" so results and picks are kept.`, 'error'); return; }
+    if (!confirm(`Week ${week} is already published. Replacing it regenerates every dual ID, so picks already saved for it may attach to the wrong dual. Replace anyway?`)) return;
+  }
   if (cleanDuals.length === 0) { showStatus('Add at least one dual with both teams and a date.', 'error'); return; }
 
   const btn = document.getElementById('publishBtn');
