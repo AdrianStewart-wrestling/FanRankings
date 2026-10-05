@@ -445,13 +445,18 @@ function persistSubmitted() {
 // ===== Week window (enforced by Firestore rules; the page only mirrors it) =====
 const ET_FMT = { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
 function fmtET(ms) { return new Date(ms).toLocaleString('en-US', ET_FMT) + ' ET'; }
+// Sentinel weeks are display-only: no ballots at all (also enforced in firestore.rules).
+const NO_VOTING_WEEK_IDS = ['week-0'];
+function isNoVotingWeek() { return NO_VOTING_WEEK_IDS.includes(currentWeekId); }
 function votingOpen(now = Date.now()) {
+  if (isNoVotingWeek()) return false;
   if (weekStatus !== 'open') return false;
   if (weekOpensAt != null && now < weekOpensAt) return false;
   if (weekClosesAt != null && now >= weekClosesAt) return false;
   return true;
 }
 function weekBadgeText() {
+  if (isNoVotingWeek()) return weekClosesAt != null ? `📅 ${weekLabel} · Voting opens ${fmtET(weekClosesAt)}` : `📅 ${weekLabel} · Voting not open`;
   if (votingOpen() && weekClosesAt != null) return `📅 ${weekLabel} · Voting closes ${fmtET(weekClosesAt - 60000)}`;
   if (votingOpen()) return `📅 ${weekLabel}`;
   return `📅 ${weekLabel} · Voting closed`;
@@ -910,6 +915,12 @@ function renderBallotCard() {
       ? `Voting for ${weekLabel} has closed. Your ${labelFor(activeBallot)} ballot was counted.`
       : `Voting for ${weekLabel} has closed. The next week's ballot opens soon.`;
     document.getElementById('editBtn').style.display = 'none';
+    if (isNoVotingWeek()) {
+      document.getElementById('successTitle').textContent = 'Voting Not Open Yet';
+      document.getElementById('successMsg').textContent = weekClosesAt != null
+        ? `Fan Rankings voting opens ${fmtET(weekClosesAt)} with the Preseason ballot.`
+        : 'Fan Rankings voting is not open yet.';
+    }
   } else if (isSubmitted) {
     document.getElementById('votingState').style.display = 'none';
     document.getElementById('successState').classList.add('visible');
