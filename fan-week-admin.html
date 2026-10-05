@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fan Rankings · Week Control</title>
+<style>
+  :root { --ink:#1c1c1c; --muted:#6b6a64; --line:#e3e1da; --paper:#faf9f6; --accent:#c0392b; --green:#2e7d52; --gold:#c9a84c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:15px/1.5 system-ui, -apple-system, 'Segoe UI', Arial, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; margin:0 0 16px; }
+  h2 { font-size: 15px; margin: 0 0 10px; }
+  .big { font-size: 20px; font-weight: 600; }
+  .pill { display:inline-block; font-size:12px; font-weight:600; padding:1px 8px; border-radius:10px; border:1px solid currentColor; margin-left:6px; }
+  .open { color: var(--green); } .closed { color: var(--accent); } .final { color: var(--muted); } .scheduled { color: var(--gold); }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+  input { font:inherit; padding:7px 9px; border:1px solid var(--line); border-radius:6px; width: 100%; max-width: 320px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  button { font:inherit; padding:8px 14px; border-radius:6px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.primary { background: var(--ink); color:#fff; border-color: var(--ink); }
+  button.danger { border-color: var(--accent); color: var(--accent); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  #msg { margin-top: 12px; white-space: pre-wrap; font-size: 14px; }
+  table { width:100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); }
+  .wrap { overflow-x:auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fan Rankings · Week Control</h1>
+  <p class="sub">Voting closes automatically Sunday 11:59 PM ET and the next week opens Monday 12:00 AM ET. Use these buttons only to change that.</p>
+
+  <section>
+    <h2>Current week</h2>
+    <div id="current" class="big">Loading…</div>
+    <div id="currentDetail" class="sub" style="margin:6px 0 0"></div>
+  </section>
+
+  <section>
+    <h2>Admin actions</h2>
+    <label for="adminKey">Admin key</label>
+    <input id="adminKey" type="password" autocomplete="off">
+    <div class="row">
+      <button class="primary" id="rolloverBtn">Run rollover now</button>
+      <button class="danger" id="closeBtn">Close current week now</button>
+      <button id="openNextBtn">Open next week now</button>
+    </div>
+    <div id="msg" role="status" aria-live="polite"></div>
+    <p class="sub" style="margin-top:12px">Run rollover now: does exactly what the automatic Monday job does (safe to repeat).<br>
+      Close current week now: ends voting early and freezes the results; the next week still opens at its scheduled time.<br>
+      Open next week now: opens the next week early (only after the current week is closed).</p>
+  </section>
+
+  <section>
+    <h2>Season schedule</h2>
+    <div class="wrap"><table><thead><tr><th>Week</th><th>Opens (ET)</th><th>Closes (ET)</th><th>Status</th></tr></thead><tbody id="sched"></tbody></table></div>
+  </section>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+const app = initializeApp({ apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc", authDomain: "ncaa-wrestling-52fa3.firebaseapp.com", projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app", messagingSenderId: "338738139578", appId: "1:338738139578:web:b3f061e03d985b7530cd83" });
+const db = getFirestore(app), fanWeekAdmin = httpsCallable(getFunctions(app, "us-east1"), "fanWeekAdmin");
+const $ = id => document.getElementById(id);
+const ms = v => v && typeof v.toMillis === 'function' ? v.toMillis() : null;
+const fmt = t => t == null ? '—' : new Date(t).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function load() {
+  const cur = await getDoc(doc(db, 'weeks', 'current')), c = cur.exists() ? cur.data() : {};
+  const open = c.status === 'open' && (ms(c.closesAt) == null || Date.now() < ms(c.closesAt)) && (ms(c.opensAt) == null || Date.now() >= ms(c.opensAt));
+  $('current').innerHTML = `${esc(c.label || c.weekId || '—')} <span class="pill ${open ? 'open' : 'closed'}">${open ? 'Voting open' : 'Voting closed'}</span>`;
+  $('currentDetail').textContent = `Opens ${fmt(ms(c.opensAt))} · Closes ${fmt(ms(c.closesAt) != null ? ms(c.closesAt) - 60000 : null)} · Last completed: ${c.lastCompletedWeekId || '—'} · Movement vs: ${c.previousWeekId || '—'}`;
+  const s = await getDocs(collection(db, 'fanWeeks'));
+  const rows = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (ms(a.opensAt) || 0) - (ms(b.opensAt) || 0));
+  $('sched').innerHTML = rows.map(w => `<tr><td>${esc(w.label || w.id)}</td><td>${fmt(ms(w.opensAt))}</td><td>${fmt(ms(w.closesAt) != null ? ms(w.closesAt) - 60000 : null)}</td>
+    <td><span class="pill ${esc(w.status || 'scheduled')}">${esc(w.status || 'scheduled')}</span></td></tr>`).join('') || '<tr><td colspan="4">No schedule yet.</td></tr>';
+}
+async function run(action, confirmText) {
+  const adminKey = $('adminKey').value.trim();
+  if (!adminKey) { $('msg').textContent = 'Enter the admin key first.'; return; }
+  if (confirmText && !confirm(confirmText)) return;
+  document.querySelectorAll('button').forEach(b => b.disabled = true); $('msg').textContent = 'Working…';
+  try {
+    const r = (await fanWeekAdmin({ adminKey, action })).data, p = r.plan || {};
+    $('msg').textContent = p.action === 'none' ? `Nothing to do: ${p.reason}.` : p.action === 'advance' ? `Done. Finalized: ${(p.finalize || []).join(', ') || '—'}. Now open: ${p.openWeekId}.`
+      : p.action === 'close' ? `Done. Finalized: ${(p.finalize || []).join(', ') || '—'}. Voting is closed (${p.reason}).` : 'Done.';
+  } catch (e) { $('msg').textContent = e.message || 'Failed.'; }
+  document.querySelectorAll('button').forEach(b => b.disabled = false); await load();
+}
+$('rolloverBtn').onclick = () => run('runRollover');
+$('closeBtn').onclick = () => run('closeNow', 'Close voting for the current week NOW and freeze its results?');
+$('openNextBtn').onclick = () => run('openNextNow', 'Open the next week NOW (before its scheduled time)?');
+load().catch(e => { $('current').textContent = 'Could not load: ' + e.message; });
+</script>
+</body>
+</html>

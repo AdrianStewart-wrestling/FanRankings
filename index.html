@@ -417,6 +417,19 @@
       .partnership-badge { display: none; }
       .partner-strip-img { display: none; }
     }
+    /* movement vs the prior week's FINAL ranking (same look as the voting page) */
+    .move-col { width: 44px; text-align: center; }
+    .move-indicator {
+      display: inline-flex; align-items: center; gap: 1px;
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; font-weight: 700;
+      padding: 1px 4px; border-radius: 2px; letter-spacing: 0.02em; white-space: nowrap;
+    }
+    .move-up { background: rgba(46,125,82,0.12); color: var(--green, #2e7d52); }
+    .move-down { background: rgba(192,57,43,0.1); color: var(--accent); }
+    .move-same { color: var(--muted2); font-size: 0.75rem; padding: 0 3px; }
+    .move-new { background: var(--gold); color: #1c1c1c; font-size: 0.55rem; letter-spacing: 0.08em; padding: 2px 5px; }
+    .move-arrow { font-size: 0.72rem; line-height: 1; }
+    .week-note { font-size: 0.72rem; color: var(--muted2); margin: 0 0 0.6rem; }
   </style>
 </head>
 <body>
@@ -605,6 +618,8 @@ let wrestlerDB = [];
 let activeTab = 125; // number for weights, or 'p4p' / 'teams' for specials
 let currentWeekId = 'week-0';
 let weekLabel = 'Off-Season';
+let previousWeekId = null;       // prior week of the CURRENT week (its frozen final ranking)
+let lastCompletedWeekId = null;  // most recently finalized week (shown until the new week has votes)
 
 function normalizeName(name='') {
   return String(name).trim().toLowerCase();
@@ -643,6 +658,8 @@ async function fetchWeekInfo() {
     const data = snap.exists() ? snap.data() : { weekId: 'week-0', label: 'Off-Season', weekNumber: 0 };
     currentWeekId = data.weekId || 'week-0';
     weekLabel = data.label || 'Off-Season';
+    previousWeekId = data.previousWeekId || null;
+    lastCompletedWeekId = data.lastCompletedWeekId || null;
     document.getElementById('weekLabel').textContent = weekLabel.toUpperCase();
     document.getElementById('statWeek').textContent = data.weekNumber ?? data.week ?? '—';
   } catch (e) {
@@ -705,18 +722,8 @@ async function fetchRankings(tab) {
     `<div class="state-box"><p><span class="spinner"></span>Loading rankings...</p></div>`;
 
   try {
-    // Check pre-computed rankings first (weights subcollection uses string keys)
-    const rankingKey = String(tab);
-    const rankingsRef = doc(db, 'rankings', currentWeekId, 'weights', rankingKey);
-    const snap = await getDoc(rankingsRef);
-    if (snap.exists()) {
-      renderTable(snap.data(), tab);
-      return;
-    }
-
-    // Otherwise rebuild from raw ballots
-    const rebuilt = await computeResultsFromBallots(tab);
-    renderTable(rebuilt, tab);
+    const view = await chooseRankingsView(String(tab));
+    renderTable(view.data, tab, view);
   } catch (e) {
     console.error(e);
     document.getElementById('tableContainer').innerHTML =
@@ -724,16 +731,47 @@ async function fetchRankings(tab) {
   }
 }
 
-function renderTable(data, tab) {
+// Which week to show for a tab: the current week once it has votes; until then the most recently completed week's
+// FROZEN final ranking (so the page never goes blank at rollover). Movement always compares the displayed week
+// against the week before it, using that week's frozen final ranking.
+async function chooseRankingsView(key) {
+  const get = async (weekId) => { if (!weekId) return null; const s = await getDoc(doc(db, 'rankings', weekId, 'weights', key)); return s.exists() ? s.data() : null; };
+  const cur = await get(currentWeekId);
+  let shownWeekId = currentWeekId, data = cur, prevWeekId = previousWeekId, note = '';
+  if ((!cur || !cur.totalBallots) && lastCompletedWeekId && lastCompletedWeekId !== currentWeekId) {
+    const last = await get(lastCompletedWeekId);
+    if (last && last.totalBallots) {
+      shownWeekId = lastCompletedWeekId; data = last;
+      const meta = await getDoc(doc(db, 'fanWeeks', lastCompletedWeekId));
+      prevWeekId = meta.exists() ? (meta.data().previousWeekId || null) : null;
+      note = `Final results · ${last.weekLabel || lastCompletedWeekId}. ${weekLabel} voting is open — live rankings appear once votes are in.`;
+    }
+  } else if (cur && cur.final) {
+    note = `Final results · ${cur.weekLabel || currentWeekId}.`;
+  }
+  const prev = prevWeekId && prevWeekId !== shownWeekId ? await get(prevWeekId) : null;
+  const prevRanks = new Map((prev && prev.results || []).map(r => [normalizeName(r.name), Number(r.rank)]));
+  return { data: data || { results: [], totalBallots: 0, weekLabel }, shownWeekId, prevWeekId, prevRanks, hasPrev: !!prev, note };
+}
+
+function movementHtml(currentRank, prevRank) {
+  if (prevRank == null) return `<span class="move-indicator move-new">NEW</span>`;
+  const delta = prevRank - currentRank;
+  if (delta === 0) return `<span class="move-same" title="No change">&mdash;</span>`;
+  if (delta > 0) return `<span class="move-indicator move-up" title="Up ${delta} from #${prevRank}"><span class="move-arrow">&#9650;</span>${delta}</span>`;
+  return `<span class="move-indicator move-down" title="Down ${Math.abs(delta)} from #${prevRank}"><span class="move-arrow">&#9660;</span>${Math.abs(delta)}</span>`;
+}
+
+function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, note: '' }) {
   if (data.totalBallots !== undefined) {
     // Only update the sidebar "ballots cast" stat when on a weight tab (not the specials)
     if (!isSpecialTab(tab)) {
       document.getElementById('statBallots').textContent = data.totalBallots || '0';
     }
     document.getElementById('panelBallotCount').textContent =
-      data.totalBallots
+      (data.totalBallots
         ? `${data.totalBallots} ballot${data.totalBallots !== 1 ? 's' : ''} \u00b7 ${data.weekLabel || 'Off-Season'}`
-        : `0 ballots \u00b7 ${data.weekLabel || 'Off-Season'}`;
+        : `0 ballots \u00b7 ${data.weekLabel || 'Off-Season'}`) + (data.final ? ' \u00b7 Final' : '');
   }
 
   if (!data.results || !data.results.length) {
@@ -750,11 +788,14 @@ function renderTable(data, tab) {
   const isTeams = tab === 'teams';
   const nameColHeader = isTeams ? 'Team' : 'Wrestler';
 
+  const showMove = view.hasPrev;   // no prior-week ranking (e.g. the first week) -> no movement column
   document.getElementById('tableContainer').innerHTML = `
+    ${view.note ? `<p class="week-note">${view.note}</p>` : ''}
     <table>
       <thead>
         <tr>
           <th>#</th>
+          ${showMove ? '<th class="move-col" title="Movement vs last week\'s final ranking">+/&minus;</th>' : ''}
           <th>${nameColHeader}</th>
           ${isTeams ? '' : '<th>School</th>'}
           <th class="right" style="padding-right:1rem;">Votes</th>
@@ -768,6 +809,7 @@ function renderTable(data, tab) {
               <div class="rank-num">${r.rank}</div>
               ${i < 3 ? `<span class="rank-medal">${medals[i]}</span>` : ''}
             </td>
+            ${showMove ? `<td class="move-col">${movementHtml(r.rank, view.prevRanks.has(normalizeName(r.name)) ? view.prevRanks.get(normalizeName(r.name)) : null)}</td>` : ''}
             <td><div class="wrestler-name">${r.name}</div></td>
             ${isTeams ? '' : `<td><div class="wrestler-school">${r.school || '&mdash;'}</div></td>`}
             <td class="right">

@@ -278,9 +278,9 @@
       </div>
       <div class="success-state" id="successState">
         <div class="check-ring">&#10003;</div>
-        <h3>Ballot Submitted!</h3>
+        <h3 id="successTitle">Ballot Submitted!</h3>
         <p id="successMsg">Your rankings are live.</p>
-        <button class="btn-change" onclick="editBallot()">Edit my picks</button>
+        <button class="btn-change" id="editBtn" onclick="editBallot()">Edit my picks</button>
       </div>
     </div>
   </div>
@@ -349,9 +349,10 @@ import {
   getDocs,
   query,
   where,
-  runTransaction,
+  setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
@@ -365,6 +366,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+let myUid = null;                      // anonymous voter id (one per browser); ballots are {weekId}__{uid}__{key}
+let weekOpensAt = null, weekClosesAt = null, weekStatus = 'open';
 
 // ===== Ballot types =====
 // Weight classes are numbers. P4P and Teams are string keys.
@@ -412,7 +416,7 @@ let wrestlerDB = [];
 let teamsDB = []; // [{ name: 'Penn State', wrestlerCount: 10 }]
 let activeBallot = 125; // current selection (number for weights, string for p4p/teams)
 let picks = {}; // keyed by ballot key ("125", "p4p", "teams")
-let submitted = JSON.parse(localStorage.getItem('fanVoteSubmitted') || '{}');
+let submitted = {};                    // this voter's saved ballots for the CURRENT week (loaded from Firestore)
 let weekLabel = "Off-Season";
 let currentWeekId = 'week-0';
 let currentWeekNumber = 0;
@@ -433,7 +437,39 @@ function hideStatus() {
 }
 
 function persistSubmitted() {
-  localStorage.setItem('fanVoteSubmitted', JSON.stringify(submitted));
+  // "✓ Voted" now comes from this voter's saved ballots for the current week (see loadMyBallots), so it can never
+  // carry over from a previous week. Clear the old week-blind browser flag.
+  localStorage.removeItem('fanVoteSubmitted');
+}
+
+// ===== Week window (enforced by Firestore rules; the page only mirrors it) =====
+const ET_FMT = { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+function fmtET(ms) { return new Date(ms).toLocaleString('en-US', ET_FMT) + ' ET'; }
+function votingOpen(now = Date.now()) {
+  if (weekStatus !== 'open') return false;
+  if (weekOpensAt != null && now < weekOpensAt) return false;
+  if (weekClosesAt != null && now >= weekClosesAt) return false;
+  return true;
+}
+function weekBadgeText() {
+  if (votingOpen() && weekClosesAt != null) return `📅 ${weekLabel} · Voting closes ${fmtET(weekClosesAt - 60000)}`;
+  if (votingOpen()) return `📅 ${weekLabel}`;
+  return `📅 ${weekLabel} · Voting closed`;
+}
+async function signInVoter() {
+  try { const cred = await signInAnonymously(auth); myUid = cred.user.uid; }
+  catch (e) { console.warn('Anonymous sign-in failed:', e); myUid = null; }
+}
+// Load this voter's ballots for the current week: drives "✓ Voted" and pre-fills Edit My Picks.
+async function loadMyBallots() {
+  submitted = {};
+  if (!myUid) return;
+  try {
+    const snap = await getDocs(query(collection(db, 'ballots'), where('uid', '==', myUid), where('weekId', '==', currentWeekId)));
+    snap.docs.forEach(d => { const b = d.data(); if (!b.ballotKey || !Array.isArray(b.picks)) return;
+      const k = (b.ballotKey === P4P_KEY || b.ballotKey === TEAMS_KEY) ? b.ballotKey : Number(b.ballotKey);
+      submitted[k] = true; picks[k] = b.picks.slice(); });
+  } catch (e) { console.warn('Could not load your saved ballots:', e); }
 }
 
 function normalizeName(name='') {
@@ -485,7 +521,10 @@ async function fetchWeekInfo() {
     // Prefer explicit previousWeekId from doc; fall back to week-{n-1}
     previousWeekId = data.previousWeekId
       || (currentWeekNumber > 0 ? `week-${currentWeekNumber - 1}` : null);
-    document.getElementById('weekBadge').textContent = `📅 ${weekLabel} · Ballot closes Sunday`;
+    weekOpensAt = data.opensAt && typeof data.opensAt.toMillis === 'function' ? data.opensAt.toMillis() : null;
+    weekClosesAt = data.closesAt && typeof data.closesAt.toMillis === 'function' ? data.closesAt.toMillis() : null;
+    weekStatus = data.status || 'open';
+    document.getElementById('weekBadge').textContent = weekBadgeText();
     document.getElementById('weekLabelNav').textContent = weekLabel.toUpperCase();
     document.getElementById('statWeek').textContent = currentWeekNumber || '—';
   } catch (e) {
@@ -582,8 +621,7 @@ async function fetchResults(ballotKey) {
       return;
     }
 
-    const rebuilt = await computeResultsFromBallots(ballotKey);
-    renderResultsSidebar(rebuilt, ballotKey, prevData);
+    renderResultsSidebar({ results: [], totalBallots: 0, weekLabel }, ballotKey, prevData);
   } catch (e) {
     console.warn('Could not load results:', e);
     document.getElementById('resultsList').innerHTML = `<div class="no-votes">Could not load results.</div>`;
@@ -779,66 +817,27 @@ async function submitBallot() {
   btn.textContent = 'Submitting...';
   showStatus('Sending your ballot...', 'loading');
 
-  const rankingsRef = doc(db, 'rankings', currentWeekId, 'weights', weightDocId(activeBallot));
-  const ballotRef = doc(collection(db, 'ballots'));
-  const rankPoints = rankPointsFor(activeBallot);
-  const filterVal = weightFieldFor(activeBallot);
+  if (!myUid || !votingOpen()) {
+    showStatus(!myUid ? 'Still connecting — please try again in a moment.' : `Voting for ${weekLabel} is closed.`, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Submit Ballot';
+    renderBallotCard();
+    return;
+  }
+  const ballotKey = weightDocId(activeBallot);
+  const ballotRef = doc(db, 'ballots', `${currentWeekId}__${myUid}__${ballotKey}`);   // same doc on every edit
 
   try {
-    await runTransaction(db, async (tx) => {
-      const currentSnap = await tx.get(rankingsRef);
-      const current = currentSnap.exists()
-        ? currentSnap.data()
-        : { results: [], totalBallots: 0, weekId: currentWeekId, weekLabel, weight: filterVal };
-
-      const scoreMap = new Map(
-        (current.results || []).map(row => [
-          normalizeName(row.name),
-          {
-            ...row,
-            points: Number(row.points || 0),
-            school: row.school || (activeBallot === TEAMS_KEY ? '' : schoolFor(row.name))
-          }
-        ])
-      );
-
-      validPicks.forEach((name, idx) => {
-        const key = normalizeName(name);
-        const entry = scoreMap.get(key) || {
-          name,
-          school: activeBallot === TEAMS_KEY ? '' : schoolFor(name),
-          points: 0
-        };
-        entry.name = entry.name || name;
-        if (activeBallot !== TEAMS_KEY) entry.school = entry.school || schoolFor(name);
-        entry.points += rankPoints[idx] || 0;
-        scoreMap.set(key, entry);
-      });
-
-      const results = Array.from(scoreMap.values())
-        .sort((a, b) => (b.points - a.points) || a.name.localeCompare(b.name))
-        .map((row, idx) => ({ rank: idx + 1, name: row.name, school: row.school || '', points: row.points }));
-
-      tx.set(ballotRef, {
-        createdAt: serverTimestamp(),
-        weekId: currentWeekId,
-        weekLabel,
-        weekNumber: currentWeekNumber,
-        weight: filterVal,
-        ballotType: activeBallot === P4P_KEY ? 'p4p' : activeBallot === TEAMS_KEY ? 'teams' : 'weight',
-        picks: validPicks
-      });
-
-      tx.set(rankingsRef, {
-        weekId: currentWeekId,
-        weekLabel,
-        weekNumber: currentWeekNumber,
-        weight: filterVal,
-        ballotType: activeBallot === P4P_KEY ? 'p4p' : activeBallot === TEAMS_KEY ? 'teams' : 'weight',
-        totalBallots: Number(current.totalBallots || 0) + 1,
-        results,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
+    await setDoc(ballotRef, {
+      uid: myUid,
+      weekId: currentWeekId,
+      weekLabel,
+      weekNumber: currentWeekNumber,
+      ballotKey,
+      weight: weightFieldFor(activeBallot),
+      ballotType: activeBallot === P4P_KEY ? 'p4p' : activeBallot === TEAMS_KEY ? 'teams' : 'weight',
+      picks: validPicks,
+      updatedAt: serverTimestamp()
     });
 
     submitted[activeBallot] = true;
@@ -846,14 +845,15 @@ async function submitBallot() {
     hideStatus();
     document.getElementById('votingState').style.display = 'none';
     document.getElementById('successState').classList.add('visible');
-    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is live on the scoreboard.`;
+    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is saved. The rankings update within a few seconds.`;
     renderWeightSelector();
     renderProgress();
     renderStats();
     await fetchResults(activeBallot);
+    setTimeout(() => fetchResults(activeBallot), 2500);   // the server tally lands within a few seconds
   } catch (e) {
     console.error(e);
-    showStatus('Submission failed. Check Firestore rules and try again.', 'error');
+    showStatus(e && e.code === 'permission-denied' ? `Voting for ${weekLabel} is closed — your ballot was not saved.` : 'Submission failed. Please try again.', 'error');
     btn.disabled = false;
     btn.textContent = 'Submit Ballot';
     return;
@@ -864,6 +864,7 @@ async function submitBallot() {
 }
 
 function editBallot() {
+  if (!votingOpen()) { renderBallotCard(); return; }
   submitted[activeBallot] = false;
   persistSubmitted();
   document.getElementById('votingState').style.display = '';
@@ -899,10 +900,20 @@ function renderBallotCard() {
     document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 8 · #1 IS YOUR PICK FOR BEST';
   }
 
-  if (isSubmitted) {
+  document.getElementById('successTitle').textContent = 'Ballot Submitted!';
+  document.getElementById('editBtn').style.display = '';
+  if (!votingOpen()) {
     document.getElementById('votingState').style.display = 'none';
     document.getElementById('successState').classList.add('visible');
-    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is live on the scoreboard.`;
+    document.getElementById('successTitle').textContent = 'Voting Closed';
+    document.getElementById('successMsg').textContent = isSubmitted
+      ? `Voting for ${weekLabel} has closed. Your ${labelFor(activeBallot)} ballot was counted.`
+      : `Voting for ${weekLabel} has closed. The next week's ballot opens soon.`;
+    document.getElementById('editBtn').style.display = 'none';
+  } else if (isSubmitted) {
+    document.getElementById('votingState').style.display = 'none';
+    document.getElementById('successState').classList.add('visible');
+    document.getElementById('successMsg').textContent = `Your ${labelFor(activeBallot)} ballot is saved for ${weekLabel}. You can change it until voting closes.`;
   } else {
     document.getElementById('votingState').style.display = '';
     document.getElementById('successState').classList.remove('visible');
@@ -966,7 +977,11 @@ window.editBallot = editBallot;
 
 (async () => {
   showStatus('Loading...', 'loading');
-  await Promise.all([fetchWeekInfo(), fetchWrestlers()]);
+  await Promise.all([fetchWeekInfo(), fetchWrestlers(), signInVoter()]);
+  await loadMyBallots();
+  persistSubmitted();
+  // If the week closes while the page is open, switch to the closed state without a reload.
+  setInterval(() => { document.getElementById('weekBadge').textContent = weekBadgeText(); if (!votingOpen()) renderBallotCard(); }, 30000);
   // Preload previous-week rankings for the starting ballot so dropdowns sort correctly on first paint
   await fetchPreviousRankings(activeBallot);
   hideStatus();
