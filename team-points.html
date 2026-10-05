@@ -578,6 +578,7 @@ async function fetchWrestlers() {
   wrestlerDB = snap.docs
     .map(d => d.data())
     .filter(w => w && w.name && w.school)
+    .filter(w => w.active !== false)   // deactivated (no longer a starter) wrestlers are hidden, as on the poll page
     .map(w => ({ name: w.name, school: w.school, weight: Number(w.weight) }));
   teams = [...new Set(wrestlerDB.map(w => w.school))].sort((a,b) => a.localeCompare(b));
 }
