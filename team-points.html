@@ -449,6 +449,8 @@ function updateBanners() {
   const compareName = document.getElementById('compareSelect').value;
   const bannerEl = document.getElementById('totalBannerContainer');
 
+  updateCompareBanner();
+
   if (!teamName) { bannerEl.innerHTML = ''; return; }
 
   const totals = computeTeamTotal(rowState);
@@ -560,17 +562,28 @@ function renderCompareSection() {
       <div class="total-banner alt">
         <div>
           <div class="total-banner-team">${compareName} &mdash; Projected Total</div>
-          <div class="total-banner-num">${totals.total.toFixed(1)}</div>
+          <div class="total-banner-num" id="compareTotalNum">${totals.total.toFixed(1)}</div>
         </div>
         <div class="total-banner-breakdown">
-          <strong>${totals.adv.toFixed(1)}</strong> advancement &nbsp;+&nbsp;
-          <strong>${totals.place.toFixed(1)}</strong> placement &nbsp;+&nbsp;
-          <strong>${totals.bonus.toFixed(1)}</strong> bonus
+          <strong id="compareAdv">${totals.adv.toFixed(1)}</strong> advancement &nbsp;+&nbsp;
+          <strong id="comparePlace">${totals.place.toFixed(1)}</strong> placement &nbsp;+&nbsp;
+          <strong id="compareBonus">${totals.bonus.toFixed(1)}</strong> bonus
         </div>
       </div>
       <div id="compareTableContainer">${buildTableHtml(compareRowState)}</div>
     </div>`;
   attachTableListeners('compareTableContainer', compareRowState);
+}
+
+// Refreshes the compare team's summary card in place (keeps input focus in the table)
+function updateCompareBanner() {
+  const numEl = document.getElementById('compareTotalNum');
+  if (!numEl || !document.getElementById('compareSelect').value) return;
+  const t = computeTeamTotal(compareRowState);
+  numEl.textContent = t.total.toFixed(1);
+  document.getElementById('compareAdv').textContent = t.adv.toFixed(1);
+  document.getElementById('comparePlace').textContent = t.place.toFixed(1);
+  document.getElementById('compareBonus').textContent = t.bonus.toFixed(1);
 }
 
 async function fetchWrestlers() {
