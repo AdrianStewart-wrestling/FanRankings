@@ -188,9 +188,7 @@ defaults to 19:00.</div>
 
   <div class="section-card">
     <div class="section-title">Import a Week from the 2026–27 Schedule</div>
-    <div class="section-hint">Paste one week file (payloads/week-N.json) built from the frozen schedule. Check it first: an existing week
-      is only replaced when every dual is the same dual in the same position (so dual IDs, saved picks and results are kept),
-      results already entered are carried over, and a dual that has already locked is never reopened.</div>
+    <div class="section-hint">Paste one week file (payloads/week-N.json). Check it first. On a week that is already published, every published dual keeps its ID (so saved picks and results stay put): its time can change, its date can move if it hasn’t locked, and new duals can be added after the last one. Removing or swapping a published dual is refused, results are carried over, and a dual that has already locked is never reopened.</div>
     <textarea id="masterImport" rows="6" placeholder='{"data":{"week":13,"label":"Week 13 · Jan 18 – Jan 24","duals":[...]}}'></textarea>
     <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
       <button type="button" class="btn-secondary" id="checkMasterBtn">Check week</button>
@@ -433,27 +431,45 @@ function parseMasterInput(raw) {
   return { week, label: data.label || `Week ${week}`, lockNote: data.lockNote || '', duals: data.duals };
 }
 // Pure planner (also exercised by the offline tests): returns what would be published, or why it is refused.
+// Re-importing an existing week keeps every published dual at its ID (dN), so saved picks never move:
+//  - SAME matchup at the same position (same teamA/teamB) is required for every published dual;
+//  - its time may change (never once locked: a locked dual's time is held), and its DATE may move
+//    if the dual has not locked and has no result (listed as a move for the owner to confirm);
+//  - NEW duals may only be appended after the last published one (new IDs); one that would already be
+//    locked on arrival is refused;
+//  - removing, swapping or renaming a published dual is refused.
 function planMasterPublish(incoming, existing, nowMs) {
   const weekId = `week-${incoming.week}`;
-  if (!existing) return { ok: true, weekId, isNew: true, status: 'open', duals: incoming.duals.map(d => ({ date: d.date, time: d.time, location: d.location || '', teamA: d.teamA, teamB: d.teamB })), changes: [], held: [], carried: 0 };
+  if (!existing) return { ok: true, weekId, isNew: true, status: 'open', duals: incoming.duals.map(d => ({ date: d.date, time: d.time, location: d.location || '', teamA: d.teamA, teamB: d.teamB })), changes: [], held: [], moved: [], added: [], carried: 0 };
   const cur = Object.entries(existing.duals || {}).sort(([a], [b]) => Number(a.slice(1)) - Number(b.slice(1)));
+  const lockMs = d => dualLockTime(d)?.getTime() ?? Infinity;
   const problems = [];
-  if (cur.length !== incoming.duals.length) problems.push(`Published week has ${cur.length} duals; this file has ${incoming.duals.length}.`);
-  incoming.duals.forEach((d, i) => { const c = cur[i] && cur[i][1];
-    if (!c || cur[i][0] !== `d${i}`) { problems.push(`d${i}: missing in the published week`); return; }
-    if (c.date !== d.date || c.teamA !== d.teamA || c.teamB !== d.teamB) problems.push(`d${i}: published ${c.date} ${c.teamA} vs ${c.teamB}, file ${d.date} ${d.teamA} vs ${d.teamB}`); });
+  if (incoming.duals.length < cur.length) problems.push(`Published week has ${cur.length} duals; this file has ${incoming.duals.length}. Published duals can't be removed here.`);
+  cur.forEach(([id, c], i) => { const d = incoming.duals[i];
+    if (id !== `d${i}`) { problems.push(`${id}: published IDs are not d0..d${cur.length - 1}`); return; }
+    if (!d) return;
+    if (c.teamA !== d.teamA || c.teamB !== d.teamB) { problems.push(`d${i}: published ${c.date} ${c.teamA} vs ${c.teamB}, file ${d.date} ${d.teamA} vs ${d.teamB}`); return; }
+    if (c.date !== d.date) {
+      if (c.winner) problems.push(`d${i} ${d.teamA} vs ${d.teamB}: has a result, so its date can't move`);
+      else if (nowMs >= lockMs(c)) problems.push(`d${i} ${d.teamA} vs ${d.teamB}: already locked on ${c.date}, so its date can't move`);
+      else if (nowMs >= lockMs(d)) problems.push(`d${i} ${d.teamA} vs ${d.teamB}: the new date ${d.date} ${d.time} is already past`);
+    } });
+  incoming.duals.slice(cur.length).forEach((d, j) => { const i = cur.length + j;
+    if (nowMs >= lockMs(d)) problems.push(`d${i} (new) ${d.teamA} vs ${d.teamB}: ${d.date} ${d.time} is already past, so it would be locked on arrival`); });
   if (problems.length) return { ok: false, weekId, problems };
-  const changes = [], held = []; let carried = 0;
-  const duals = incoming.duals.map((d, i) => { const c = cur[i][1];
+  const changes = [], held = [], moved = [], added = []; let carried = 0;
+  const duals = incoming.duals.map((d, i) => { const c = cur[i] && cur[i][1];
+    if (!c) { added.push(`d${i} (new) ${d.date} ${d.time} ${d.teamA} vs ${d.teamB}`); return { date: d.date, time: d.time, location: d.location || '', teamA: d.teamA, teamB: d.teamB }; }
     const out = { date: d.date, time: d.time, location: c.location || d.location || '', teamA: d.teamA, teamB: d.teamB };
     if (c.winner) { out.winner = c.winner; carried++; }
-    if ((c.time || '19:00') !== d.time) {
-      const wasLocked = nowMs >= (dualLockTime(c)?.getTime() ?? Infinity);
+    if (c.date !== d.date) moved.push(`d${i} ${d.teamA} vs ${d.teamB}: ${c.date} ${c.time || '19:00'} -> ${d.date} ${d.time}`);
+    else if ((c.time || '19:00') !== d.time) {
+      const wasLocked = nowMs >= lockMs(c);
       if (wasLocked) { out.time = c.time || '19:00'; held.push(`d${i} ${d.teamA} vs ${d.teamB}: already locked — kept ${out.time}`); }
       else changes.push(`d${i} ${d.teamA} vs ${d.teamB}: ${c.time || '19:00'} -> ${d.time}`);
     }
     return out; });
-  return { ok: true, weekId, isNew: false, status: existing.status || 'open', duals, changes, held, carried };
+  return { ok: true, weekId, isNew: false, status: existing.status || 'open', duals, changes, held, moved, added, carried };
 }
 window.__planMasterPublish = planMasterPublish;   // test hook (offline test harness)
 
@@ -467,10 +483,13 @@ document.getElementById('checkMasterBtn').onclick = async () => {
     const plan = planMasterPublish(incoming, existing, Date.now());
     if (!plan.ok) { rep.textContent = `Not published. These duals differ from the published ${plan.weekId}, and changing them would move saved picks to the wrong dual. Get owner approval first:\n- ` + plan.problems.join('\n- '); return; }
     checkedMaster = { incoming, plan };
+    const list = (title, xs) => xs.length ? `\n${title}:\n- ` + xs.join('\n- ') : '';
     rep.textContent = plan.isNew
       ? `${plan.weekId} is new: ${plan.duals.length} duals ready to publish.`
-      : `${plan.weekId} matches the published week dual-for-dual (${plan.duals.length} duals). Lock-time changes: ${plan.changes.length}. Results carried over: ${plan.carried}. Held (already locked): ${plan.held.length}.` +
-        (plan.changes.length ? '\n- ' + plan.changes.join('\n- ') : '') + (plan.held.length ? '\n- ' + plan.held.join('\n- ') : '');
+      : (plan.added.length || plan.moved.length
+          ? `${plan.weekId}: every published dual keeps its ID. New duals added: ${plan.added.length}. Dates moved: ${plan.moved.length}. Lock-time changes: ${plan.changes.length}. Results carried over: ${plan.carried}. Held (already locked): ${plan.held.length}.`
+          : `${plan.weekId} matches the published week dual-for-dual (${plan.duals.length} duals). Lock-time changes: ${plan.changes.length}. Results carried over: ${plan.carried}. Held (already locked): ${plan.held.length}.`) +
+        list('Added', plan.added) + list('Moved (confirm before publishing)', plan.moved) + list('Lock-time changes', plan.changes) + list('Held', plan.held);
     pub.disabled = false;
   } catch (e) { rep.textContent = 'Could not check that week: ' + e.message; }
 };
