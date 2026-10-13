@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /dual-results-entry.html
+Disallow: /results-entry.html
+Disallow: /fan-week-admin.html
+
+Sitemap: https://fans.33deep.com/sitemap.xml
