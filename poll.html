@@ -718,11 +718,27 @@ function renderResultsSidebar(data, ballotKey, prevData = { rankMap: new Map(), 
 
 // Sort a roster array: ranked items (by prev-week rank) first, unranked alphabetical after.
 // Also returns the rank map so the caller can decorate labels.
+// Wrestler order for the unranked part of a ballot (all of Week 1): by school, then last name.
+// Fans know schools better than names. Suffixes (Jr., II, III...) are skipped when finding the last name.
+const NAME_SUFFIXES = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v']);
+function lastNameOf(name = '') {
+  const parts = String(name).trim().split(/\s+/);
+  while (parts.length > 1 && NAME_SUFFIXES.has(parts[parts.length - 1].toLowerCase().replace(/[.,]/g, ''))) parts.pop();
+  return parts[parts.length - 1] || '';
+}
+function bySchoolThenLastName(a, b) {
+  return (a.school || '').trim().localeCompare((b.school || '').trim())
+    || lastNameOf(a.name).localeCompare(lastNameOf(b.name))
+    || a.name.localeCompare(b.name);
+}
+
 function sortByPrevRank(roster, ballotKey) {
   const rankMap = prevRankCache[ballotKey] || new Map();
+  // Teams stay alphabetical by name; wrestlers go by school, then last name
+  const unrankedOrder = ballotKey === TEAMS_KEY ? ((a, b) => a.name.localeCompare(b.name)) : bySchoolThenLastName;
   if (!rankMap.size) {
-    // No previous-week data — pure alphabetical (roster is already sorted that way)
-    return { roster: [...roster].sort((a, b) => a.name.localeCompare(b.name)), rankMap };
+    // No previous-week data (Week 1): everyone in the unranked order
+    return { roster: [...roster].sort(unrankedOrder), rankMap };
   }
   const sorted = [...roster].sort((a, b) => {
     const ra = rankMap.get(normalizeName(a.name));
@@ -732,8 +748,8 @@ function sortByPrevRank(roster, ballotKey) {
     if (ra == null && rb != null) return 1;
     // Both ranked — by rank asc
     if (ra != null && rb != null) return ra - rb;
-    // Both unranked — alphabetical
-    return a.name.localeCompare(b.name);
+    // Both unranked — school, then last name (teams: alphabetical)
+    return unrankedOrder(a, b);
   });
   return { roster: sorted, rankMap };
 }
@@ -766,7 +782,7 @@ function buildOptions(ballotKey, excludeNames = [], selectedName = '') {
   const opts = sorted.map(w => {
     const rank = rankMap.get(normalizeName(w.name));
     const prefix = rank != null ? `#${rank} · ` : '';
-    return `<option value="${w.name}" ${w.name === selectedName ? 'selected' : ''}>${prefix}${w.name} · ${w.school}</option>`;
+    return `<option value="${w.name}" ${w.name === selectedName ? 'selected' : ''}>${prefix}${w.school} · ${w.name}</option>`;
   }).join('');
   return blank + opts;
 }
