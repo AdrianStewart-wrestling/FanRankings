@@ -430,6 +430,66 @@
     .move-new { background: var(--gold); color: #1c1c1c; font-size: 0.55rem; letter-spacing: 0.08em; padding: 2px 5px; }
     .move-arrow { font-size: 0.72rem; line-height: 1; }
     .week-note { font-size: 0.72rem; color: var(--muted2); margin: 0 0 0.6rem; }
+
+    /* WEEK PICKER */
+    .week-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin: -0.6rem 0 1.2rem;
+    }
+    .week-bar label {
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    }
+    .week-select {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700;
+      letter-spacing: 0.04em; color: var(--accent2);
+      background: var(--surface); border: 1px solid var(--border-dark); border-radius: 2px;
+      padding: 5px 30px 5px 10px; cursor: pointer; max-width: 100%;
+      appearance: none; -webkit-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+      background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+    }
+    .week-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .week-back {
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em;
+      color: var(--accent); background: none; border: none; cursor: pointer; padding: 0;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .past-badge {
+      font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 2px 6px; border-radius: 2px;
+      background: var(--accent2); color: #fff;
+    }
+
+    /* WRESTLER HISTORY */
+    .name-btn {
+      font: inherit; color: inherit; background: none; border: none; padding: 0;
+      cursor: pointer; text-align: left;
+    }
+    .name-btn .wrestler-name { border-bottom: 1px dashed var(--border-dark); display: inline; }
+    .name-btn:hover .wrestler-name, .name-btn[aria-expanded="true"] .wrestler-name { color: var(--accent); border-bottom-color: var(--accent); }
+    .hist-hint { font-size: 0.7rem; color: var(--muted2); margin: 0.8rem 0 0; }
+    tbody tr.hist-row, tbody tr.hist-row:hover { background: var(--surface2); }
+    .hist-row td { padding: 0.9rem 0 1.1rem; }
+    .hist-wrap { display: flex; gap: 1.4rem; align-items: center; flex-wrap: wrap; padding: 0 0.6rem; }
+    .hist-title {
+      font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; padding: 0 0.6rem;
+    }
+    .hist-chart { flex: 1 1 260px; min-width: 220px; max-width: 420px; }
+    .hist-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+    .hist-list { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 200px; }
+    .hist-chip {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 2px;
+      padding: 4px 8px; text-align: center; min-width: 52px;
+    }
+    .hist-chip.is-shown { border-color: var(--accent); }
+    .hist-chip .wk { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.08em; color: var(--muted); display: block; }
+    .hist-chip .rk { font-family: 'Barlow Condensed', sans-serif; font-size: 1.15rem; font-weight: 700; color: var(--accent2); line-height: 1.1; }
+    .hist-chip .rk.unranked { color: var(--muted2); }
+    .hist-chip .live { font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--green); letter-spacing: 0.08em; display: block; }
+    .hist-msg { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); padding: 0 0.6rem; }
   </style>
 </head>
 <body>
@@ -490,6 +550,11 @@
     <div class="panel-header">
       <div class="panel-weight" id="panelWeight">125 <span>LBS</span></div>
       <div class="panel-ballot-count" id="panelBallotCount"></div>
+    </div>
+    <div class="week-bar" id="weekBar" hidden>
+      <label for="weekSelect">Week</label>
+      <select class="week-select" id="weekSelect" aria-label="Choose a week"></select>
+      <button type="button" class="week-back" id="weekBack" hidden>Back to this week</button>
     </div>
     <div id="tableContainer">
       <div class="state-box">
@@ -621,6 +686,171 @@ let weekLabel = 'Off-Season';
 let previousWeekId = null;       // prior week of the CURRENT week (its frozen final ranking)
 let lastCompletedWeekId = null;  // most recently finalized week (shown until the new week has votes)
 
+// ---- Week picker + wrestler history ----
+// weekChain: newest first. Built by walking previousWeekId links from weeks/current through fanWeeks/{id}
+// (single-document reads only, the same reads this page already makes).
+let weekChain = [];              // [{ weekId, label, short, prev, isCurrent }]
+// The pre-launch Off-Season is kept for movement comparisons but isn't offered as a season week.
+const HIDDEN_HISTORY_WEEKS = ['week-0'];
+const pickable = () => weekChain.filter(w => w.isCurrent || !HIDDEN_HISTORY_WEEKS.includes(w.weekId));
+let selectedWeekId = null;       // null = "this week" (the automatic current/last-final view)
+let renderSeq = 0;               // ignores slow responses after a newer tab/week was chosen
+let lastView = null;             // what the table is currently showing (for history highlighting)
+const rankCache = new Map();     // `${weekId}|${key}` -> data, for finished weeks only (the live week is always re-read)
+
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function shortWeekLabel(weekId, meta = {}) {
+  const id = String(weekId || '');
+  if (id === 'week-0') return 'Off';
+  if (/preseason/i.test(id)) return 'Pre';
+  const n = meta.weekNumber ?? (/week-(\d+)$/.exec(id) || [])[1];
+  return n != null && n !== '' ? `W${n}` : id;
+}
+
+async function getWeekRanking(weekId, key) {
+  if (!weekId) return null;
+  const cacheKey = `${weekId}|${key}`;
+  if (weekId !== currentWeekId && rankCache.has(cacheKey)) return rankCache.get(cacheKey);
+  const s = await getDoc(doc(db, 'rankings', weekId, 'weights', key));
+  const data = s.exists() ? s.data() : null;
+  if (weekId !== currentWeekId) rankCache.set(cacheKey, data);
+  return data;
+}
+
+async function buildWeekChain() {
+  const chain = [];
+  const seen = new Set();
+  let id = currentWeekId, isCurrent = true;
+  while (id && !seen.has(id) && chain.length < 40) {
+    seen.add(id);
+    let meta = {};
+    try { const s = await getDoc(doc(db, 'fanWeeks', id)); if (s.exists()) meta = s.data(); } catch (e) { /* label falls back */ }
+    const prev = isCurrent ? (previousWeekId || meta.previousWeekId || null) : (meta.previousWeekId || null);
+    const label = meta.label || (isCurrent ? weekLabel : id);
+    chain.push({ weekId: id, label, short: shortWeekLabel(id, meta), prev, isCurrent });
+    id = prev; isCurrent = false;
+  }
+  weekChain = chain;
+}
+
+function renderWeekPicker() {
+  const sel = document.getElementById('weekSelect');
+  const bar = document.getElementById('weekBar');
+  const list = pickable();
+  if (!list.length) { bar.hidden = true; return; }
+  const cur = list[0];
+  sel.innerHTML = [`<option value="">This week · ${esc(cur.label)}</option>`]
+    .concat(list.slice(1).map(w => `<option value="${esc(w.weekId)}">${esc(w.label)} · Final</option>`))
+    .join('');
+  sel.value = selectedWeekId || '';
+  document.getElementById('weekBack').hidden = !selectedWeekId;
+  bar.hidden = list.length < 2;   // nothing to pick until a week has finished
+}
+
+function syncUrl() {
+  try {
+    const u = new URL(location.href);
+    if (selectedWeekId) u.searchParams.set('week', selectedWeekId); else u.searchParams.delete('week');
+    if (String(activeTab) !== '125') u.searchParams.set('tab', String(activeTab)); else u.searchParams.delete('tab');
+    history.replaceState(null, '', u.pathname + (u.search ? u.search : '') + u.hash);
+  } catch (e) { /* not critical */ }
+}
+
+function setWeek(weekId) {
+  selectedWeekId = weekId && pickable().some(w => w.weekId === weekId && !w.isCurrent) ? weekId : null;
+  renderWeekPicker();
+  syncUrl();
+  fetchRankings(activeTab);
+  if (typeof gtag === 'function') gtag('event', 'select_rankings_week', { week_id: selectedWeekId || 'current' });
+}
+
+// A finished week, exactly as it froze, with movement against the week before it.
+async function pastWeekView(key, weekId) {
+  const entry = weekChain.find(w => w.weekId === weekId) || { label: weekId, prev: null };
+  const data = await getWeekRanking(weekId, key);
+  const prev = entry.prev ? await getWeekRanking(entry.prev, key) : null;
+  const prevRanks = new Map((prev && prev.results || []).map(r => [normalizeName(r.name), Number(r.rank)]));
+  return {
+    data: data || { results: [], totalBallots: 0, weekLabel: entry.label },
+    shownWeekId: weekId, prevWeekId: entry.prev, prevRanks, hasPrev: !!(prev && prev.results && prev.results.length),
+    note: `Final results · ${entry.label}.`, isPast: true
+  };
+}
+
+// Every week this wrestler/team appears in, oldest first. Weeks with no ballots for this tab are skipped.
+async function loadHistory(key, name) {
+  const target = normalizeName(name);
+  const weeks = pickable().reverse();
+  const datas = await Promise.all(weeks.map(w => getWeekRanking(w.weekId, key).catch(() => null)));
+  return weeks.map((w, i) => {
+    const d = datas[i];
+    if (!d || !d.totalBallots || !(d.results || []).length) return null;
+    const row = d.results.find(r => normalizeName(r.name) === target);
+    return { weekId: w.weekId, short: w.short, label: w.label, live: w.isCurrent && !d.final,
+             rank: row ? Number(row.rank) : null, points: row ? row.points : 0, fieldSize: d.results.length };
+  }).filter(Boolean);
+}
+
+function historyChartSvg(points) {
+  const ranked = points.filter(p => p.rank != null);
+  if (ranked.length < 2) return '';
+  const W = 400, H = 120, padL = 30, padR = 14, padT = 14, padB = 24;
+  const maxRank = Math.max(3, ...ranked.map(p => p.rank));
+  const x = i => padL + (points.length === 1 ? 0 : i * (W - padL - padR) / (points.length - 1));
+  const y = r => padT + (r - 1) * (H - padT - padB) / (maxRank - 1);
+  const ticks = [...new Set([1, Math.ceil(maxRank / 2), maxRank])];
+  const segs = []; let cur = [];
+  points.forEach((p, i) => { if (p.rank == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([x(i), y(p.rank)]); });
+  if (cur.length) segs.push(cur);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rank by week">
+    ${ticks.map(t => `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="#dddbd5" stroke-width="1"/>
+      <text x="${padL - 8}" y="${y(t) + 4}" text-anchor="end" font-family="DM Mono, monospace" font-size="10" fill="#888880">#${t}</text>`).join('')}
+    ${segs.map(sg => `<polyline points="${sg.map(p => p.join(',')).join(' ')}" fill="none" stroke="#c0392b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
+    ${points.map((p, i) => p.rank == null ? '' : `<circle cx="${x(i)}" cy="${y(p.rank)}" r="4" fill="${p.live ? '#ffffff' : '#c0392b'}" stroke="#c0392b" stroke-width="2"><title>${esc(p.label)}: #${p.rank}</title></circle>`).join('')}
+    ${points.map((p, i) => `<text x="${x(i)}" y="${H - 6}" text-anchor="middle" font-family="DM Mono, monospace" font-size="10" fill="#888880">${esc(p.short)}</text>`).join('')}
+  </svg>`;
+}
+
+async function toggleHistory(btn) {
+  const tr = btn.closest('tr');
+  const open = tr.nextElementSibling && tr.nextElementSibling.classList.contains('hist-row');
+  document.querySelectorAll('#tableContainer tr.hist-row').forEach(r => r.remove());
+  document.querySelectorAll('#tableContainer .name-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  if (open) return;
+  const name = btn.dataset.name;
+  const key = String(activeTab);
+  const cols = tr.children.length;
+  const row = document.createElement('tr');
+  row.className = 'hist-row';
+  row.innerHTML = `<td colspan="${cols}"><div class="hist-msg"><span class="spinner"></span>Loading history…</div></td>`;
+  tr.after(row);
+  btn.setAttribute('aria-expanded', 'true');
+  try {
+    const pts = await loadHistory(key, name);
+    if (!row.isConnected) return;
+    const shownId = lastView && lastView.shownWeekId;
+    const chips = pts.map(p => `
+      <div class="hist-chip${p.weekId === shownId ? ' is-shown' : ''}" title="${esc(p.label)}${p.rank != null ? ` · ${p.points} pts` : ''}">
+        <span class="wk">${esc(p.short)}</span>
+        <span class="rk${p.rank == null ? ' unranked' : ''}">${p.rank != null ? '#' + p.rank : '&mdash;'}</span>
+        ${p.live ? '<span class="live">LIVE</span>' : ''}
+      </div>`).join('');
+    const chart = historyChartSvg(pts);
+    row.innerHTML = `<td colspan="${cols}">
+      <div class="hist-title">${esc(name)} · week by week</div>
+      ${pts.length ? `<div class="hist-wrap">${chart ? `<div class="hist-chart">${chart}</div>` : ''}<div class="hist-list">${chips}</div></div>`
+                   : '<div class="hist-msg">No ranking history yet.</div>'}
+      ${pts.length === 1 ? '<div class="hist-msg" style="margin-top:0.6rem">The chart fills in as more weeks finish.</div>' : ''}
+    </td>`;
+  } catch (e) {
+    console.error(e);
+    if (row.isConnected) row.innerHTML = `<td colspan="${cols}"><div class="hist-msg">Could not load history &mdash; check connection.</div></td>`;
+  }
+}
+
 function normalizeName(name='') {
   return String(name).trim().toLowerCase();
 }
@@ -721,11 +951,15 @@ async function fetchRankings(tab) {
   document.getElementById('tableContainer').innerHTML =
     `<div class="state-box"><p><span class="spinner"></span>Loading rankings...</p></div>`;
 
+  const seq = ++renderSeq;
   try {
-    const view = await chooseRankingsView(String(tab));
+    const view = selectedWeekId ? await pastWeekView(String(tab), selectedWeekId) : await chooseRankingsView(String(tab));
+    if (seq !== renderSeq) return;   // a newer tab/week was chosen meanwhile
+    lastView = view;
     renderTable(view.data, tab, view);
   } catch (e) {
     console.error(e);
+    if (seq !== renderSeq) return;
     document.getElementById('tableContainer').innerHTML =
       `<div class="state-box"><p>Could not load rankings &mdash; check connection.</p></div>`;
   }
@@ -764,8 +998,8 @@ function movementHtml(currentRank, prevRank) {
 
 function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, note: '' }) {
   if (data.totalBallots !== undefined) {
-    // Only update the sidebar "ballots cast" stat when on a weight tab (not the specials)
-    if (!isSpecialTab(tab)) {
+    // Only update the sidebar "ballots cast" stat when on a weight tab (not the specials) -- and only for this week
+    if (!isSpecialTab(tab) && !view.isPast) {
       document.getElementById('statBallots').textContent = data.totalBallots || '0';
     }
     document.getElementById('panelBallotCount').textContent =
@@ -775,6 +1009,14 @@ function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, n
   }
 
   if (!data.results || !data.results.length) {
+    if (view.isPast) {
+      document.getElementById('tableContainer').innerHTML = `
+      <div class="state-box">
+        <p>No ballots were cast for this ${isSpecialTab(tab) ? (tab === 'p4p' ? 'P4P list' : 'team ranking') : 'weight class'} in ${esc(data.weekLabel || 'that week')}.</p>
+        <button type="button" class="btn-vote" onclick="window.setWeek(null)">Back to this week</button>
+      </div>`;
+      return;
+    }
     document.getElementById('tableContainer').innerHTML = `
       <div class="state-box">
         <p>No votes yet for this ${isSpecialTab(tab) ? (tab === 'p4p' ? 'P4P list' : 'team ranking') : 'weight class'} &mdash; be the first!</p>
@@ -790,7 +1032,7 @@ function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, n
 
   const showMove = view.hasPrev;   // no prior-week ranking (e.g. the first week) -> no movement column
   document.getElementById('tableContainer').innerHTML = `
-    ${view.note ? `<p class="week-note">${view.note}</p>` : ''}
+    ${view.note ? `<p class="week-note">${view.isPast ? '<span class="past-badge">Past week</span> ' : ''}${esc(view.note)}</p>` : ''}
     <table>
       <thead>
         <tr>
@@ -810,7 +1052,7 @@ function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, n
               ${i < 3 ? `<span class="rank-medal">${medals[i]}</span>` : ''}
             </td>
             ${showMove ? `<td class="move-col">${movementHtml(r.rank, view.prevRanks.has(normalizeName(r.name)) ? view.prevRanks.get(normalizeName(r.name)) : null)}</td>` : ''}
-            <td><div class="wrestler-name">${r.name}</div></td>
+            <td><button type="button" class="name-btn" data-name="${esc(r.name)}" aria-expanded="false" title="See week-by-week history"><span class="wrestler-name">${esc(r.name)}</span></button></td>
             ${isTeams ? '' : `<td><div class="wrestler-school">${r.school || '&mdash;'}</div></td>`}
             <td class="right">
               <div class="points-col">${r.points}</div>
@@ -823,7 +1065,8 @@ function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, n
             </td>
           </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table>
+    <p class="hist-hint">Tap a ${isTeams ? 'team' : 'name'} to see ${isTeams ? 'its' : 'their'} rank week by week.</p>`;
 }
 
 function renderWeightTabs() {
@@ -842,6 +1085,7 @@ function setTab(t) {
   // Normalize — numeric tabs come in as numbers, specials as strings
   activeTab = (typeof t === 'string' && !isSpecialTab(t)) ? Number(t) : t;
   renderWeightTabs();
+  syncUrl();
   fetchRankings(activeTab);
   if (typeof gtag === 'function') {
     gtag('event', 'select_rankings_tab', { tab_name: String(activeTab) });
@@ -852,9 +1096,27 @@ function setTab(t) {
 window.setTab = setTab;
 // Keep old name for backwards compat if anything else uses it
 window.setWeight = setTab;
+window.setWeek = setWeek;
+
+document.getElementById('weekSelect').addEventListener('change', e => setWeek(e.target.value || null));
+document.getElementById('weekBack').addEventListener('click', () => setWeek(null));
+document.getElementById('tableContainer').addEventListener('click', e => {
+  const btn = e.target.closest('.name-btn');
+  if (btn) toggleHistory(btn);
+});
 
 (async () => {
   await Promise.all([fetchWeekInfo(), fetchWrestlers()]);
+  try { await buildWeekChain(); } catch (e) { console.warn('Could not load past weeks:', e); weekChain = []; }
+  // Shareable links: index.html?week=s2027-week-3&tab=p4p
+  try {
+    const params = new URLSearchParams(location.search);
+    const t = params.get('tab');
+    if (t && (isSpecialTab(t) || weights.includes(Number(t)))) activeTab = isSpecialTab(t) ? t : Number(t);
+    const w = params.get('week');
+    if (w && pickable().some(x => x.weekId === w && !x.isCurrent)) selectedWeekId = w;
+  } catch (e) { /* ignore bad links */ }
+  renderWeekPicker();
   renderWeightTabs();
   fetchRankings(activeTab);
 })();
