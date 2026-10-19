@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex"/>
+  <title>Weekly Recap — The Fan's Vote</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9; --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent2: #1a1a2e; --text: #1c1c1c; --muted: #888880; --muted2: #b0aea6;
+      --gold: #c9a84c; --green: #2e7d52; --cactus-green: #3a9e2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+    header {
+      background: #fff; border-bottom: 2px solid var(--border); padding: 0 2rem; height: 64px;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; text-decoration: none; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .header-tag { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+    h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 800; line-height: 0.95; text-transform: uppercase; }
+    h1 em { color: var(--accent); font-style: italic; }
+    .lede { color: var(--muted); font-size: 0.9rem; margin: 0.6rem 0 1.4rem; max-width: 640px; line-height: 1.5; }
+    .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 1rem 0; border-top: 2px solid var(--accent2); border-bottom: 1px solid var(--border); }
+    .bar label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    select, .btn {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em;
+      border-radius: 2px; padding: 7px 14px; cursor: pointer;
+    }
+    select { background: #fff; border: 1px solid var(--border-dark); color: var(--accent2); max-width: 100%; }
+    .btn { background: var(--accent); color: #fff; border: none; text-transform: uppercase; }
+    .btn:hover { background: #a93226; }
+    .btn.ghost { background: transparent; color: var(--accent2); border: 1px solid var(--border-dark); }
+    .btn.ghost:hover { border-color: var(--accent2); }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+    .warn { margin-top: 1rem; padding: 0.7rem 1rem; border-left: 3px solid var(--gold); background: rgba(201,168,76,0.12); font-size: 0.85rem; line-height: 1.5; }
+    .warn[hidden] { display: none; }
+    .status { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); padding: 2rem 0; }
+    h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin: 2.2rem 0 0.4rem; }
+    .sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .card { background: #fff; border: 1px solid var(--border); padding: 10px; }
+    .card canvas { width: 100%; height: auto; display: block; background: #0d0f1e; }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
+    .card-name { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+    .card-foot .btn { font-size: 0.85rem; padding: 5px 10px; }
+    textarea {
+      width: 100%; min-height: 420px; font-family: 'DM Mono', monospace; font-size: 0.78rem; line-height: 1.55;
+      padding: 1rem; border: 1px solid var(--border-dark); background: #fff; color: var(--text); resize: vertical;
+    }
+    .notes-actions { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; align-items: center; }
+    .copied { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--green); }
+    @media (max-width: 600px) { .wrap { padding: 1.2rem 16px; } header { padding: 0 16px; } .header-tag { display: none; } }
+  </style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html">The Fan's <em>Vote</em></a>
+  <div class="header-tag">Weekly Recap · for X &amp; the Cactus podcast</div>
+</header>
+
+<div class="wrap">
+  <h1>Weekly <em>Recap</em></h1>
+  <p class="lede">Pick a finished week. The graphics below are 1600×900, sized for X posts and the podcast screen. Download any one, or all of them. The talking points underneath are built from the same numbers.</p>
+
+  <div class="bar">
+    <label for="weekSelect">Week</label>
+    <select id="weekSelect" aria-label="Choose a week"></select>
+    <button class="btn" id="dlAll" disabled>Download all graphics</button>
+  </div>
+  <div class="warn" id="liveWarn" hidden></div>
+
+  <div id="status" class="status">Loading weeks…</div>
+
+  <div id="out" hidden>
+    <h2>Graphics</h2>
+    <p class="sub">Up to 4 images fit in one X post. A good set: <strong>#1 at every weight</strong>, <strong>Movers</strong>, <strong>P4P</strong>, <strong>Teams</strong>, then single weights as replies.</p>
+    <div class="grid" id="graphics"></div>
+
+    <h2>Podcast talking points</h2>
+    <p class="sub">Plain text. Copy it into your show notes or read straight from it.</p>
+    <div class="notes-actions">
+      <button class="btn" id="copyNotes">Copy</button>
+      <button class="btn ghost" id="dlNotes">Download .txt</button>
+      <span class="copied" id="copied" hidden>Copied ✓</span>
+    </div>
+    <textarea id="notes" readonly></textarea>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+});
+const db = getFirestore(app);
+
+// ===== config =====
+const WEIGHTS = ['125','133','141','149','157','165','174','184','197','285'];
+const SPECIALS = ['p4p', 'teams'];
+const TOP_N = key => (key === 'p4p' || key === 'teams') ? 10 : 8;
+const HIDDEN_WEEKS = ['week-0'];   // pre-launch Off-Season: never offered, never used for movement
+const SITE = 'fans.33deep.com';
+const C = { bg: '#0d0f1e', panel: '#1a1a2e', panel2: '#232542', line: 'rgba(255,255,255,0.10)', text: '#ffffff',
+  dim: 'rgba(255,255,255,0.55)', faint: 'rgba(255,255,255,0.30)', red: '#e04a3a', redDeep: '#c0392b', gold: '#c9a84c',
+  silver: '#b9b9c4', bronze: '#b8916a', up: '#3fbf75', down: '#e04a3a', cactus: '#3a9e2e', newBg: '#c9a84c' };
+const F = { cond: '"Barlow Condensed", "Arial Narrow", sans-serif', mono: '"DM Mono", ui-monospace, monospace' };
+
+// ===== helpers =====
+const norm = s => String(s || '').trim().toLowerCase();
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const keyLabel = k => k === 'p4p' ? 'P4P' : k === 'teams' ? 'TEAMS' : `${k} LBS`;
+const keyShort = k => k === 'p4p' ? 'P4P' : k === 'teams' ? 'Teams' : k;
+const plainLabel = l => String(l || '').replace(/\s*·\s*/g, ' · ');
+function weekShort(id, meta = {}) {
+  if (/preseason/i.test(id)) return 'Preseason';
+  const n = meta.weekNumber ?? (/week-(\d+)$/.exec(id) || [])[1];
+  return n != null && n !== '' ? `Week ${n}` : id;
+}
+
+let current = {};
+let chain = [];          // newest first: { weekId, label, short, prev, isCurrent }
+const cache = new Map();
+
+async function getRanking(weekId, key) {
+  const k = weekId + '|' + key;
+  if (cache.has(k)) return cache.get(k);
+  const s = await getDoc(doc(db, 'rankings', weekId, 'weights', key));
+  const d = s.exists() ? s.data() : null;
+  cache.set(k, d);
+  return d;
+}
+
+async function buildChain() {
+  const s = await getDoc(doc(db, 'weeks', 'current'));
+  current = s.exists() ? s.data() : {};
+  const out = [], seen = new Set();
+  let id = current.weekId, isCurrent = true;
+  while (id && !seen.has(id) && out.length < 40) {
+    seen.add(id);
+    let meta = {};
+    try { const m = await getDoc(doc(db, 'fanWeeks', id)); if (m.exists()) meta = m.data(); } catch (e) {}
+    const prev = isCurrent ? (current.previousWeekId || meta.previousWeekId || null) : (meta.previousWeekId || null);
+    out.push({ weekId: id, label: meta.label || (isCurrent ? current.label : id), short: weekShort(id, meta), prev, isCurrent });
+    id = prev; isCurrent = false;
+  }
+  chain = out.filter(w => !HIDDEN_WEEKS.includes(w.weekId));
+}
+
+// Everything a recap needs for one week, for every category.
+async function loadWeek(entry) {
+  const prevId = entry.prev && !HIDDEN_WEEKS.includes(entry.prev) ? entry.prev : null;
+  const keys = WEIGHTS.concat(SPECIALS);
+  const [curs, prevs] = await Promise.all([
+    Promise.all(keys.map(k => getRanking(entry.weekId, k).catch(() => null))),
+    Promise.all(keys.map(k => prevId ? getRanking(prevId, k).catch(() => null) : null)),
+  ]);
+  const cats = {};
+  keys.forEach((k, i) => {
+    const d = curs[i] || { results: [], totalBallots: 0 };
+    const p = prevs[i];
+    const prevRank = new Map((p && p.results || []).map(r => [norm(r.name), Number(r.rank)]));
+    const n = TOP_N(k);
+    const rows = (d.results || []).slice().sort((a, b) => a.rank - b.rank).map(r => {
+      const was = prevRank.has(norm(r.name)) ? prevRank.get(norm(r.name)) : null;
+      return { rank: Number(r.rank), name: r.name, school: r.school || '', points: Number(r.points) || 0, was,
+               move: !p ? null : (was == null ? 'new' : was - Number(r.rank)) };
+    });
+    const top = rows.slice(0, n);
+    const prevTop = (p && p.results || []).filter(r => Number(r.rank) <= n).sort((a, b) => a.rank - b.rank);
+    const nowRank = new Map(rows.map(r => [norm(r.name), r.rank]));
+    const droppedOut = !p ? [] : prevTop.filter(r => !top.some(t => norm(t.name) === norm(r.name)))
+      .map(r => ({ name: r.name, school: r.school || '', was: Number(r.rank), now: nowRank.get(norm(r.name)) ?? null }));
+    cats[k] = { key: k, ballots: Number(d.totalBallots) || 0, final: !!d.final, top, droppedOut, hasPrev: !!p };
+  });
+  const prevEntry = prevId ? chain.find(w => w.weekId === prevId) : null;
+  return { entry, cats, hasPrev: !!prevId, prevShort: prevEntry ? prevEntry.short : null };
+}
+
+function movers(week) {
+  const rise = [], fall = [], fresh = [];
+  for (const k of WEIGHTS.concat(SPECIALS)) {
+    const c = week.cats[k]; if (!c.hasPrev) continue;
+    const n = TOP_N(k);
+    c.top.forEach(r => {
+      if (r.was == null || r.was > n) fresh.push({ k, ...r });
+      else if (r.was - r.rank > 0) rise.push({ k, ...r, d: r.was - r.rank });
+      else if (r.was - r.rank < 0) fall.push({ k, ...r, d: r.rank - r.was });
+    });
+    c.droppedOut.forEach(r => fall.push({ k, name: r.name, school: r.school, was: r.was, rank: r.now, out: true, d: (r.now ?? n + 1) - r.was }));
+  }
+  rise.sort((a, b) => b.d - a.d || a.rank - b.rank);
+  fall.sort((a, b) => b.d - a.d || a.was - b.was);
+  fresh.sort((a, b) => a.rank - b.rank);
+  return { rise, fall, fresh };
+}
+
+// ===== canvas drawing =====
+const W = 1600, H = 900;
+let mascot = null;
+function loadMascot() {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = 'images/cactus-mascot.png'; });
+}
+function newCanvas() { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; }
+function font(ctx, weight, size, fam = F.cond, style = '') { ctx.font = `${style} ${weight} ${size}px ${fam}`.trim(); }
+function fit(ctx, text, maxW, weight, size, min, fam = F.cond, style = '') {
+  let s = size; font(ctx, weight, s, fam, style);
+  while (s > min && ctx.measureText(text).width > maxW) { s -= 1; font(ctx, weight, s, fam, style); }
+  if (ctx.measureText(text).width > maxW) {
+    let t = text; while (t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    return t + '…';
+  }
+  return text;
+}
+function spaced(ctx, text, x, y, spacing, align = 'left') {
+  if ('letterSpacing' in ctx) { ctx.letterSpacing = spacing + 'px'; const a = ctx.textAlign; ctx.textAlign = align; ctx.fillText(text, x, y); ctx.textAlign = a; ctx.letterSpacing = '0px'; return; }
+  ctx.textAlign = align; ctx.fillText(text, x, y); ctx.textAlign = 'left';
+}
+function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function rankColor(rank) { return rank === 1 ? C.gold : rank === 2 ? C.silver : rank === 3 ? C.bronze : C.faint; }
+
+function badge(ctx, move, x, y, size = 1) {   // x = left, y = vertical center. Returns width.
+  if (move == null) return 0;
+  let text, bg, fg;
+  if (move === 'new') { text = 'NEW'; bg = C.newBg; fg = '#1c1c1c'; }
+  else if (move === 0) { font(ctx, 500, 26 * size, F.mono); ctx.fillStyle = C.faint; ctx.textBaseline = 'middle'; ctx.fillText('—', x + 8, y); ctx.textBaseline = 'alphabetic'; return 40 * size; }
+  else if (move > 0) { text = '▲' + move; bg = 'rgba(63,191,117,0.16)'; fg = C.up; }
+  else { text = '▼' + Math.abs(move); bg = 'rgba(224,74,58,0.16)'; fg = C.down; }
+  font(ctx, 500, 20 * size, F.mono);
+  const w = ctx.measureText(text).width + 16 * size, h = 30 * size;
+  ctx.fillStyle = bg; rr(ctx, x, y - h / 2, w, h, 3); ctx.fill();
+  ctx.fillStyle = fg; ctx.textBaseline = 'middle'; ctx.fillText(text, x + 8 * size, y + 1); ctx.textBaseline = 'alphabetic';
+  return w;
+}
+
+function frame(ctx, week, kicker, title) {
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = C.redDeep; ctx.fillRect(0, 0, W, 8);
+  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.red; spaced(ctx, "THE FAN'S VOTE", 70, 66, 4);
+  const brandW = ctx.measureText("THE FAN'S VOTE").width + 14 * 4;
+  ctx.fillStyle = C.faint; ctx.fillText('·', 70 + brandW + 14, 66);
+  ctx.fillStyle = C.dim; spaced(ctx, kicker.toUpperCase(), 70 + brandW + 44, 66, 3);
+  font(ctx, 800, 76, F.cond); ctx.fillStyle = C.text;
+  ctx.fillText(fit(ctx, title.toUpperCase(), 1130, 800, 76, 48), 66, 140);
+  // partner lockup, top right
+  if (mascot) { const h = 118, w = mascot.width * h / mascot.height; ctx.drawImage(mascot, W - 70 - w, 28, w, h); }
+  font(ctx, 500, 14, F.mono); ctx.fillStyle = C.faint; spaced(ctx, 'OFFICIAL PARTNER', W - 170, 92, 2, 'right');
+  font(ctx, 700, 28, F.cond); ctx.fillStyle = C.cactus; spaced(ctx, 'CACTUS WRESTLING', W - 170, 124, 2, 'right');
+  // footer
+  ctx.fillStyle = C.line; ctx.fillRect(70, H - 74, W - 140, 1);
+  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim; spaced(ctx, SITE.toUpperCase() + '  ·  VOTE EVERY WEEK', 70, H - 34, 2);
+}
+
+function finalTag(week) { return week.entry.isCurrent ? 'Live · not final' : 'Final'; }
+
+function drawTopList(week, key) {
+  const c = newCanvas(), ctx = c.getContext('2d'), cat = week.cats[key];
+  const label = key === 'p4p' ? 'Pound-for-Pound Top 10' : key === 'teams' ? 'Team Rankings Top 10' : `${key} lbs · Top 8`;
+  frame(ctx, week, `${week.entry.short} · ${finalTag(week)}`, label);
+  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim;
+  spaced(ctx, `${cat.ballots} BALLOTS`, W - 70, H - 34, 2, 'right');
+  const rows = cat.top, n = TOP_N(key);
+  const top = 178, bottom = H - 96, rowH = Math.min(84, (bottom - top) / n);
+  const showMove = cat.hasPrev, isTeams = key === 'teams';
+  const xRank = 70, xMove = 150, xName = showMove ? 270 : 170, xBarEnd = W - 70, barW = 260;
+  const maxPts = rows[0] ? rows[0].points || 1 : 1;
+  if (!rows.length) { font(ctx, 500, 26, F.mono); ctx.fillStyle = C.dim; ctx.fillText('No ballots this week.', xRank, top + 80); return c; }
+  rows.forEach((r, i) => {
+    const y = top + i * rowH, mid = y + rowH / 2;
+    if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fillRect(56, y, W - 112, rowH); }
+    font(ctx, 800, Math.min(56, rowH * 0.72), F.cond); ctx.fillStyle = rankColor(r.rank);
+    ctx.textBaseline = 'middle'; ctx.fillText(String(r.rank), xRank, mid + 2);
+    if (showMove) badge(ctx, r.move, xMove, mid);
+    const nameMax = W - xName - barW - 260;
+    const nameSize = Math.min(44, rowH * 0.56);
+    const nm = fit(ctx, r.name, isTeams ? nameMax + 200 : nameMax * 0.62, 700, nameSize, 26);
+    ctx.fillStyle = r.rank === 1 ? C.text : 'rgba(255,255,255,0.92)'; ctx.fillText(nm, xName, mid + 5);
+    if (!isTeams && r.school) {
+      const nw = ctx.measureText(nm).width;
+      font(ctx, 400, Math.min(20, rowH * 0.26), F.mono); ctx.fillStyle = C.dim;
+      const sx = xName + nw + 20;
+      ctx.fillText(fit(ctx, r.school.toUpperCase(), Math.max(60, xBarEnd - barW - 150 - sx), 400, Math.min(20, rowH * 0.26), 13, F.mono), sx, mid + 3);
+    }
+    // points + bar
+    font(ctx, 700, Math.min(40, rowH * 0.5), F.cond); ctx.fillStyle = r.rank === 1 ? C.red : C.text; ctx.textAlign = 'right';
+    ctx.fillText(String(r.points), xBarEnd - barW - 64, mid + 5);
+    font(ctx, 400, 14, F.mono); ctx.fillStyle = C.faint; ctx.fillText('PTS', xBarEnd - barW - 24, mid + 3); ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(255,255,255,0.08)'; rr(ctx, xBarEnd - barW, mid - 4, barW, 8, 4); ctx.fill();
+    ctx.fillStyle = r.rank <= 3 ? rankColor(r.rank) : C.redDeep; rr(ctx, xBarEnd - barW, mid - 4, Math.max(8, barW * r.points / maxPts), 8, 4); ctx.fill();
+    ctx.textBaseline = 'alphabetic';
+  });
+  return c;
+}
+
+function drawNumberOnes(week) {
+  const c = newCanvas(), ctx = c.getContext('2d');
+  frame(ctx, week, `${week.entry.short} · ${finalTag(week)}`, '#1 at every weight');
+  const total = WEIGHTS.concat(SPECIALS).reduce((s, k) => s + week.cats[k].ballots, 0);
+  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim; spaced(ctx, `${total} BALLOTS`, W - 70, H - 34, 2, 'right');
+  const gx = 70, gy = 180, gap = 16, cols = 5, cw = (W - 140 - gap * (cols - 1)) / cols, ch = 228;
+  WEIGHTS.forEach((k, i) => {
+    const x = gx + (i % cols) * (cw + gap), y = gy + Math.floor(i / cols) * (ch + gap), r = week.cats[k].top[0];
+    ctx.fillStyle = C.panel; rr(ctx, x, y, cw, ch, 6); ctx.fill();
+    ctx.fillStyle = C.redDeep; ctx.fillRect(x, y, 5, ch);
+    font(ctx, 800, 44, F.cond); ctx.fillStyle = C.red; ctx.fillText(k, x + 24, y + 54);
+    const kw = ctx.measureText(k).width;
+    font(ctx, 500, 15, F.mono); ctx.fillStyle = C.faint; ctx.fillText('LBS', x + 24 + kw + 8, y + 52);
+    if (!r) { font(ctx, 500, 18, F.mono); ctx.fillStyle = C.dim; ctx.fillText('No ballots', x + 24, y + 112); return; }
+    if (week.cats[k].hasPrev) badge(ctx, r.move, x + cw - 24 - (r.move === 'new' ? 58 : r.move === 0 ? 40 : 54), y + 40, 0.9);
+    const parts = r.name.split(' '), first = parts.length > 1 ? parts.slice(0, -1).join(' ') : '', last = parts[parts.length - 1];
+    font(ctx, 600, 28, F.cond); ctx.fillStyle = C.dim; ctx.fillText(fit(ctx, first, cw - 48, 600, 28, 18), x + 24, y + 112);
+    ctx.fillStyle = C.text; ctx.fillText(fit(ctx, last.toUpperCase(), cw - 48, 800, 48, 26), x + 24, y + 160);
+    font(ctx, 400, 16, F.mono); ctx.fillStyle = C.dim; ctx.fillText(fit(ctx, (r.school || '').toUpperCase(), cw - 48, 400, 16, 11, F.mono), x + 24, y + 200);
+  });
+  // P4P + Teams strip
+  const sy = gy + 2 * (ch + gap), sw = (W - 140 - gap) / 2, sh = 108;
+  [['p4p', 'P4P #1'], ['teams', 'TEAM #1']].forEach(([k, lab], i) => {
+    const x = gx + i * (sw + gap), r = week.cats[k].top[0];
+    ctx.fillStyle = C.panel2; rr(ctx, x, sy, sw, sh, 6); ctx.fill();
+    font(ctx, 500, 18, F.mono); ctx.fillStyle = C.gold; spaced(ctx, lab, x + 24, sy + 62, 3);
+    if (!r) { font(ctx, 500, 18, F.mono); ctx.fillStyle = C.dim; ctx.fillText('No ballots', x + 170, sy + 62); return; }
+    ctx.fillStyle = C.text; ctx.fillText(fit(ctx, r.name.toUpperCase(), sw - 340, 800, 50, 26), x + 160, sy + 72);
+    font(ctx, 400, 16, F.mono); ctx.fillStyle = C.dim;
+    const tail = (k === 'teams' ? '' : (r.school || '').toUpperCase());
+    ctx.textAlign = 'right'; ctx.fillText(fit(ctx, tail, 160, 400, 16, 11, F.mono), x + sw - 24, sy + 64); ctx.textAlign = 'left';
+  });
+  return c;
+}
+
+function drawMovers(week) {
+  const m = movers(week);
+  const c = newCanvas(), ctx = c.getContext('2d');
+  frame(ctx, week, `${week.entry.short} vs ${week.prevShort || 'last week'} · ${finalTag(week)}`, "This week's movers");
+  const cols = [['Biggest climbs', m.rise, C.up], ['Biggest drops', m.fall, C.down], ['New in the rankings', m.fresh, C.gold]];
+  const gx = 70, gy = 180, gap = 20, cw = (W - 140 - gap * 2) / 3, chH = H - 96 - gy;
+  cols.forEach(([title, list, color], i) => {
+    const x = gx + i * (cw + gap);
+    ctx.fillStyle = C.panel; rr(ctx, x, gy, cw, chH, 6); ctx.fill();
+    ctx.fillStyle = color; ctx.fillRect(x, gy, cw, 5);
+    font(ctx, 800, 34, F.cond); ctx.fillStyle = C.text; ctx.fillText(title.toUpperCase(), x + 26, gy + 56);
+    const items = list.slice(0, 6), rowH = 78;
+    if (!items.length) { font(ctx, 400, 18, F.mono); ctx.fillStyle = C.dim; ctx.fillText('None this week', x + 26, gy + 110); }
+    items.forEach((r, j) => {
+      const y = gy + 92 + j * rowH;
+      if (j) { ctx.fillStyle = C.line; ctx.fillRect(x + 26, y - 10, cw - 52, 1); }
+      font(ctx, 500, 15, F.mono); ctx.fillStyle = C.faint; spaced(ctx, keyLabel(r.k), x + 26, y + 14, 2);
+      ctx.fillStyle = C.text; ctx.fillText(fit(ctx, r.name, cw - 200, 700, 32, 20), x + 26, y + 52);
+      font(ctx, 700, 30, F.cond); ctx.fillStyle = color; ctx.textAlign = 'right';
+      const big = i === 2 ? `#${r.rank}` : (r.out ? 'OUT' : (i === 0 ? '▲' : '▼') + r.d);
+      ctx.fillText(big, x + cw - 26, y + 36);
+      font(ctx, 400, 15, F.mono); ctx.fillStyle = C.dim;
+      const small = i === 2 ? (r.was ? `was #${r.was}` : 'first time') : r.out ? `was #${r.was}` : `#${r.was} → #${r.rank}`;
+      ctx.fillText(small, x + cw - 26, y + 58); ctx.textAlign = 'left';
+    });
+  });
+  return c;
+}
+
+// ===== podcast notes =====
+function notesText(week) {
+  const e = week.entry, L = [];
+  const fin = e.isCurrent ? ' (LIVE, NOT FINAL)' : ' FINAL';
+  L.push(`THE FAN'S VOTE — ${plainLabel(e.label).toUpperCase()}${fin}`);
+  L.push(`Fan-powered NCAA wrestling rankings · ${SITE} · with Cactus Wrestling`);
+  const total = WEIGHTS.concat(SPECIALS).reduce((s, k) => s + week.cats[k].ballots, 0);
+  const busiest = WEIGHTS.slice().sort((a, b) => week.cats[b].ballots - week.cats[a].ballots)[0];
+  L.push('');
+  L.push(`BALLOTS: ${total} across 12 categories. Most-voted weight: ${busiest} (${week.cats[busiest].ballots}).`);
+  L.push('  ' + WEIGHTS.concat(SPECIALS).map(k => `${keyShort(k)}: ${week.cats[k].ballots}`).join(' · '));
+  L.push('');
+  L.push('#1 AT EVERY WEIGHT');
+  for (const k of WEIGHTS.concat(SPECIALS)) {
+    const cat = week.cats[k], r = cat.top[0], r2 = cat.top[1];
+    if (!r) { L.push(`  ${keyShort(k).padEnd(6)} — no ballots`); continue; }
+    let status = '';
+    if (cat.hasPrev) status = r.was === 1 ? 'holds #1' : r.was == null ? 'NEW #1 (unranked last week)' : `NEW #1 (was #${r.was})`;
+    const margin = r2 ? `, ${r.points - r2.points} pts ahead of ${r2.name}` : '';
+    L.push(`  ${keyShort(k).padEnd(6)} — ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''}, ${r.points} pts${margin}${status ? ' · ' + status : ''}`);
+  }
+  if (week.hasPrev) {
+    const m = movers(week);
+    L.push('');
+    L.push(`BIGGEST CLIMBS (vs ${week.prevShort})`);
+    (m.rise.length ? m.rise.slice(0, 6) : [null]).forEach(r => L.push(r ? `  ▲${r.d}  ${keyShort(r.k)} — ${r.name}: #${r.was} → #${r.rank}` : '  none'));
+    L.push('');
+    L.push('BIGGEST DROPS');
+    (m.fall.length ? m.fall.slice(0, 6) : [null]).forEach(r => L.push(!r ? '  none' : r.out
+      ? `  OUT  ${keyShort(r.k)} — ${r.name}: was #${r.was}, now ${r.rank ? '#' + r.rank : 'unranked'}`
+      : `  ▼${r.d}  ${keyShort(r.k)} — ${r.name}: #${r.was} → #${r.rank}`));
+    L.push('');
+    L.push('NEW IN THE RANKINGS');
+    (m.fresh.length ? m.fresh : [null]).forEach(r => L.push(r ? `  ${keyShort(r.k)} — ${r.name} debuts at #${r.rank}${r.was ? ` (was #${r.was})` : ''}` : '  none'));
+  } else {
+    L.push('');
+    L.push('First ranked week of the season — movement starts next week.');
+  }
+  const races = WEIGHTS.concat(SPECIALS).map(k => ({ k, a: week.cats[k].top[0], b: week.cats[k].top[1] }))
+    .filter(x => x.a && x.b).map(x => ({ ...x, gap: x.a.points - x.b.points, pct: (x.a.points - x.b.points) / (x.a.points || 1) }));
+  if (races.length) {
+    L.push('');
+    L.push('CLOSEST RACES FOR #1');
+    races.slice().sort((p, q) => p.pct - q.pct).slice(0, 3).forEach(x => L.push(`  ${keyShort(x.k)} — ${x.a.name} ${x.a.points} vs ${x.b.name} ${x.b.points} (${x.gap} pts)`));
+    L.push('');
+    L.push('RUNAWAY #1s');
+    races.slice().sort((p, q) => q.pct - p.pct).slice(0, 3).forEach(x => L.push(`  ${keyShort(x.k)} — ${x.a.name} leads ${x.b.name} by ${x.gap} pts (${Math.round(x.pct * 100)}% of the leader's total)`));
+  }
+  for (const [k, title] of [['p4p', 'P4P TOP 10'], ['teams', 'TEAM TOP 10']]) {
+    L.push('');
+    L.push(title);
+    const t = week.cats[k].top;
+    if (!t.length) L.push('  no ballots');
+    t.forEach(r => L.push(`  ${String(r.rank).padStart(2)}. ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''} — ${r.points}${r.move == null ? '' : r.move === 'new' ? ' · NEW' : r.move === 0 ? '' : r.move > 0 ? ` · ▲${r.move}` : ` · ▼${-r.move}`}`));
+  }
+  L.push('');
+  L.push(`Full rankings, any week: ${SITE}/index.html?week=${e.weekId}`);
+  L.push(`Vote for next week: ${SITE}/poll.html`);
+  return L.join('\n');
+}
+
+// ===== page =====
+let active = null;   // { week, canvases: [{name, file, canvas}] }
+
+function fileSlug(week) { return `fans-vote-${week.entry.short.toLowerCase().replace(/\s+/g, '-')}`; }
+
+function download(canvas, file) {
+  return new Promise(res => canvas.toBlob(b => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = file;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); res();
+  }, 'image/png'));
+}
+
+async function show(weekId) {
+  const entry = chain.find(w => w.weekId === weekId) || chain[0];
+  const status = document.getElementById('status'), out = document.getElementById('out');
+  status.hidden = false; status.textContent = 'Building recap…'; out.hidden = true;
+  document.getElementById('dlAll').disabled = true;
+  const warn = document.getElementById('liveWarn');
+  warn.hidden = !entry.isCurrent;
+  warn.innerHTML = entry.isCurrent ? `<strong>${esc(plainLabel(entry.label))} is still open.</strong> These numbers will change until voting closes. Use this to preview; post the recap once the week is final.` : '';
+  try {
+    const week = await loadWeek(entry);
+    const slug = fileSlug(week);
+    const list = [{ name: '#1 at every weight', file: `${slug}-number-ones.png`, canvas: drawNumberOnes(week) }];
+    if (week.hasPrev) list.push({ name: 'Movers', file: `${slug}-movers.png`, canvas: drawMovers(week) });
+    list.push({ name: 'P4P top 10', file: `${slug}-p4p.png`, canvas: drawTopList(week, 'p4p') });
+    list.push({ name: 'Teams top 10', file: `${slug}-teams.png`, canvas: drawTopList(week, 'teams') });
+    WEIGHTS.forEach(k => list.push({ name: `${k} lbs`, file: `${slug}-${k}.png`, canvas: drawTopList(week, k) }));
+    active = { week, list };
+    const grid = document.getElementById('graphics'); grid.innerHTML = '';
+    list.forEach((g, i) => {
+      const card = document.createElement('div'); card.className = 'card';
+      card.appendChild(g.canvas);
+      const foot = document.createElement('div'); foot.className = 'card-foot';
+      foot.innerHTML = `<span class="card-name">${esc(g.name)}</span><button class="btn" data-i="${i}">Download PNG</button>`;
+      card.appendChild(foot); grid.appendChild(card);
+    });
+    document.getElementById('notes').value = notesText(week);
+    status.hidden = true; out.hidden = false;
+    document.getElementById('dlAll').disabled = false;
+    try { const u = new URL(location.href); u.searchParams.set('week', entry.weekId); history.replaceState(null, '', u.pathname + u.search); } catch (e) {}
+  } catch (e) {
+    console.error(e);
+    status.textContent = 'Could not build the recap — check your connection and reload.';
+  }
+}
+
+document.getElementById('graphics').addEventListener('click', e => {
+  const b = e.target.closest('button[data-i]'); if (!b || !active) return;
+  const g = active.list[Number(b.dataset.i)]; download(g.canvas, g.file);
+});
+document.getElementById('dlAll').addEventListener('click', async () => {
+  if (!active) return;
+  for (const g of active.list) { await download(g.canvas, g.file); await new Promise(r => setTimeout(r, 350)); }
+});
+document.getElementById('copyNotes').addEventListener('click', async () => {
+  const t = document.getElementById('notes');
+  try { await navigator.clipboard.writeText(t.value); } catch (e) { t.select(); document.execCommand('copy'); }
+  const c = document.getElementById('copied'); c.hidden = false; setTimeout(() => { c.hidden = true; }, 2000);
+});
+document.getElementById('dlNotes').addEventListener('click', () => {
+  if (!active) return;
+  const b = new Blob([document.getElementById('notes').value], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${fileSlug(active.week)}-talking-points.txt`; a.click();
+});
+document.getElementById('weekSelect').addEventListener('change', e => show(e.target.value));
+
+(async () => {
+  try {
+    await Promise.all([
+      buildChain(),
+      (async () => { mascot = await loadMascot(); })(),
+      document.fonts ? Promise.all(['800 40px "Barlow Condensed"', '700 40px "Barlow Condensed"', '600 40px "Barlow Condensed"', '400 20px "DM Mono"', '500 20px "DM Mono"'].map(f => document.fonts.load(f))).catch(() => {}) : null,
+    ]);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('status').textContent = 'Could not load weeks — check your connection and reload.';
+    return;
+  }
+  if (!chain.length) { document.getElementById('status').textContent = 'No weeks yet.'; return; }
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = chain.map(w => `<option value="${esc(w.weekId)}">${esc(plainLabel(w.label))}${w.isCurrent ? ' · live (not final)' : ' · Final'}</option>`).join('');
+  // Default: the requested week, else the most recent FINISHED week, else this week as a preview.
+  let want = null;
+  try { want = new URLSearchParams(location.search).get('week'); } catch (e) {}
+  const pick = (want && chain.find(w => w.weekId === want)) || chain.find(w => !w.isCurrent) || chain[0];
+  sel.value = pick.weekId;
+  show(pick.weekId);
+})();
+</script>
+</body>
+</html>
