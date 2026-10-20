@@ -236,12 +236,39 @@
       .masthead h1 { font-size: 2.1rem; }
       .name-bar-grid { grid-template-columns: 1fr; }
     }
+  
+    /* ---- 33 Deep brand lockup (Nov 2026): The Fan's Vote is part of 33 Deep ---- */
+    .brand-lockup { display: flex; align-items: center; gap: 0.7rem; }
+    .deep-hex {
+      width: 34px; height: 38px; flex-shrink: 0; background: var(--gold); text-decoration: none;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Arial Black', 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 14px; color: var(--accent2); letter-spacing: -0.02em;
+    }
+    .brand-text { display: flex; flex-direction: column; line-height: 1; }
+    .brand-deep { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent2); font-weight: 500; margin-top: 4px; text-decoration: none; align-self: flex-start; }
+    a.deep-hex:hover, a.deep-hex:focus-visible { filter: brightness(1.08); }
+    .brand-deep:hover, .brand-deep:focus-visible { color: var(--accent); }
+    .footer-deep { flex: 1 0 100%; display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.1rem; padding-bottom: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .footer-deep .deep-hex { width: 28px; height: 32px; font-size: 12px; }
+    .footer-deep p { font-size: 0.78rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .footer-deep a.footer-deep-link { color: var(--gold); text-decoration: none; font-weight: 700; white-space: nowrap; }
+    .footer-deep a.footer-deep-link:hover { text-decoration: underline; }
+    footer { flex-wrap: wrap; }   /* the "part of 33 Deep" line takes its own row (Leaderboard's footer didn't wrap) */
+    @media (max-width: 768px) { .deep-hex { width: 30px; height: 34px; font-size: 12px; } .brand-lockup { gap: 0.55rem; } }
   </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">The Fan's <em>Vote</em></div>
+  <div class="brand-lockup">
+    <a class="deep-hex" href="https://33deep.com/" aria-label="33 Deep home" title="33 Deep — NCAA wrestling history and brackets">33</a>
+    <div class="brand-text">
+      <div class="logo">The Fan's <em>Vote</em></div>
+      <a class="brand-deep" href="https://33deep.com/" title="33 Deep — NCAA wrestling history and brackets">33 Deep</a>
+    </div>
+  </div>
   <nav class="nav-links">
     <a href="index.html">Rankings</a>
     <a href="poll.html">Cast Your Vote</a>
@@ -360,6 +387,10 @@
 </div>
 
 <footer>
+  <div class="footer-deep">
+    <a class="deep-hex" href="https://33deep.com/" aria-label="33 Deep home">33</a>
+    <p>The Fan's Vote is part of <strong>33 Deep</strong> &mdash; every NCAA wrestling championship since 1928, bracket by bracket. <a class="footer-deep-link" href="https://33deep.com/">Explore the history &rarr;</a></p>
+  </div>
   <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
   <div class="footer-partner">
     <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
