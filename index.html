@@ -501,6 +501,26 @@
     .hist-chip .rk.unranked { color: var(--muted2); }
     .hist-chip .live { font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--green); letter-spacing: 0.08em; display: block; }
     .hist-msg { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); padding: 0 0.6rem; }
+      /* ---- Mobile header fix (Oct 2026): phones only. The header row (logo + 5 links + week label) and the masthead were
+       wider than a phone screen, and the rankings table stretched its column past the screen edge, so the whole page scrolled
+       sideways ~125px at 390px. Links move to their own row that scrolls inside itself, the masthead scales down, and the
+       table column may shrink to the screen with tighter padding. Desktop/tablet above 768px is unchanged. ---- */
+    @media (max-width: 768px) {
+      header { height: auto; flex-wrap: wrap; padding: 0.55rem 1rem; column-gap: 1rem; row-gap: 0.35rem; }
+      .nav-links { order: 3; flex: 1 0 100%; gap: 1.3rem; overflow-x: auto; white-space: nowrap;
+        scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .header-right { order: 2; flex: 1 0 100%; }
+      .header-meta { font-size: 0.55rem; text-align: left; display: flex; flex-wrap: wrap; column-gap: 0.9rem; line-height: 1.4; }
+      .masthead { padding: 1.4rem 1rem; }
+      .masthead-left { gap: 0.8rem; max-width: 100%; }
+      .masthead-cactus img { height: 84px; }
+      .masthead h1 { font-size: clamp(2.2rem, 11vw, 2.8rem); }
+      .main { grid-template-columns: minmax(0, 1fr); }      /* the column may shrink below the table's natural width */
+      .rankings-panel { padding: 1.25rem 0.75rem; border-right: none; }
+      td, thead th { padding-right: 0.6rem; }
+      .sidebar { padding: 1.5rem 1rem; }
+    }
   </style>
 </head>
 <body>
