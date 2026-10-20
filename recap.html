@@ -263,7 +263,14 @@ function frame(ctx, week, kicker, title) {
   font(ctx, 700, 28, F.cond); ctx.fillStyle = C.cactus; spaced(ctx, 'CACTUS WRESTLING', W - 170, 124, 2, 'right');
   // footer
   ctx.fillStyle = C.line; ctx.fillRect(70, H - 74, W - 140, 1);
-  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim; spaced(ctx, SITE.toUpperCase() + '  ·  VOTE EVERY WEEK', 70, H - 34, 2);
+  // 33 Deep badge (Nov 2026): gold hexagon + "33", then the site line
+  { const cx = 86, cy = H - 41, r = 17; ctx.beginPath();
+    for (let i = 0; i < 6; i++) { const a = Math.PI / 3 * i - Math.PI / 2; ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); }
+    ctx.closePath(); ctx.fillStyle = C.gold; ctx.fill();
+    ctx.font = '900 15px "Arial Black", Arial, sans-serif'; ctx.fillStyle = C.bg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('33', cx, cy + 1); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; }
+  font(ctx, 700, 20, F.mono); ctx.fillStyle = C.text; spaced(ctx, '33 DEEP', 116, H - 34, 2);
+  font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim; spaced(ctx, '·  ' + SITE.toUpperCase() + '  ·  VOTE EVERY WEEK', 236, H - 34, 2);
 }
 
 // First-place votes: % = first-place votes / ballots at that weight. Shown only when > 0.
