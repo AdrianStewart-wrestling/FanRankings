@@ -274,6 +274,16 @@
       font-family: 'DM Mono', monospace; font-size: 0.62rem;
       color: var(--muted); margin-top: 2px; letter-spacing: 0.04em;
     }
+    .first-place {   /* first-place votes (Oct 2026): shown only when > 0 */
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      color: var(--muted); margin-top: 3px; letter-spacing: 0.04em;
+    }
+    .first-place b { color: var(--accent); font-weight: 500; }
+    .first-place .fp-short { display: none; }
+    @media (min-width: 769px) and (max-width: 1060px) {   /* sidebar squeezes the name column: compact "26% · 13 #1" */
+      .first-place .fp-long { display: none; }
+      .first-place .fp-short { display: inline; }
+    }
     .points-col {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 1.6rem; font-weight: 700; color: var(--accent2); text-align: right;
@@ -703,6 +713,16 @@ function esc(v) {
   return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// First-place votes (Oct 2026). Written by the server tally as results[].firstPlaceVotes; weeks frozen before the
+// change don't have the field, so nothing is shown for them. % = first-place votes / that week's ballots at this weight,
+// multiplied before dividing so exact halves (e.g. 29 of 200 = 14.5%) always round up, same as recap.html.
+function firstPlaceHtml(r, totalBallots) {
+  const n = Number(r && r.firstPlaceVotes), total = Number(totalBallots);
+  if (!(n > 0) || !(total > 0)) return '';
+  const label = `${n} first-place vote${n === 1 ? '' : 's'}`;
+  return `<div class="first-place" title="${label} of ${total} ballots"><b>${Math.round(n * 100 / total)}%</b> &middot; <span class="fp-long">${label}</span><span class="fp-short">${n} #1</span></div>`;
+}
+
 function shortWeekLabel(weekId, meta = {}) {
   const id = String(weekId || '');
   if (id === 'week-0') return 'Off';
@@ -1053,7 +1073,7 @@ function renderTable(data, tab, view = { prevRanks: new Map(), hasPrev: false, n
               ${i < 3 ? `<span class="rank-medal">${medals[i]}</span>` : ''}
             </td>
             ${showMove ? `<td class="move-col">${movementHtml(r.rank, view.prevRanks.has(normalizeName(r.name)) ? view.prevRanks.get(normalizeName(r.name)) : null)}</td>` : ''}
-            <td><button type="button" class="name-btn" data-name="${esc(r.name)}" aria-expanded="false" title="See week-by-week history"><span class="wrestler-name">${esc(r.name)}</span></button></td>
+            <td><button type="button" class="name-btn" data-name="${esc(r.name)}" aria-expanded="false" title="See week-by-week history"><span class="wrestler-name">${esc(r.name)}</span></button>${firstPlaceHtml(r, data.totalBallots)}</td>
             ${isTeams ? '' : `<td><div class="wrestler-school">${r.school || '&mdash;'}</div></td>`}
             <td class="right">
               <div class="points-col">${r.points}</div>

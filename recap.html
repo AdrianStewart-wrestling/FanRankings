@@ -176,14 +176,17 @@ async function loadWeek(entry) {
     const rows = (d.results || []).slice().sort((a, b) => a.rank - b.rank).map(r => {
       const was = prevRank.has(norm(r.name)) ? prevRank.get(norm(r.name)) : null;
       return { rank: Number(r.rank), name: r.name, school: r.school || '', points: Number(r.points) || 0, was,
-               move: !p ? null : (was == null ? 'new' : was - Number(r.rank)) };
+               move: !p ? null : (was == null ? 'new' : was - Number(r.rank)),
+               fp: r.firstPlaceVotes == null ? null : Number(r.firstPlaceVotes) || 0 };   // first-place votes (Oct 2026)
     });
     const top = rows.slice(0, n);
     const prevTop = (p && p.results || []).filter(r => Number(r.rank) <= n).sort((a, b) => a.rank - b.rank);
     const nowRank = new Map(rows.map(r => [norm(r.name), r.rank]));
     const droppedOut = !p ? [] : prevTop.filter(r => !top.some(t => norm(t.name) === norm(r.name)))
       .map(r => ({ name: r.name, school: r.school || '', was: Number(r.rank), now: nowRank.get(norm(r.name)) ?? null }));
-    cats[k] = { key: k, ballots: Number(d.totalBallots) || 0, final: !!d.final, top, droppedOut, hasPrev: !!p };
+    const hasFp = rows.some(r => r.fp != null);                                   // false for weeks frozen before Oct 2026
+    cats[k] = { key: k, ballots: Number(d.totalBallots) || 0, final: !!d.final, top, droppedOut, hasPrev: !!p,
+                hasFp, firstPlace: hasFp ? rows.filter(r => r.fp > 0) : [] };
   });
   const prevEntry = prevId ? chain.find(w => w.weekId === prevId) : null;
   return { entry, cats, hasPrev: !!prevId, prevShort: prevEntry ? prevEntry.short : null };
@@ -263,6 +266,11 @@ function frame(ctx, week, kicker, title) {
   font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim; spaced(ctx, SITE.toUpperCase() + '  ·  VOTE EVERY WEEK', 70, H - 34, 2);
 }
 
+// First-place votes: % = first-place votes / ballots at that weight. Shown only when > 0.
+// Multiply before dividing so exact halves (29 of 200 = 14.5%) round up consistently; same formula as index.html.
+const fpPct = (n, ballots) => ballots > 0 ? Math.round(n * 100 / ballots) : 0;
+const fpShort = (r, ballots) => r && r.fp > 0 ? `${fpPct(r.fp, ballots)}% · ${r.fp} #1` : '';
+
 function finalTag(week) { return week.entry.isCurrent ? 'Live · not final' : 'Final'; }
 
 function drawTopList(week, key) {
@@ -270,7 +278,7 @@ function drawTopList(week, key) {
   const label = key === 'p4p' ? 'Pound-for-Pound Top 10' : key === 'teams' ? 'Team Rankings Top 10' : `${key} lbs · Top 8`;
   frame(ctx, week, `${week.entry.short} · ${finalTag(week)}`, label);
   font(ctx, 500, 20, F.mono); ctx.fillStyle = C.dim;
-  spaced(ctx, `${cat.ballots} BALLOTS`, W - 70, H - 34, 2, 'right');
+  spaced(ctx, `${cat.ballots} BALLOTS${cat.firstPlace.length ? '  ·  #1 = FIRST-PLACE VOTES' : ''}`, W - 70, H - 34, 2, 'right');
   const rows = cat.top, n = TOP_N(key);
   const top = 178, bottom = H - 96, rowH = Math.min(84, (bottom - top) / n);
   const showMove = cat.hasPrev, isTeams = key === 'teams';
@@ -285,13 +293,17 @@ function drawTopList(week, key) {
     if (showMove) badge(ctx, r.move, xMove, mid);
     const nameMax = W - xName - barW - 260;
     const nameSize = Math.min(44, rowH * 0.56);
-    const nm = fit(ctx, r.name, isTeams ? nameMax + 200 : nameMax * 0.62, 700, nameSize, 26);
+    const fpTxt = fpShort(r, cat.ballots), fpRight = xBarEnd - barW - 160, fpSize = Math.min(18, rowH * 0.24);
+    let fpLeft = xBarEnd;
+    if (fpTxt) { font(ctx, 500, fpSize, F.mono); fpLeft = fpRight - ctx.measureText(fpTxt).width;
+      ctx.fillStyle = r.rank === 1 ? C.gold : C.dim; ctx.textAlign = 'right'; ctx.fillText(fpTxt, fpRight, mid + 3); ctx.textAlign = 'left'; }
+    const nm = fit(ctx, r.name, Math.min(isTeams ? nameMax + 200 : nameMax * 0.62, fpLeft - xName - 24), 700, nameSize, 26);
     ctx.fillStyle = r.rank === 1 ? C.text : 'rgba(255,255,255,0.92)'; ctx.fillText(nm, xName, mid + 5);
     if (!isTeams && r.school) {
       const nw = ctx.measureText(nm).width;
       font(ctx, 400, Math.min(20, rowH * 0.26), F.mono); ctx.fillStyle = C.dim;
       const sx = xName + nw + 20;
-      ctx.fillText(fit(ctx, r.school.toUpperCase(), Math.max(60, xBarEnd - barW - 150 - sx), 400, Math.min(20, rowH * 0.26), 13, F.mono), sx, mid + 3);
+      ctx.fillText(fit(ctx, r.school.toUpperCase(), Math.max(60, Math.min(xBarEnd - barW - 150, fpLeft - 24) - sx), 400, Math.min(20, rowH * 0.26), 13, F.mono), sx, mid + 3);
     }
     // points + bar
     font(ctx, 700, Math.min(40, rowH * 0.5), F.cond); ctx.fillStyle = r.rank === 1 ? C.red : C.text; ctx.textAlign = 'right';
@@ -322,7 +334,9 @@ function drawNumberOnes(week) {
     const parts = r.name.split(' '), first = parts.length > 1 ? parts.slice(0, -1).join(' ') : '', last = parts[parts.length - 1];
     font(ctx, 600, 28, F.cond); ctx.fillStyle = C.dim; ctx.fillText(fit(ctx, first, cw - 48, 600, 28, 18), x + 24, y + 112);
     ctx.fillStyle = C.text; ctx.fillText(fit(ctx, last.toUpperCase(), cw - 48, 800, 48, 26), x + 24, y + 160);
-    font(ctx, 400, 16, F.mono); ctx.fillStyle = C.dim; ctx.fillText(fit(ctx, (r.school || '').toUpperCase(), cw - 48, 400, 16, 11, F.mono), x + 24, y + 200);
+    const fpT = r.fp > 0 ? `${fpPct(r.fp, week.cats[k].ballots)}% · ${r.fp} of ${week.cats[k].ballots} #1 votes` : '';
+    font(ctx, 400, 16, F.mono); ctx.fillStyle = C.dim; ctx.fillText(fit(ctx, (r.school || '').toUpperCase(), cw - 48, 400, 16, 11, F.mono), x + 24, fpT ? y + 190 : y + 200);
+    if (fpT) { ctx.fillStyle = C.gold; ctx.fillText(fit(ctx, fpT.toUpperCase(), cw - 48, 500, 15, 10, F.mono), x + 24, y + 214); }
   });
   // P4P + Teams strip
   const sy = gy + 2 * (ch + gap), sw = (W - 140 - gap) / 2, sh = 108;
@@ -334,7 +348,10 @@ function drawNumberOnes(week) {
     ctx.fillStyle = C.text; ctx.fillText(fit(ctx, r.name.toUpperCase(), sw - 340, 800, 50, 26), x + 160, sy + 72);
     font(ctx, 400, 16, F.mono); ctx.fillStyle = C.dim;
     const tail = (k === 'teams' ? '' : (r.school || '').toUpperCase());
-    ctx.textAlign = 'right'; ctx.fillText(fit(ctx, tail, 160, 400, 16, 11, F.mono), x + sw - 24, sy + 64); ctx.textAlign = 'left';
+    const fpT = r.fp > 0 ? `${fpPct(r.fp, week.cats[k].ballots)}% · ${r.fp} #1` : '';
+    ctx.textAlign = 'right'; ctx.fillText(fit(ctx, tail, 160, 400, 16, 11, F.mono), x + sw - 24, fpT ? sy + 52 : sy + 64);
+    if (fpT) { ctx.fillStyle = C.gold; ctx.fillText(fit(ctx, fpT.toUpperCase(), 160, 500, 15, 10, F.mono), x + sw - 24, sy + 78); }
+    ctx.textAlign = 'left';
   });
   return c;
 }
@@ -387,7 +404,8 @@ function notesText(week) {
     let status = '';
     if (cat.hasPrev) status = r.was === 1 ? 'holds #1' : r.was == null ? 'NEW #1 (unranked last week)' : `NEW #1 (was #${r.was})`;
     const margin = r2 ? `, ${r.points - r2.points} pts ahead of ${r2.name}` : '';
-    L.push(`  ${keyShort(k).padEnd(6)} — ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''}, ${r.points} pts${margin}${status ? ' · ' + status : ''}`);
+    const fpT = r.fp > 0 ? ` · ${r.fp} of ${cat.ballots} first-place votes (${fpPct(r.fp, cat.ballots)}%)` : '';
+    L.push(`  ${keyShort(k).padEnd(6)} — ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''}, ${r.points} pts${fpT}${margin}${status ? ' · ' + status : ''}`);
   }
   if (week.hasPrev) {
     const m = movers(week);
@@ -416,12 +434,23 @@ function notesText(week) {
     L.push('RUNAWAY #1s');
     races.slice().sort((p, q) => q.pct - p.pct).slice(0, 3).forEach(x => L.push(`  ${keyShort(x.k)} — ${x.a.name} leads ${x.b.name} by ${x.gap} pts (${Math.round(x.pct * 100)}% of the leader's total)`));
   }
+  const fpKeys = WEIGHTS.concat(SPECIALS).filter(k => week.cats[k].hasFp);
+  if (fpKeys.length) {
+    L.push('');
+    L.push('FIRST-PLACE VOTES (share of ballots ranking him/them #1)');
+    for (const k of fpKeys) {
+      const cat = week.cats[k], fpl = cat.firstPlace, sum = fpl.reduce((s, r) => s + r.fp, 0);
+      L.push(`  ${keyShort(k).padEnd(6)} — ${cat.ballots} ballots: ` + (fpl.length
+        ? fpl.map(r => `${r.name} ${fpPct(r.fp, cat.ballots)}% (${r.fp})`).join(' · ') + (sum < cat.ballots ? ` · ${cat.ballots - sum} with no valid #1` : '')
+        : 'none'));
+    }
+  }
   for (const [k, title] of [['p4p', 'P4P TOP 10'], ['teams', 'TEAM TOP 10']]) {
     L.push('');
     L.push(title);
     const t = week.cats[k].top;
     if (!t.length) L.push('  no ballots');
-    t.forEach(r => L.push(`  ${String(r.rank).padStart(2)}. ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''} — ${r.points}${r.move == null ? '' : r.move === 'new' ? ' · NEW' : r.move === 0 ? '' : r.move > 0 ? ` · ▲${r.move}` : ` · ▼${-r.move}`}`));
+    t.forEach(r => L.push(`  ${String(r.rank).padStart(2)}. ${r.name}${r.school && k !== 'teams' ? ` (${r.school})` : ''} — ${r.points}${r.fp > 0 ? ` · ${r.fp} #1 (${fpPct(r.fp, week.cats[k].ballots)}%)` : ''}${r.move == null ? '' : r.move === 'new' ? ' · NEW' : r.move === 0 ? '' : r.move > 0 ? ` · ▲${r.move}` : ` · ▼${-r.move}`}`));
   }
   L.push('');
   L.push(`Full rankings, any week: ${SITE}/index.html?week=${e.weekId}`);
