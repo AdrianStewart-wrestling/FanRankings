@@ -39,6 +39,7 @@
     .status-msg { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 8px 12px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted); display: none; margin-bottom: 1rem; }
     .status-msg.visible { display: block; }
     .status-msg.error { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .status-msg { white-space: pre-line; }
     .status-msg.success { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
     .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.2rem 1.4rem; margin-bottom: 1.4rem; }
@@ -91,6 +92,17 @@
 
     .dual-row-admin { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1.1rem; margin-bottom: 0.7rem; }
     .dual-row-admin.confirmed { border-color: var(--green); background: var(--green-dim); }
+    /* Save all results (Nov 2026): rows with an unsaved winner, and the one-click save bar */
+    .dual-row-admin.pending { border-color: var(--gold); background: rgba(201,168,76,0.10); }
+    .dual-row-admin .pending-note { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: #8a6d1f; letter-spacing: 0.04em; margin-left: auto; }
+    .save-all-bar { position: sticky; bottom: 0; z-index: 20; background: var(--accent2); border-radius: 4px; padding: 0.75rem 1rem; margin-top: 0.4rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; box-shadow: 0 -4px 14px rgba(0,0,0,0.12); }
+    .save-all-bar[hidden] { display: none; }
+    .save-all-bar span { font-family: 'DM Mono', monospace; font-size: 0.66rem; color: rgba(255,255,255,0.75); letter-spacing: 0.04em; }
+    .save-all-bar span b { color: var(--gold); }
+    .btn-save-all { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 20px; background: var(--gold); color: var(--accent2); border: none; border-radius: 3px; cursor: pointer; }
+    .btn-save-all:disabled { opacity: 0.6; cursor: wait; }
+    .btn-discard { font-family: 'DM Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; background: transparent; color: rgba(255,255,255,0.65); border: 1px solid rgba(255,255,255,0.25); border-radius: 3px; padding: 7px 10px; cursor: pointer; }
     .dual-row-admin .meta-line { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .dual-row-admin .names { font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
     .dual-row-admin .current { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-bottom: 8px; }
@@ -555,6 +567,13 @@ async function loadWeeks() {
   if (allWeeks.length) renderManageWeek(sel.value);
 }
 
+// Winners chosen but not saved yet, kept across reloads: { 'week-3|d4': 'A' }
+const pendingResults = {};
+const pendingKey = (weekId, dualId) => `${weekId}|${dualId}`;
+function pendingFor(weekId) {
+  return Object.entries(pendingResults).filter(([k]) => k.startsWith(weekId + '|')).map(([k, winner]) => ({ dualId: k.slice(weekId.length + 1), winner }));
+}
+
 function renderManageWeek(weekId) {
   const week = allWeeks.find(w => w.id === weekId);
   const detail = document.getElementById('manageWeekDetail');
@@ -581,19 +600,22 @@ function renderManageWeek(weekId) {
       html += `<div class="day-group-header">${formatGroupDay(d.date)}</div>`;
     }
     const locked = isDualLocked(d);
-    html += `<div class="dual-row-admin ${d.winner ? 'confirmed' : ''}">
+    const pend = pendingResults[pendingKey(week.id, dualId)];
+    const shown = pend || d.winner || '';
+    html += `<div class="dual-row-admin ${pend ? 'pending' : d.winner ? 'confirmed' : ''}" data-row="${dualId}">
       <div class="meta-line">
         <span>${formatWhen(d)}</span>
         ${d.location ? `<span>&middot; ${escapeHtml(d.location)}</span>` : ''}
         ${!d.winner ? `<span class="status-pill ${locked ? 'locked' : 'open'}">${locked ? 'Locked' : 'Open for picks'}</span>` : ''}
+        <span class="pending-note" data-pending-note="${dualId}">${pend ? 'Not saved yet' : ''}</span>
       </div>
       <div class="names">${escapeHtml(d.teamA)} vs ${escapeHtml(d.teamB)}</div>
       <div class="current">${d.winner ? `Winner: <strong>${escapeHtml(d.winner === 'A' ? d.teamA : d.teamB)}</strong>` : 'Not yet decided'}</div>
       <div class="controls">
         <select data-dual="${dualId}">
           <option value="">Select winner…</option>
-          <option value="A" ${d.winner === 'A' ? 'selected' : ''}>${escapeHtml(d.teamA)}</option>
-          <option value="B" ${d.winner === 'B' ? 'selected' : ''}>${escapeHtml(d.teamB)}</option>
+          <option value="A" ${shown === 'A' ? 'selected' : ''}>${escapeHtml(d.teamA)}</option>
+          <option value="B" ${shown === 'B' ? 'selected' : ''}>${escapeHtml(d.teamB)}</option>
         </select>
         <button type="button" class="btn-set" data-set="${dualId}">${d.winner ? 'Update' : 'Set'}</button>
         <button type="button" class="btn-clear" data-clear="${dualId}" ${d.winner ? '' : 'disabled'}>Clear</button>
@@ -601,7 +623,71 @@ function renderManageWeek(weekId) {
     </div>`;
   });
 
+  html += `<div class="save-all-bar" id="saveAllBar" hidden>
+    <span id="saveAllText"></span>
+    <span style="display:flex;gap:8px;align-items:center;">
+      <button type="button" class="btn-discard" id="discardAllBtn">Discard</button>
+      <button type="button" class="btn-save-all" id="saveAllBtn">Save all results</button>
+    </span>
+  </div>`;
   detail.innerHTML = html;
+
+  const winnersById = Object.fromEntries(dualsSorted.map(([id, d]) => [id, d.winner || '']));
+  const updateSaveBar = () => {
+    const n = pendingFor(week.id).length;
+    document.getElementById('saveAllBar').hidden = n === 0;
+    document.getElementById('saveAllText').innerHTML = `<b>${n}</b> result${n === 1 ? '' : 's'} picked, not saved yet`;
+    document.getElementById('saveAllBtn').textContent = `Save all results (${n})`;
+  };
+  // Choosing a winner marks the row; nothing is saved until "Save all results" (or that row's Set).
+  detail.querySelectorAll('select[data-dual]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const dualId = sel.dataset.dual, key = pendingKey(week.id, dualId);
+      if (sel.value && sel.value !== winnersById[dualId]) pendingResults[key] = sel.value; else delete pendingResults[key];
+      const row = detail.querySelector(`[data-row="${dualId}"]`);
+      row.classList.toggle('pending', !!pendingResults[key]);
+      row.classList.toggle('confirmed', !pendingResults[key] && !!winnersById[dualId]);
+      detail.querySelector(`[data-pending-note="${dualId}"]`).textContent = pendingResults[key] ? 'Not saved yet' : '';
+      updateSaveBar();
+    });
+  });
+  updateSaveBar();
+
+  document.getElementById('discardAllBtn').onclick = () => {
+    pendingFor(week.id).forEach(p => delete pendingResults[pendingKey(week.id, p.dualId)]);
+    renderManageWeek(week.id);
+  };
+
+  // One click: saves every picked result through the same setDualResult call the Set button uses,
+  // one at a time (so each is scored exactly as before), then reloads the week once.
+  document.getElementById('saveAllBtn').onclick = async () => {
+    const adminKey = getAdminKey();
+    if (!adminKey) { showStatus('Enter your admin key first.', 'error'); return; }
+    const todo = pendingFor(week.id);
+    if (!todo.length) return;
+    const btn = document.getElementById('saveAllBtn');
+    btn.disabled = true; document.getElementById('discardAllBtn').disabled = true;
+    const failed = [];
+    let saved = 0;
+    for (let i = 0; i < todo.length; i++) {
+      const { dualId, winner } = todo[i];
+      const d = week.duals[dualId];
+      showStatus(`Saving ${i + 1} of ${todo.length}: ${d.teamA} vs ${d.teamB}…`, 'loading');
+      try {
+        await setDualResultFn({ adminKey, weekId: week.id, dualId, winner });
+        delete pendingResults[pendingKey(week.id, dualId)];
+        saved++;
+        if (saved === 1) markKeyVerified();
+      } catch (e) {
+        failed.push(`${d.teamA} vs ${d.teamB}: ${e.message || 'failed'}`);
+        // A wrong admin key fails every call the same way, so stop instead of repeating it.
+        if (saved === 0 && /key|permission|denied|unauth/i.test(e.message || '')) { failed.push(`Stopped: ${todo.length - i - 1} not attempted.`); break; }
+      }
+    }
+    await loadWeeks();
+    if (!failed.length) showStatus(`${saved} result${saved === 1 ? '' : 's'} saved.`, 'success');
+    else showStatus(`${saved} saved, ${todo.length - saved} not saved (still marked "Not saved yet"):\n` + failed.join('\n'), 'error');
+  };
 
   document.getElementById('toggleStatusBtn').onclick = async () => {
     const adminKey = getAdminKey();
@@ -629,6 +715,7 @@ function renderManageWeek(weekId) {
       showStatus('Saving result...', 'loading');
       try {
         await setDualResultFn({ adminKey, weekId: week.id, dualId, winner });
+        delete pendingResults[pendingKey(week.id, dualId)];
         markKeyVerified();
         showStatus('Result saved.', 'success');
         await loadWeeks();
@@ -648,6 +735,7 @@ function renderManageWeek(weekId) {
       showStatus('Clearing result...', 'loading');
       try {
         await clearDualResultFn({ adminKey, weekId: week.id, dualId });
+        delete pendingResults[pendingKey(week.id, dualId)];
         markKeyVerified();
         showStatus('Result cleared.', 'success');
         await loadWeeks();
