@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-R18TQ9ZF9Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-R18TQ9ZF9Z');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>This Week in Fan Rankings — The Fan's Vote · 33 Deep</title>
+  <meta name="description" content="How the fans voted this week: the #1 at every weight, first-place vote shares, the closest races and the P4P and team top 10s. Fan-powered NCAA wrestling rankings."/>
+  <meta property="og:title" content="This Week in Fan Rankings — The Fan's Vote"/>
+  <meta property="og:description" content="The #1 at every weight, as voted by fans. Vote every week at fans.33deep.com."/>
+  <meta property="og:url" content="https://fans.33deep.com/week.html"/>
+  <meta property="og:type" content="website"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f5f4f0; --surface: #ffffff; --surface2: #eeede9; --border: #dddbd5; --border-dark: #c8c5bc;
+      --accent: #c0392b; --accent-dim: rgba(192,57,43,0.08); --accent2: #1a1a2e; --text: #1c1c1c;
+      --muted: #888880; --muted2: #b0aea6; --gold: #c9a84c; --green: #2e7d52; --cactus-green: #3a9e2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Lato', sans-serif; min-height: 100vh; }
+    a { color: inherit; }
+
+    /* ---- header (same as the other Fan's Vote pages) ---- */
+    header { background: #fff; border-bottom: 2px solid var(--border); padding: 0 2rem; display: flex; align-items: center;
+      justify-content: space-between; height: 64px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+    .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.06em; color: var(--accent2); text-transform: uppercase; }
+    .logo em { color: var(--accent); font-style: normal; }
+    .brand-lockup { display: flex; align-items: center; gap: 0.7rem; }
+    .deep-hex { width: 34px; height: 38px; flex-shrink: 0; background: var(--gold); text-decoration: none;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); display: flex; align-items: center; justify-content: center;
+      font-family: 'Arial Black', 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 14px; color: var(--accent2); letter-spacing: -0.02em; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1; }
+    .brand-deep { font-family: 'DM Mono', monospace; font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent2);
+      font-weight: 500; margin-top: 4px; text-decoration: none; align-self: flex-start; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--accent); }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .partnership-badge { display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 1rem; }
+    .partnership-badge img { height: 48px; width: auto; filter: drop-shadow(0 0 5px rgba(58,158,46,0.5)); }
+    .partnership-text { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; line-height: 1.6; }
+    .partnership-text strong { display: block; color: var(--cactus-green); font-size: 0.68rem; letter-spacing: 0.06em; }
+
+    /* ---- hero ---- */
+    .hero { background: var(--accent2); color: #fff; padding: 2.6rem 2rem 2.2rem; position: relative; overflow: hidden; }
+    .hero::after { content: '33'; position: absolute; right: -1.5rem; bottom: -4.5rem; font-family: 'Arial Black', sans-serif; font-weight: 900;
+      font-size: 18rem; line-height: 1; color: rgba(201,168,76,0.07); pointer-events: none; }
+    .hero-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+    .eyebrow { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+    .eyebrow .final { display: inline-block; background: var(--gold); color: var(--accent2); padding: 1px 7px; border-radius: 2px; margin-left: 0.4rem; font-weight: 500; }
+    .hero h1 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; text-transform: uppercase; font-size: clamp(2.6rem, 7vw, 4.6rem); line-height: 0.92; margin: 0.6rem 0 0.9rem; }
+    .hero h1 span { color: var(--accent); font-style: italic; }
+    .hero-sub { color: rgba(255,255,255,0.72); max-width: 560px; line-height: 1.55; font-size: 0.98rem; }
+    .hero-stats { display: flex; gap: 2.2rem; margin: 1.5rem 0 1.6rem; flex-wrap: wrap; }
+    .hero-stats div { font-family: 'Barlow Condensed', sans-serif; font-size: 2.1rem; font-weight: 800; line-height: 1; }
+    .hero-stats small { display: block; font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.5); margin-top: 5px; font-weight: 400; text-transform: uppercase; }
+    .hero-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; }
+    .btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 11px 22px; border-radius: 2px; text-decoration: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #a93226; }
+    .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+    .week-pick { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+    .week-pick[hidden] { display: none; }
+    .week-pick label { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+    .week-pick select { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; padding: 7px 10px; border-radius: 2px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.06); color: #fff; }
+    .week-pick select option { color: var(--text); }
+
+    /* ---- sections ---- */
+    main { max-width: 1100px; margin: 0 auto; padding: 2.4rem 2rem 1rem; }
+    section { margin-bottom: 2.8rem; }
+    .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; border-bottom: 2px solid var(--accent2); padding-bottom: 0.5rem; margin-bottom: 1.2rem; }
+    .sec-head h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; }
+    .sec-head p { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; text-align: right; }
+
+    /* #1 cards */
+    .ones { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 12px; }
+    .one { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1rem 1.05rem 0.95rem; text-decoration: none; display: flex; flex-direction: column;
+      position: relative; transition: border-color .15s, transform .15s; }
+    .one:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .one-top { display: flex; align-items: baseline; justify-content: space-between; }
+    .one-wt { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--accent); line-height: 1; }
+    .one-wt small { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted2); margin-left: 3px; font-weight: 400; }
+    .one-first { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; color: var(--muted); margin-top: 0.7rem; line-height: 1.05; }
+    .one-last { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 800; text-transform: uppercase; line-height: 1; color: var(--accent2); white-space: nowrap; }
+    .one-last.long { font-size: 1.4rem; } .one-last.xlong { font-size: 1.15rem; }
+    .one-school { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+    .share { margin-top: auto; padding-top: 0.85rem; }
+    .share-row { display: flex; justify-content: space-between; align-items: baseline; font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.04em; }
+    .share-row b { font-family: 'Barlow Condensed', sans-serif; font-size: 1.35rem; color: var(--accent2); letter-spacing: 0; }
+    .share-bar { height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+    .share-bar i { display: block; height: 100%; background: var(--gold); border-radius: 3px; }
+    .one.special { background: var(--accent2); border-color: var(--accent2); }
+    .one.special .one-wt { color: var(--gold); font-size: 1.15rem; letter-spacing: 0.08em; }
+    .one.special .one-last { color: #fff; white-space: normal; }
+    .one.special .one-first, .one.special .one-school, .one.special .share-row { color: rgba(255,255,255,0.55); }
+    .one.special .share-row b { color: #fff; }
+    .one.special .share-bar { background: rgba(255,255,255,0.1); }
+    .split-tag { position: absolute; top: 0.85rem; right: 0.9rem; font-family: 'DM Mono', monospace; font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase;
+      background: var(--accent-dim); color: var(--accent); padding: 2px 6px; border-radius: 2px; }
+    .one.special .split-tag { background: rgba(224,74,58,0.18); color: #f08a7e; }
+    .move { font-family: 'DM Mono', monospace; font-size: 0.6rem; font-weight: 700; padding: 1px 5px; border-radius: 2px; }
+    .move.up { background: rgba(46,125,82,0.12); color: var(--green); } .move.down { background: var(--accent-dim); color: var(--accent); }
+    .move.new { background: var(--gold); color: var(--accent2); font-size: 0.5rem; letter-spacing: 0.08em; }
+
+    /* storylines */
+    .stories { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .story { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 4px; padding: 1.1rem 1.2rem 1.15rem; }
+    .story.gold { border-left-color: var(--gold); } .story.navy { border-left-color: var(--accent2); } .story.green { border-left-color: var(--green); }
+    .story .kicker { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .story h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.45rem; font-weight: 800; line-height: 1.05; margin: 0.35rem 0 0.5rem; text-transform: uppercase; color: var(--accent2); }
+    .story p { font-size: 0.9rem; line-height: 1.55; color: #4a4a46; }
+    .story p b { color: var(--text); }
+    .vs { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.6rem; align-items: center; margin-top: 0.85rem; padding-top: 0.8rem; border-top: 1px dashed var(--border); }
+    .vs > div { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); line-height: 1.5; }
+    .vs > div:last-child { text-align: right; }
+    .vs b { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem; color: var(--accent2); letter-spacing: 0; }
+    .vs .mid { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; color: var(--muted2); font-size: 0.95rem; }
+
+    /* top 10s */
+    .tens { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .ten { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+    .ten-head { background: var(--accent2); color: #fff; padding: 0.8rem 1.1rem; display: flex; justify-content: space-between; align-items: baseline; }
+    .ten-head h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.35rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+    .ten-head span { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: rgba(255,255,255,0.5); letter-spacing: 0.1em; }
+    .ten ol { list-style: none; }
+    .ten li { display: grid; grid-template-columns: 2rem 1fr auto; gap: 0.6rem; align-items: center; padding: 0.55rem 1.1rem; border-top: 1px solid var(--surface2); }
+    .ten li:first-child { border-top: none; }
+    .ten .rk { font-family: 'Barlow Condensed', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--muted2); }
+    .ten li:nth-child(1) .rk { color: var(--gold); } .ten li:nth-child(2) .rk { color: #9a9a9a; } .ten li:nth-child(3) .rk { color: #a0845c; }
+    .ten .nm { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+    .ten .nm small { display: block; font-family: 'DM Mono', monospace; font-size: 0.56rem; color: var(--muted); font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+    .ten .nm small b { color: var(--accent); font-weight: 500; }
+    .ten .pt { font-family: 'Barlow Condensed', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--accent2); text-align: right; }
+    .ten .pt small { display: block; font-family: 'DM Mono', monospace; font-size: 0.5rem; color: var(--muted2); font-weight: 400; }
+
+    /* closing CTA */
+    .cta { background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--accent); border-radius: 4px; padding: 1.8rem 1.6rem; display: flex; gap: 1.4rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .cta h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; font-weight: 800; text-transform: uppercase; line-height: 1; }
+    .cta p { color: var(--muted); margin-top: 0.4rem; font-size: 0.92rem; }
+    .cta .btns { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .btn-dark { background: var(--accent2); color: #fff; } .btn-dark:hover { background: #2a2a44; }
+    .btn-line { background: transparent; border: 1px solid var(--border-dark); color: var(--accent2); }
+    .btn-line:hover { border-color: var(--accent); color: var(--accent); }
+    .toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: var(--accent2); color: #fff; padding: 0.6rem 1rem; border-radius: 3px;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 200; }
+    .toast.show { opacity: 1; }
+    .state { text-align: center; padding: 4rem 1rem; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; }
+
+    /* ---- footer (same as the other pages) ---- */
+    footer { background: var(--accent2); padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; flex-wrap: wrap; gap: 0.5rem; }
+    footer p { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: rgba(255,255,255,0.4); letter-spacing: 0.06em; }
+    footer a { color: rgba(255,255,255,0.6); text-decoration: none; }
+    .footer-partner { display: flex; align-items: center; gap: 8px; }
+    .footer-partner img { height: 28px; width: auto; }
+    .footer-deep { flex: 1 0 100%; display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.1rem; padding-bottom: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .footer-deep .deep-hex { width: 28px; height: 32px; font-size: 12px; }
+    .footer-deep p { font-size: 0.78rem; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .footer-deep a.footer-deep-link { color: var(--gold); font-weight: 700; white-space: nowrap; }
+
+    @media (max-width: 768px) {
+      header { height: auto; flex-wrap: wrap; padding: 0.55rem 1rem; column-gap: 1rem; row-gap: 0.35rem; }
+      .nav-links { order: 3; flex: 1 0 100%; gap: 1.3rem; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding-bottom: 2px; }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .partnership-badge { display: none; }
+      .deep-hex { width: 30px; height: 34px; font-size: 12px; } .brand-lockup { gap: 0.55rem; }
+      .hero { padding: 1.8rem 1rem 1.6rem; }
+      .hero-stats { gap: 1.4rem; } .hero-stats div { font-size: 1.7rem; }
+      .week-pick { margin-left: 0; width: 100%; }
+      .week-pick select { flex: 1; }
+      main { padding: 1.8rem 1rem 0.5rem; }
+      .sec-head { flex-direction: column; gap: 0.2rem; } .sec-head p { text-align: left; }
+      .ones { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .one { padding: 0.85rem 0.8rem; } .one-last { font-size: 1.35rem; } .one-last.long { font-size: 1.08rem; } .one-last.xlong { font-size: 0.92rem; } .one-first { font-size: 0.9rem; }
+      .split-tag { position: static; align-self: flex-start; margin-top: 0.4rem; order: 3; }
+      .stories, .tens { grid-template-columns: 1fr; }
+      .cta { padding: 1.4rem 1.1rem; }
+      footer { padding: 1.2rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand-lockup">
+    <a class="deep-hex" href="https://33deep.com/" aria-label="33 Deep home" title="33 Deep — NCAA wrestling history and brackets">33</a>
+    <div class="brand-text">
+      <div class="logo">The Fan's <em>Vote</em></div>
+      <a class="brand-deep" href="https://33deep.com/" title="33 Deep — NCAA wrestling history and brackets">33 Deep</a>
+    </div>
+  </div>
+  <nav class="nav-links">
+    <a href="week.html" class="active">This Week</a>
+    <a href="index.html">Rankings</a>
+    <a href="poll.html">Cast Your Vote</a>
+    <a href="team-points.html">Team Points</a>
+    <a href="road-to-55.html">Road to 55</a>
+    <a href="dual-pickem.html">Dual Pick'em</a>
+  </nav>
+  <div class="header-right">
+    <div class="partnership-badge">
+      <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+      <div class="partnership-text">Official Partner<strong>Cactus Wrestling</strong></div>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow" id="eyebrow">Fan Rankings</div>
+    <h1>The fans<br><span>have spoken</span></h1>
+    <p class="hero-sub" id="heroSub">Every ranking on this page comes straight from fan ballots — no editors, no algorithm.</p>
+    <div class="hero-stats" id="heroStats"></div>
+    <div class="hero-actions">
+      <a class="btn btn-primary" id="voteBtn" href="poll.html">Cast your vote &rarr;</a>
+      <button class="btn btn-ghost" id="shareBtn" type="button">Share this week</button>
+      <div class="week-pick" id="weekPick" hidden>
+        <label for="weekSelect">Week</label>
+        <select id="weekSelect"></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main id="main"><div class="state">Loading the fans' verdict…</div></main>
+
+<footer>
+  <div class="footer-deep">
+    <a class="deep-hex" href="https://33deep.com/" aria-label="33 Deep home">33</a>
+    <p>The Fan's Vote is part of <strong>33 Deep</strong> &mdash; every NCAA wrestling championship since 1928, bracket by bracket. <a class="footer-deep-link" href="https://33deep.com/">Explore the history &rarr;</a></p>
+  </div>
+  <p>The Fan's Vote &middot; Fan-Powered NCAA Wrestling Rankings &middot; Not affiliated with the NCAA</p>
+  <div class="footer-partner">
+    <img src="images/cactus-mascot.png" alt="Cactus Wrestling mascot" width="150">
+    <p>In partnership with <a href="https://www.youtube.com/@CACTUS-Wrestling" target="_blank" rel="noopener">Cactus Wrestling</a></p>
+  </div>
+</footer>
+<div class="toast" id="toast">Link copied</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCPcMkc3z6OZeHgUDLk32iRJHkxP9cQGhc",
+  authDomain: "ncaa-wrestling-52fa3.firebaseapp.com",
+  projectId: "ncaa-wrestling-52fa3",
+  storageBucket: "ncaa-wrestling-52fa3.firebasestorage.app",
+  messagingSenderId: "338738139578",
+  appId: "1:338738139578:web:b3f061e03d985b7530cd83",
+  measurementId: "G-Q1PJ7S60LT"
+});
+const db = getFirestore(app);
+
+// This page shows FINISHED weeks only (frozen results never change): ~24 single-document reads per visit, no listeners.
+const WEIGHTS = ['125', '133', '141', '149', '157', '165', '174', '184', '197', '285'];
+const KEYS = [...WEIGHTS, 'p4p', 'teams'];
+let splitKeysAll = new Set();
+const HIDDEN_WEEKS = ['week-0'];                       // pre-launch Off-Season: never offered
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').trim().toLowerCase();
+const pct = (n, d) => d > 0 ? Math.round(n * 100 / d) : 0;   // same rounding as the Rankings page
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const label = k => k === 'p4p' ? 'P4P' : k === 'teams' ? 'Teams' : `${k} lbs`;
+const plain = l => String(l || '').replace(/\s*·\s*/g, ' · ');
+const shortOf = (id, meta = {}) => /preseason/i.test(id) ? 'Preseason' : (meta.weekNumber ? `Week ${meta.weekNumber}` : id);
+
+const cache = new Map();
+async function ranking(weekId, key) {
+  const k = weekId + '|' + key;
+  if (!cache.has(k)) cache.set(k, getDoc(doc(db, 'rankings', weekId, 'weights', key)).then(s => s.exists() ? s.data() : null).catch(() => null));
+  return cache.get(k);
+}
+
+// Finished weeks, newest first, by walking previousWeekId from weeks/current.
+let current = {}, finals = [];
+async function loadWeeks() {
+  const s = await getDoc(doc(db, 'weeks', 'current'));
+  current = s.exists() ? s.data() : {};
+  const out = [], seen = new Set();
+  let id = current.weekId, isCurrent = true;
+  while (id && !seen.has(id) && out.length < 40) {
+    seen.add(id);
+    let meta = {};
+    try { const m = await getDoc(doc(db, 'fanWeeks', id)); if (m.exists()) meta = m.data(); } catch (e) {}
+    const isFinal = meta.status === 'final' || (!isCurrent) || current.lastCompletedWeekId === id;
+    out.push({ weekId: id, label: meta.label || id, short: shortOf(id, meta), prev: isCurrent ? (current.previousWeekId || meta.previousWeekId) : meta.previousWeekId, isFinal });
+    id = isCurrent ? (current.previousWeekId || meta.previousWeekId) : meta.previousWeekId; isCurrent = false;
+  }
+  finals = out.filter(w => w.isFinal && !HIDDEN_WEEKS.includes(w.weekId));
+}
+
+async function loadWeek(entry) {
+  const prevId = entry.prev && !HIDDEN_WEEKS.includes(entry.prev) ? entry.prev : null;
+  const [cur, prev] = await Promise.all([
+    Promise.all(KEYS.map(k => ranking(entry.weekId, k))),
+    Promise.all(KEYS.map(k => prevId ? ranking(prevId, k) : null)),
+  ]);
+  const cats = {};
+  KEYS.forEach((k, i) => {
+    const d = cur[i] || { results: [], totalBallots: 0 }, p = prev[i];
+    const prevRank = new Map((p && p.results || []).map(r => [norm(r.name), Number(r.rank)]));
+    const rows = (d.results || []).slice().sort((a, b) => a.rank - b.rank).map(r => ({
+      rank: Number(r.rank), name: r.name, school: r.school || '', points: Number(r.points) || 0,
+      fp: r.firstPlaceVotes == null ? null : Number(r.firstPlaceVotes) || 0,
+      was: prevRank.get(norm(r.name)) ?? null }));
+    cats[k] = { key: k, ballots: Number(d.totalBallots) || 0, rows, hasPrev: !!(p && p.results && p.results.length),
+                hasFp: rows.some(r => r.fp != null) };
+  });
+  return { entry, cats, prevShort: prevId ? (finals.find(w => w.weekId === prevId) || {}).short : null };
+}
+
+// ---- storylines, all derived from the frozen results ----
+function storylines(week) {
+  const list = KEYS.map(k => week.cats[k]).filter(c => c.rows.length >= 2);
+  const out = [];
+  // 1. Split decisions: #1 on points is not the fans' most popular #1 pick
+  const splits = list.filter(c => c.hasFp).map(c => {
+    const top = c.rows[0], fav = c.rows.slice().sort((a, b) => (b.fp - a.fp) || (a.rank - b.rank))[0];
+    return fav.name !== top.name && fav.fp > (top.fp || 0) ? { c, top, fav } : null; }).filter(Boolean)
+    .sort((a, b) => (b.fav.fp - b.top.fp) / b.c.ballots - (a.fav.fp - a.top.fp) / a.c.ballots);
+  splitKeysAll = new Set(splits.map(s => s.c.key));
+  splits.slice(0, 2).forEach(({ c, top, fav }) => out.push({ tone: '', kicker: `Split decision · ${label(c.key)}`,
+    title: `More #1 votes, still #2: ${fav.name}`,
+    body: `<b>${esc(fav.name)}</b> was ranked #1 on <b>${fav.fp}</b> ballots to ${top.fp} for ${esc(top.name)}, but ${esc(top.name)} finished first on points (<b>${fmt(top.points)}</b> to ${fmt(fav.points)}). Depth beats passion: being near the top of almost every ballot outscores being #1 on more of them.`,
+    vs: [top, fav], ballots: c.ballots }));
+  // 2. Closest race for #1 (not already told as a split)
+  const told = new Set(splits.slice(0, 2).map(s => s.c.key));
+  const closest = list.filter(c => !told.has(c.key)).map(c => ({ c, gap: c.rows[0].points - c.rows[1].points, rel: (c.rows[0].points - c.rows[1].points) / (c.rows[0].points || 1) }))
+    .sort((a, b) => a.rel - b.rel)[0];
+  if (closest) { const [a, b] = closest.c.rows; out.push({ tone: 'navy', kicker: `Closest race · ${label(closest.c.key)}`,
+    title: `${closest.gap} points apart at the top`,
+    body: `<b>${esc(a.name)}</b> holds #1 at ${label(closest.c.key)} by just <b>${closest.gap}</b> points over ${esc(b.name)} — ${pct(closest.gap, a.points)}% of the leader's total.` +
+      (b.fp != null && b.fp > (a.fp || 0) ? ` And ${esc(b.name)} actually has more first-place votes (<b>${b.fp}</b> to ${a.fp}).` : '') + ` A handful of ballots could flip it next week.`,
+    vs: [a, b], ballots: closest.c.ballots }); }
+  // 3. Most decisive #1
+  const decisive = list.filter(c => c.hasFp && c.ballots >= 10).map(c => ({ c, r: c.rows[0], share: c.rows[0].fp / c.ballots })).sort((a, b) => b.share - a.share)[0];
+  if (decisive && decisive.r.fp) out.push({ tone: 'gold', kicker: `No debate · ${label(decisive.c.key)}`,
+    title: `${pct(decisive.r.fp, decisive.c.ballots)}% of fans agree on ${decisive.r.name}`,
+    body: `<b>${esc(decisive.r.name)}</b>${decisive.r.school && decisive.c.key !== 'teams' ? ` (${esc(decisive.r.school)})` : ''} was ranked #1 on <b>${decisive.r.fp} of ${decisive.c.ballots}</b> ballots — the most one-sided #1 of the week.` });
+  // 4. Movers (from the second finished week on)
+  if (week.prevShort) {
+    const moves = WEIGHTS.flatMap(k => week.cats[k].rows.filter(r => r.rank <= 8).map(r => ({ k, r, d: r.was == null ? null : r.was - r.rank })));
+    const newOnes = moves.filter(m => m.r.rank === 1 && m.r.was !== 1);
+    const climb = moves.filter(m => m.d > 0).sort((a, b) => b.d - a.d)[0];
+    let mv = null;
+    if (newOnes.length) mv = ({ tone: 'green', kicker: `New at the top · vs ${week.prevShort}`, title: newOnes.length === 1 ? `A new #1 at ${label(newOnes[0].k)}` : `${newOnes.length} new #1s this week`,
+      body: newOnes.map(m => `<b>${esc(m.r.name)}</b> takes #1 at ${label(m.k)}${m.r.was ? ` (was #${m.r.was})` : ' (unranked last week)'}`).join('. ') + '.' });
+    else if (climb) mv = ({ tone: 'green', kicker: `Biggest climb · ${label(climb.k)}`, title: `${climb.r.name} jumps ${climb.d} spots`,
+      body: `<b>${esc(climb.r.name)}</b> moved from #${climb.r.was} to <b>#${climb.r.rank}</b> at ${label(climb.k)}.` });
+    if (mv) out.splice(1, 0, mv);   // once there's movement, it's the week's second story (always shown)
+  }
+  return out.slice(0, 4);
+}
+
+// ---- rendering ----
+function moveTag(c, r) {
+  if (!c.hasPrev) return '';
+  if (r.was == null) return '<span class="move new">NEW</span>';
+  const d = r.was - r.rank; return d > 0 ? `<span class="move up">▲${d}</span>` : d < 0 ? `<span class="move down">▼${-d}</span>` : '';
+}
+function card(c, splitKeys) {
+  const r = c.rows[0];
+  if (!r) return `<div class="one"><div class="one-top"><div class="one-wt">${label(c.key)}</div></div><div class="one-school" style="margin-top:1rem">No ballots</div></div>`;
+  const special = c.key === 'p4p' || c.key === 'teams';
+  const parts = String(r.name).split(' '), first = c.key === 'teams' ? '' : parts.slice(0, -1).join(' '), last = c.key === 'teams' ? r.name : parts[parts.length - 1];
+  const tab = c.key;
+  return `<a class="one${special ? ' special' : ''}" href="index.html?week=${encodeURIComponent(currentEntry.weekId)}&tab=${tab}" title="Full ${label(c.key)} rankings">
+    <div class="one-top"><div class="one-wt">${special ? (c.key === 'p4p' ? 'P4P #1' : 'TEAM #1') : `${c.key}<small>LBS</small>`}</div>${moveTag(c, r)}</div>
+    ${splitKeys.has(c.key) ? '<span class="split-tag">Split</span>' : ''}
+    <div class="one-first">${esc(first) || '&nbsp;'}</div>
+    <div class="one-last${c.key === 'teams' ? '' : last.length > 11 ? ' xlong' : last.length > 8 ? ' long' : ''}">${esc(last)}</div>
+    <div class="one-school">${c.key === 'teams' ? `${fmt(r.points)} pts` : esc(r.school)}</div>
+    ${c.hasFp ? `<div class="share"><div class="share-row"><span>${r.fp} of ${c.ballots} #1 votes</span><b>${pct(r.fp, c.ballots)}%</b></div>
+      <div class="share-bar"><i style="width:${pct(r.fp, c.ballots)}%"></i></div></div>`
+      : `<div class="share"><div class="share-row"><span>${c.ballots} ballots</span><b>${fmt(r.points)}</b></div></div>`}
+  </a>`;
+}
+function vsBlock(s) {
+  if (!s.vs) return '';
+  const side = r => `<div><b>${esc(r.name)}</b>${fmt(r.points)} pts${r.fp != null ? ` · ${r.fp} #1 (${pct(r.fp, s.ballots)}%)` : ''}</div>`;
+  return `<div class="vs">${side(s.vs[0])}<div class="mid">VS</div>${side(s.vs[1])}</div>`;
+}
+function tenList(c, title) {
+  return `<div class="ten"><div class="ten-head"><h3>${title}</h3><span>${c.ballots} BALLOTS</span></div><ol>${c.rows.slice(0, 10).map(r => `
+    <li><div class="rk">${r.rank}</div>
+      <div class="nm">${esc(r.name)} ${moveTag(c, r)}<small>${c.key === 'teams' ? '' : esc(r.school)}${r.fp > 0 ? `${c.key === 'teams' ? '' : ' · '}<b>${pct(r.fp, c.ballots)}% of #1 votes</b>` : ''}</small></div>
+      <div class="pt">${fmt(r.points)}<small>PTS</small></div></li>`).join('')}</ol></div>`;
+}
+
+let currentEntry = null;
+function render(week) {
+  currentEntry = week.entry;
+  const cats = week.cats, total = KEYS.reduce((s, k) => s + cats[k].ballots, 0);
+  const isLatest = finals[0] && finals[0].weekId === week.entry.weekId;
+  document.getElementById('eyebrow').innerHTML = `${esc(plain(week.entry.label))}<span class="final">FINAL</span>`;
+  document.title = `${week.entry.short} Fan Rankings — The Fan's Vote · 33 Deep`;
+  const busiest = WEIGHTS.slice().sort((a, b) => cats[b].ballots - cats[a].ballots)[0];
+  document.getElementById('heroStats').innerHTML = `
+    <div>${fmt(total)}<small>Ballots cast</small></div>
+    <div>12<small>Categories ranked</small></div>
+    <div>${busiest}<small>Most-voted weight</small></div>`;
+  const nextLabel = current.status === 'open' && current.label ? plain(current.label).split(' · ')[0] : null;
+  const vb = document.getElementById('voteBtn');
+  vb.innerHTML = nextLabel ? `Vote for ${esc(nextLabel)} &rarr;` : 'Cast your vote &rarr;';
+  document.getElementById('heroSub').textContent = isLatest && nextLabel
+    ? `The final fan rankings for ${week.entry.short}. ${nextLabel} voting is open now — your ballot shapes next week's page.`
+    : `The final fan rankings for ${week.entry.short}, exactly as they froze. Every ranking comes straight from fan ballots.`;
+
+  const stories = storylines(week);
+  const splitKeys = splitKeysAll;
+  document.getElementById('main').innerHTML = `
+    <section>
+      <div class="sec-head"><h2>#1 at every weight</h2><p>Bar = share of ballots ranking him #1 · SPLIT = someone else got more #1 votes · tap a card for full rankings</p></div>
+      <div class="ones">${WEIGHTS.map(k => card(cats[k], splitKeys)).join('')}${card(cats.p4p, splitKeys)}${card(cats.teams, splitKeys)}</div>
+    </section>
+    ${stories.length ? `<section>
+      <div class="sec-head"><h2>The storylines</h2><p>Written from the ballots</p></div>
+      <div class="stories">${stories.map(s => `<article class="story ${s.tone}"><div class="kicker">${esc(s.kicker)}</div><h3>${esc(s.title)}</h3><p>${s.body}</p>${vsBlock(s)}</article>`).join('')}</div>
+    </section>` : ''}
+    <section>
+      <div class="sec-head"><h2>Top 10s</h2><p>${week.prevShort ? `Movement vs ${esc(week.prevShort)}` : 'First ranked week — movement starts next week'}</p></div>
+      <div class="tens">${tenList(cats.p4p, 'Pound-for-Pound')}${tenList(cats.teams, 'Team Rankings')}</div>
+    </section>
+    <section>
+      <div class="cta">
+        <div><h2>${nextLabel ? `${esc(nextLabel)} is open` : 'Make your picks'}</h2><p>Rank your top wrestlers at every weight. It takes two minutes, and it's what this page is made of.</p></div>
+        <div class="btns"><a class="btn btn-primary" href="poll.html">Cast your vote &rarr;</a><a class="btn btn-line" href="index.html">Full rankings</a></div>
+      </div>
+    </section>`;
+}
+
+function renderPicker() {
+  const sel = document.getElementById('weekSelect');
+  sel.innerHTML = finals.map((w, i) => `<option value="${esc(w.weekId)}">${esc(w.short)}${i === 0 ? ' · latest' : ''}</option>`).join('');
+  document.getElementById('weekPick').hidden = finals.length < 2;
+}
+
+async function show(weekId) {
+  const entry = finals.find(w => w.weekId === weekId) || finals[0];
+  if (!entry) { document.getElementById('main').innerHTML = '<div class="state">The first week\'s results land Monday. Cast your vote now.</div>'; return; }
+  document.getElementById('weekSelect').value = entry.weekId;
+  try { const u = new URL(location.href); if (entry === finals[0]) u.searchParams.delete('w'); else u.searchParams.set('w', entry.weekId); history.replaceState(null, '', u.pathname + u.search); } catch (e) {}
+  render(await loadWeek(entry));
+}
+
+document.getElementById('weekSelect').addEventListener('change', e => { show(e.target.value); if (typeof gtag === 'function') gtag('event', 'week_page_select', { week_id: e.target.value }); });
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const url = location.href, title = `${currentEntry ? currentEntry.short : 'This week'} Fan Rankings — The Fan's Vote`;
+  try { if (navigator.share) { await navigator.share({ title, url }); return; } } catch (e) { return; }
+  try { await navigator.clipboard.writeText(url); } catch (e) {}
+  const t = document.getElementById('toast'); t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800);
+  if (typeof gtag === 'function') gtag('event', 'week_page_share');
+});
+
+(async () => {
+  try {
+    await loadWeeks(); renderPicker();
+    let want = null; try { want = new URLSearchParams(location.search).get('w'); } catch (e) {}
+    await show(want);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('main').innerHTML = '<div class="state">Could not load this week\'s results — check your connection and refresh.</div>';
+  }
+})();
+</script>
+</body>
+</html>
