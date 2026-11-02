@@ -212,6 +212,15 @@
     .footer-partner img { height: 30px; width: auto; filter: drop-shadow(0 0 3px rgba(58,158,46,0.4)); opacity: 0.75; }
 
     @media (max-width: 700px) { .layout { grid-template-columns: 1fr; padding: 1rem; } .sidebar { order: -1; } .partnership-badge { display: none; } .partner-strip-img { display: none; } }
+    /* Minimum picks per ballot (Nov 2026) */
+    .min-hint { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.04em; margin-top: 3px; }
+    .min-hint.short { color: var(--accent); }
+    .min-modal { position: fixed; inset: 0; background: rgba(20,20,30,0.55); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .min-modal.open { display: flex; }
+    .min-modal-box { background: var(--surface); border-top: 4px solid var(--accent); border-radius: 4px; max-width: 380px; width: 100%; padding: 1.6rem 1.5rem 1.3rem; box-shadow: 0 10px 40px rgba(0,0,0,0.25); text-align: center; }
+    .min-modal-box h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem; }
+    .min-modal-box p { font-size: 0.92rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.2rem; }
+    .min-modal-box p strong { color: var(--text); }
   
     /* ---- 33 Deep brand lockup (Nov 2026): The Fan's Vote is part of 33 Deep ---- */
     .brand-lockup { display: flex; align-items: center; gap: 0.7rem; }
@@ -247,6 +256,13 @@
   </style>
 </head>
 <body>
+<div class="min-modal" id="minModal" role="dialog" aria-modal="true" aria-labelledby="minModalTitle" onclick="if (event.target === this) window.closeMinModal()">
+  <div class="min-modal-box">
+    <h3 id="minModalTitle">Rank a few more</h3>
+    <p id="minModalText"></p>
+    <button type="button" class="btn-submit" id="minModalOk" onclick="window.closeMinModal()">Got it</button>
+  </div>
+</div>
 
 <header>
   <div class="brand-lockup">
@@ -310,7 +326,10 @@
           <div class="slots-loading"><span class="spinner"></span>Loading wrestlers...</div>
         </div>
         <div class="ballot-footer">
-          <div class="slots-filled-msg"><strong id="filledCount">0</strong> / <span id="slotTotal">8</span> <span id="slotLabel">wrestlers</span> ranked</div>
+          <div>
+            <div class="slots-filled-msg"><strong id="filledCount">0</strong> / <span id="slotTotal">8</span> <span id="slotLabel">wrestlers</span> ranked</div>
+            <div class="min-hint" id="minHint" hidden></div>
+          </div>
           <button class="btn-submit" id="submitBtn" onclick="submitBallot()" disabled>Submit Ballot</button>
         </div>
       </div>
@@ -424,6 +443,15 @@ function slotsFor(ballotKey) {
   if (ballotKey === P4P_KEY) return 10;
   if (ballotKey === TEAMS_KEY) return 10;
   return 8;
+}
+
+// Minimum picks per ballot (Nov 2026). Must match firestore.rules (minPicks). Weeks already underway when this
+// shipped keep the old rule (any number of picks), so nobody's ballot is judged by rules that changed mid-week.
+const MIN_PICKS = { weight: 4, p4p: 5, teams: 5 };
+const MIN_PICKS_EXEMPT_WEEKS = ['week-0', 's2027-preseason'];
+function minPicksFor(ballotKey) {
+  if (MIN_PICKS_EXEMPT_WEEKS.includes(currentWeekId)) return 1;
+  return ballotKey === P4P_KEY ? MIN_PICKS.p4p : ballotKey === TEAMS_KEY ? MIN_PICKS.teams : MIN_PICKS.weight;
 }
 
 // Points per rank — longer ballots need longer arrays
@@ -869,11 +897,34 @@ function updateFooter() {
   document.getElementById('slotTotal').textContent = slotsFor(activeBallot);
   document.getElementById('slotLabel').textContent = activeBallot === TEAMS_KEY ? 'teams' : 'wrestlers';
   document.getElementById('submitBtn').disabled = filled < 1;
+  const min = minPicksFor(activeBallot), hint = document.getElementById('minHint'), noun = activeBallot === TEAMS_KEY ? 'teams' : 'wrestlers';
+  hint.hidden = min <= 1;
+  hint.textContent = filled >= min ? `Minimum of ${min} met \u2713` : `Rank at least ${min} ${noun} to submit`;
+  hint.classList.toggle('short', filled < min);
 }
+
+let minModalReturnFocus = null;
+function openMinModal(filled, min) {
+  const noun = activeBallot === TEAMS_KEY ? 'teams' : 'wrestlers';
+  document.getElementById('minModalText').innerHTML =
+    `Each ballot needs at least <strong>${min} ${noun}</strong>. You've ranked <strong>${filled}</strong>.<br>` +
+    `Your #1 counts most, but every slot matters &mdash; add ${min - filled} more and submit.`;
+  minModalReturnFocus = document.activeElement;
+  document.getElementById('minModal').classList.add('open');
+  document.getElementById('minModalOk').focus();
+}
+function closeMinModal() {
+  document.getElementById('minModal').classList.remove('open');
+  const firstEmpty = document.querySelector('#slotsContainer .slot-select:not(.filled)');
+  (firstEmpty || minModalReturnFocus || document.getElementById('submitBtn')).focus();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('minModal').classList.contains('open')) closeMinModal(); });
 
 async function submitBallot() {
   const validPicks = (picks[activeBallot] || []).filter(Boolean);
   if (!validPicks.length) return;
+  const minPicks = minPicksFor(activeBallot);
+  if (validPicks.length < minPicks) { openMinModal(validPicks.length, minPicks); return; }   // also enforced by firestore.rules
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
@@ -916,7 +967,9 @@ async function submitBallot() {
     setTimeout(() => fetchResults(activeBallot), 2500);   // the server tally lands within a few seconds
   } catch (e) {
     console.error(e);
-    showStatus(e && e.code === 'permission-denied' ? `Voting for ${weekLabel} is closed — your ballot was not saved.` : 'Submission failed. Please try again.', 'error');
+    showStatus(e && e.code === 'permission-denied'
+      ? (votingOpen() ? 'Your ballot was not saved — please check your picks and try again.' : `Voting for ${weekLabel} is closed — your ballot was not saved.`)
+      : 'Submission failed. Please try again.', 'error');
     btn.disabled = false;
     btn.textContent = 'Submit Ballot';
     return;
@@ -945,6 +998,9 @@ async function setBallot(b) {
   fetchResults(b);
 }
 
+// "SELECT YOUR TOP 10" -> "RANK AT LEAST 5 (UP TO 10)" once a minimum applies
+function topLabel(k) { const n = slotsFor(k), m = minPicksFor(k); return m > 1 ? `RANK AT LEAST ${m} (UP TO ${n})` : `SELECT YOUR TOP ${n}`; }
+
 function renderBallotCard() {
   const isSubmitted = submitted[activeBallot];
   const header = document.getElementById('ballotHeader');
@@ -954,13 +1010,13 @@ function renderBallotCard() {
 
   if (activeBallot === P4P_KEY) {
     document.getElementById('ballotWeightLabel').innerHTML = `POUND <span>FOR POUND</span>`;
-    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 10 · #1 IS THE BEST WRESTLER REGARDLESS OF WEIGHT';
+    document.getElementById('ballotInstruction').textContent = `${topLabel(P4P_KEY)} · #1 IS THE BEST WRESTLER REGARDLESS OF WEIGHT`;
   } else if (activeBallot === TEAMS_KEY) {
     document.getElementById('ballotWeightLabel').innerHTML = `TEAM <span>RANKINGS</span>`;
-    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 10 · #1 IS THE BEST PROGRAM IN THE NATION';
+    document.getElementById('ballotInstruction').textContent = `${topLabel(TEAMS_KEY)} · #1 IS THE BEST PROGRAM IN THE NATION`;
   } else {
     document.getElementById('ballotWeightLabel').innerHTML = `${activeBallot} <span>LBS</span>`;
-    document.getElementById('ballotInstruction').textContent = 'SELECT YOUR TOP 8 · #1 IS YOUR PICK FOR BEST';
+    document.getElementById('ballotInstruction').textContent = `${topLabel(activeBallot)} · #1 IS YOUR PICK FOR BEST`;
   }
 
   document.getElementById('successTitle').textContent = 'Ballot Submitted!';
@@ -1042,6 +1098,7 @@ function renderStats() {
 window.onSlotChange = onSlotChange;
 window.setBallot = setBallot;
 window.submitBallot = submitBallot;
+window.closeMinModal = closeMinModal;
 window.editBallot = editBallot;
 
 (async () => {
