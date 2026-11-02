@@ -542,6 +542,11 @@
     .footer-deep a.footer-deep-link:hover { text-decoration: underline; }
     footer { flex-wrap: wrap; }   /* the "part of 33 Deep" line takes its own row (Leaderboard's footer didn't wrap) */
     @media (max-width: 768px) { .deep-hex { width: 30px; height: 34px; font-size: 12px; } .brand-lockup { gap: 0.55rem; } }
+  
+    /* ---- Menu with "This Week" (Nov 2026): labels stay on one line; tighter spacing on narrower desktops ---- */
+    .nav-links a { white-space: nowrap; }
+    @media (min-width: 769px) and (max-width: 1365px) { .nav-links { gap: 1.25rem; } }
+    @media (min-width: 769px) and (max-width: 1050px) { .nav-links { gap: 0.9rem; } .nav-links a { letter-spacing: 0.08em; } }
   </style>
 </head>
 <body>
@@ -555,6 +560,7 @@
     </div>
   </div>
   <nav class="nav-links">
+    <a href="week.html">This Week</a>
     <a href="index.html" class="active">Rankings</a>
     <a href="poll.html">Cast Your Vote</a>
     <a href="team-points.html">Team Points</a>

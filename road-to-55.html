@@ -231,6 +231,11 @@
       .header-meta { font-size: 0.55rem; text-align: left; display: flex; flex-wrap: wrap; column-gap: 0.9rem; line-height: 1.4; }
       header > .header-meta { order: 2; flex: 1 0 100%; }
     }
+  
+    /* ---- Menu with "This Week" (Nov 2026): labels stay on one line; tighter spacing on narrower desktops ---- */
+    .nav-links a { white-space: nowrap; }
+    @media (min-width: 769px) and (max-width: 1365px) { .nav-links { gap: 1.25rem; } }
+    @media (min-width: 769px) and (max-width: 1050px) { .nav-links { gap: 0.9rem; } .nav-links a { letter-spacing: 0.08em; } }
   </style>
 </head>
 <body>
@@ -244,6 +249,7 @@
     </div>
   </div>
   <nav class="nav-links">
+    <a href="week.html">This Week</a>
     <a href="index.html">Rankings</a>
     <a href="poll.html">Cast Your Vote</a>
     <a href="team-points.html">Team Points</a>
